@@ -305,7 +305,7 @@
 
     let currentUser = null;
 
-    // ФУНКЦИЯ ВХОДА С ДЕТАЛЬНЫМ ЛОГИРОВАНИЕМ
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВХОДА
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -319,8 +319,6 @@
       
       console.log("========================================");
       console.log("START LOGIN PROCESS");
-      console.log("Input Login:", username);
-      console.log("Input Pass:", password);
       
       try {
         let data = null;
@@ -331,8 +329,6 @@
           .select('*')
           .ilike('login', username)
           .maybeSingle(); 
-        
-        console.log("Search by login result:", res);
 
         if (res.data) {
             data = res.data;
@@ -345,15 +341,13 @@
               .eq('phone', username)
               .maybeSingle();
             
-            console.log("Search by phone result:", res);
-            
             if (res.data) {
                 data = res.data;
                 console.log("User found by PHONE.");
             }
         }
         
-        // Проверка на ошибки БД (кроме "не найдено")
+        // Проверка на ошибки БД
         if (res.error) {
              console.error("Supabase Error:", res.error);
              showLoginBanner('Ошибка БД: ' + res.error.message);
@@ -364,21 +358,22 @@
 
         // Если пользователь не найден
         if (!data) { 
-          console.warn("RESULT: User not found in DB.");
           showLoginBanner('Пользователь не найден'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
 
-        // Пользователь найден, проверяем пароль
-        console.log("Checking password...");
-        console.log("DB Pass Hash:", data.password_hash);
-        console.log("Input Pass:", password);
-        
-        if (data.password_hash !== password) {
+        // === ИСПРАВЛЕНИЕ ПРОВЕРКИ ПАРОЛЯ ===
+        // Приводим оба значения к нижнему регистру перед сравнением
+        const dbPass = (data.password_hash || '').toLowerCase();
+        const inputPass = password.toLowerCase();
+
+        console.log("Checking password (ignore case)...");
+
+        if (dbPass !== inputPass) {
           console.error("RESULT: Wrong password.");
-          showLoginBanner('Неверный пароль. Проверьте раскладку и регистр.'); 
+          showLoginBanner('Неверный пароль'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return;
@@ -386,7 +381,6 @@
 
         // Проверка статуса
         if (data.status !== 'подтверждено') { 
-          console.warn("RESULT: Account not confirmed.");
           showLoginBanner('Учетная запись ожидает подтверждения.'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
