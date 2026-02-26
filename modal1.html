@@ -33,7 +33,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000; /* Выше чем основной layout */
+      z-index: 1000; 
       opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease;
@@ -71,6 +71,7 @@
       align-items: center;
       justify-content: center;
       transition: background 0.2s;
+      color: var(--text-primary);
     }
     .close-modal-btn:hover { background: #e0e0e0; }
     
@@ -118,21 +119,76 @@
     }
     .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
-    /* Поля формы */
+    /* Поля формы - Floating Label Fix */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .input-group { position: relative; }
-    .input-group.filled label, .input-group input:focus + label {
-      top: 0; font-size: 12px; background: white; padding: 0 4px; color: var(--accent); left: 12px;
+    
+    .input-group { 
+      position: relative; 
+      margin-bottom: 0; /* Сброс лишних отступов */
     }
-    .input-group label {
-      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-      color: var(--text-muted); transition: 0.2s; pointer-events: none;
-    }
+    
+    /* Стили INPUT */
     .input-group input {
-      width: 100%; padding: 14px 16px; border: 1.5px solid var(--border-color);
-      border-radius: 10px; outline: none; font-size: 14px; background: transparent;
+      width: 100%; 
+      padding: 14px 16px; 
+      font-size: 15px; 
+      font-family: 'SN Pro', sans-serif; 
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px; 
+      background: var(--bg-card); 
+      color: var(--text-primary);
+      outline: none; 
+      transition: all 0.3s ease;
     }
-    .input-group input:focus { border-color: var(--accent); }
+    /* Важно: прозрачный плейсхолдер для работы CSS селектора :placeholder-shown */
+    .input-group input::placeholder { color: transparent; }
+    
+    .input-group input:focus {
+      border-color: var(--accent);
+      background: var(--bg-card); 
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Стили LABEL */
+    .input-group label {
+      position: absolute; 
+      left: 16px; 
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px; 
+      font-family: 'SN Pro', sans-serif;
+      color: var(--text-muted);
+      pointer-events: none;
+      transition: all 0.2s ease;
+      background: transparent;
+      padding: 0 4px;
+    }
+    
+    /* Анимация поднятия лейбла при фокусе ИЛИ если поле заполнено */
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      top: 0; 
+      left: 12px;
+      font-size: 12px; 
+      font-weight: 500;
+      background-color: var(--bg-card);
+      color: var(--accent);
+    }
+
+    /* Специфичные стили для DATE INPUT */
+    /* У date input нет плейсхолдера, поэтому лейбл всегда должен быть сверху */
+    .input-group input[type="date"] + label,
+    .input-group input[type="date"]:focus + label {
+      top: 0; 
+      left: 12px;
+      font-size: 12px; 
+      font-weight: 500;
+      background-color: var(--bg-card);
+      color: var(--text-muted); /* Не подсвечиваем акцентом, как при фокусе текста, просто серый */
+    }
+    .input-group input[type="date"]:focus + label {
+       color: var(--accent);
+    }
 
     /* Блок источников */
     .sources-section {
@@ -142,10 +198,20 @@
       border-radius: 12px;
       padding: 16px;
     }
-    .sources-list { flex: 2; display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; padding-right: 8px; }
+    .sources-list { 
+      flex: 2; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      max-height: 250px; 
+      overflow-y: auto; 
+      padding-right: 8px; 
+    }
+    
     .source-item {
       display: grid;
-      grid-template-columns: 1fr 80px 1fr 40px;
+      /* Исправленная сетка: 1fr 80px 1fr auto */
+      grid-template-columns: 1fr 80px 1fr auto;
       gap: 8px;
       align-items: center;
       background: white;
@@ -153,18 +219,43 @@
       border-radius: 8px;
       border: 1px solid var(--border-color);
     }
-    .source-item input { border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 13px; width: 100%; }
-    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 16px; }
+    
+    /* Инпуты внутри источника */
+    .source-item input { 
+      border: 1px solid var(--border-color); 
+      padding: 8px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      width: 100%; 
+      min-width: 0; /* Важно для Grid */
+      outline: none;
+      background: var(--bg-card);
+    }
+    .source-item input:focus {
+        border-color: var(--accent);
+    }
+    
+    .source-item button { 
+      background: transparent; 
+      border: none; 
+      color: var(--error); 
+      cursor: pointer; 
+      font-size: 18px; 
+      line-height: 1;
+      padding: 4px;
+      margin-left: 4px;
+    }
     
     .add-source-btn {
-      margin-top: auto;
-      padding: 8px;
+      margin-top: 4px;
+      padding: 10px;
       background: transparent;
       border: 1px dashed var(--border-color);
       border-radius: 8px;
       cursor: pointer;
       color: var(--text-secondary);
       font-size: 13px;
+      text-align: center;
     }
     .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
     
@@ -179,7 +270,7 @@
       justify-content: center;
       border: 1px solid var(--border-color);
     }
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
     .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
 
     /* Футер модалки */
@@ -240,7 +331,7 @@
       color: var(--text-secondary);
     }
     .progress-item { margin-bottom: 4px; }
-    .progress-item.done { color: var(--success); }
+    .progress-item.done { color: var(--success); font-weight: 500; }
   </style>
 
   <!-- Верхнее модальное окно -->
@@ -281,12 +372,13 @@
         <!-- Блок 3: Клиент -->
         <div class="form-grid">
           <div class="input-group">
+            <!-- Добавлен placeholder=" " -->
             <input type="text" id="clientName" required placeholder=" ">
-            <label>Наименование клиента</label>
+            <label for="clientName">Наименование клиента</label>
           </div>
           <div class="input-group">
             <input type="text" id="clientInn" required placeholder=" ">
-            <label>ИНН клиента</label>
+            <label for="clientInn">ИНН клиента</label>
           </div>
         </div>
 
@@ -294,18 +386,18 @@
         <div class="form-grid">
           <div class="input-group">
             <input type="date" id="startDate" required>
-            <label style="top: -8px; font-size: 12px; background: white; padding: 0 4px; left: 12px;">Дата начала</label>
+            <label for="startDate">Дата начала</label>
           </div>
           <div class="input-group">
             <input type="date" id="endDate" required>
-            <label style="top: -8px; font-size: 12px; background: white; padding: 0 4px; left: 12px;">Дата завершения</label>
+            <label for="endDate">Дата завершения</label>
           </div>
         </div>
 
         <!-- Блок 5: Источники -->
         <div class="sources-section">
           <div class="sources-list" id="sourcesList">
-            <!-- Поля источников будут добавляться динамически -->
+            <!-- Поля источников добавляются динамически -->
           </div>
           <div class="total-counter">
             <span class="total-label">Всего заданий</span>
@@ -336,17 +428,16 @@
 
 <script>
   // ==========================================
-  // ЛОГИКА MODAL1 - ИСПРАВЛЕНО
+  // ЛОГИКА MODAL1
   // ==========================================
 
-  // Получаем доступ к глобальным переменным из index.html через window
   const sbClient = window.supabaseClient;
   const user = window.currentUser;
 
   let uploadedFiles = [];
   let sources = [];
+  let sourceIdCounter = 0;
 
-  // Элементы DOM
   const overlay = document.getElementById('taskModalOverlay');
   const openBtn = document.getElementById('openModalBtn');
   const formContainer = document.getElementById('formContainer');
@@ -356,17 +447,17 @@
   const dropzone = document.getElementById('dropzone');
   const sourcesList = document.getElementById('sourcesList');
 
-  // Инициализация при загрузке страницы
   function initPage() {
-      console.log("Modal1 initialized");
-      addSourceRow(); // Добавляем первую строку
+      addSourceRow();
       bindEvents();
   }
 
   function bindEvents() {
-      // Удаляем старые обработчики, чтобы избежать дублирования (хотя при innerHTML они и так удаляются)
       openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
       
+      // Закрытие по клику на оверлей
+      overlay.onclick = (e) => { if (e.target === overlay) closeTaskModal(); };
+
       dropzone.onclick = () => fileInput.click();
       dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
       dropzone.ondragleave = () => dropzone.classList.remove('dragover');
@@ -378,7 +469,6 @@
     overlay.classList.remove('visible');
   }
 
-  // Dropzone Logic
   function handleFiles(files) {
     Array.from(files).forEach(file => uploadedFiles.push(file));
     renderFileList();
@@ -388,7 +478,7 @@
     const list = document.getElementById('fileList');
     list.innerHTML = uploadedFiles.map((file, idx) => `
       <div class="file-item">
-        <span>${file.name}</span>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span>
         <span class="file-item-remove" onclick="removeFile(${idx})">✕</span>
       </div>
     `).join('');
@@ -401,7 +491,7 @@
 
   // Sources Logic
   function addSourceRow() {
-    const id = Date.now();
+    const id = ++sourceIdCounter;
     sources.push({ id, platform: '', count: 0, link: '' });
     renderSources();
   }
@@ -421,10 +511,10 @@
   function renderSources() {
     sourcesList.innerHTML = sources.map(s => `
       <div class="source-item">
-        <input type="text" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
-        <input type="number" placeholder="Кол-во" value="${s.count || ''}" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
+        <input type="text" placeholder="Площадка (Avito)" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
+        <input type="number" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
         <input type="text" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
-        <button onclick="removeSourceRow(${s.id})">✕</button>
+        <button type="button" onclick="removeSourceRow(${s.id})">✕</button>
       </div>
     `).join('');
   }
@@ -441,6 +531,7 @@
     uploadedFiles = [];
     renderFileList();
     sources = [];
+    sourceIdCounter = 0;
     addSourceRow();
     document.getElementById('clientName').value = '';
     document.getElementById('clientInn').value = '';
@@ -454,7 +545,7 @@
   // ==========================================
 
   async function handleSubmit() {
-    if (!user) return alert('Пользователь не определен. Войдите заново.');
+    if (!user) return alert('Пользователь не определен');
 
     const clientName = document.getElementById('clientName').value;
     const clientInn = document.getElementById('clientInn').value;
@@ -464,7 +555,6 @@
     if (!clientName || !clientInn || !startDate || !endDate) return alert('Заполните все поля клиента и даты');
     if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте хотя бы одну площадку с количеством заданий');
 
-    // UI Switch
     formContainer.style.display = 'none';
     modalFooter.style.display = 'none';
     progressContainer.style.display = 'flex';
@@ -472,10 +562,7 @@
     const totalTasks = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
     let processedTasks = 0;
 
-    // Prepare Files (simulation - just names)
     const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
-
-    // Get Last Order Number
     let lastNumber = await getLastOrderNumber();
     
     const progressDetails = document.getElementById('progressDetails');
@@ -492,7 +579,7 @@
         progressDetails.appendChild(itemDiv);
 
         let insertedCount = 0;
-        const batchSize = 10; // Insert in batches
+        const batchSize = 10;
         const batches = Math.ceil(count / batchSize);
 
         for (let b = 0; b < batches; b++) {
@@ -517,14 +604,12 @@
             });
           }
 
-          // Insert Batch
           const { error } = await sbClient.from('reviews_order').insert(insertData);
           if (error) throw error;
 
           insertedCount += currentBatchSize;
           processedTasks += currentBatchSize;
 
-          // Update UI
           itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: ${insertedCount} из ${count}`;
           if (insertedCount === count) itemDiv.classList.add('done');
           
@@ -532,12 +617,10 @@
           document.getElementById('progressFill').style.width = percent + '%';
           document.getElementById('progressPercent').textContent = percent + '%';
           
-          // Small delay for UX
           await new Promise(r => setTimeout(r, 50));
         }
       }
 
-      // Finish
       document.getElementById('progressPercent').textContent = 'Готово!';
       setTimeout(() => {
         alert('Задания успешно созданы!');
@@ -551,10 +634,6 @@
     }
   }
 
-  // ==========================================
-  // ORDER NUMBER GENERATOR
-  // ==========================================
-
   async function getLastOrderNumber() {
     const { data, error } = await sbClient
       .from('reviews_order')
@@ -563,12 +642,11 @@
       .limit(1)
       .single();
 
-    if (error || !data || !data.order_number) return 'AA-00000'; // Start from AA-00001
+    if (error || !data || !data.order_number) return 'AA-00000';
     return data.order_number;
   }
 
   function incrementOrderNumber(current) {
-    // Format: LL-DDDDD
     let letters = current.substring(0, 2);
     let digits = parseInt(current.substring(3));
 
@@ -595,10 +673,10 @@
         return arr.join('');
       }
     }
-    return 'AA'; // Reset if ZZ
+    return 'AA';
   }
 
-  // Запуск инициализации сразу после загрузки скрипта
+  // Запуск инициализации
   initPage();
 
 </script>
