@@ -4,6 +4,111 @@
     /* Scoped Styles */
     .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
     
+    /* --- Card List Styles --- */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    
+    .order-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.3s ease;
+    }
+    .order-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Row 1: Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .client-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .client-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .client-inn {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .order-number-badge {
+      background: var(--bg-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Rows 2 & 3: Common Row Style */
+    .card-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .row-label {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      min-width: 140px;
+    }
+    .row-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Row 4: Platforms */
+    .platforms-container {
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+    }
+    .platform-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .platform-name {
+      width: 120px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .platform-stats {
+      display: flex;
+      gap: 16px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-count {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Existing Styles */
     .create-task-btn {
       display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
       background: var(--accent); color: white; border-radius: 12px; font-weight: 600;
@@ -132,6 +237,11 @@
     .progress-item.done { color: var(--success); font-weight: 500; }
   </style>
 
+  <!-- Container for rendered cards -->
+  <div id="ordersList" class="orders-list">
+    <!-- Cards will be injected here -->
+  </div>
+
   <div style="margin-bottom: 24px;">
     <button id="openModalBtn" class="create-task-btn">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -211,11 +321,109 @@
   const fileInput = document.getElementById('fileInput');
   const dropzone = document.getElementById('dropzone');
   const sourcesList = document.getElementById('sourcesList');
+  const ordersListContainer = document.getElementById('ordersList');
 
-  function initPage() {
+  async function initPage() {
       addSourceRow();
       bindEvents();
+      await loadAndRenderOrders(); // Load cards on init
   }
+
+  // --- RENDERING CARDS ---
+
+  async function loadAndRenderOrders() {
+    try {
+      // 1. Fetch clients (unique groups)
+      const { data: clients, error: errClients } = await sbClient
+        .from('reviews_order_client')
+        .select('*')
+        .order('start_date', { ascending: false });
+
+      if (errClients) throw errClients;
+      if (!clients || clients.length === 0) {
+        ordersListContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Активных заказов нет.</p>';
+        return;
+      }
+
+      // 2. Fetch autor details (platforms)
+      const { data: autors, error: errAutors } = await sbClient
+        .from('reviews_order_autor')
+        .select('*');
+
+      if (errAutors) throw errAutors;
+
+      // 3. Group autors by order_number_general
+      const autorsMap = {};
+      if (autors) {
+        autors.forEach(a => {
+          if (!autorsMap[a.order_number_general]) autorsMap[a.order_number_general] = [];
+          autorsMap[a.order_number_general].push(a);
+        });
+      }
+
+      // 4. Render Cards
+      ordersListContainer.innerHTML = clients.map(client => {
+        const relatedAutors = autorsMap[client.order_number_general] || [];
+        // Get first autor data for manager info (as requested)
+        const firstAutor = relatedAutors[0] || {};
+
+        return `
+          <div class="order-card">
+            <!-- Row 1 -->
+            <div class="card-header">
+              <div class="client-info">
+                <div class="client-name">${client.client_name || 'Не указан'}</div>
+                <div class="client-inn">ИНН: ${client.client_inn || '-'}</div>
+              </div>
+              <div class="order-number-badge">${client.order_number_general || '-'}</div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="card-row">
+              <span class="row-label">данные менеджера сделки</span>
+              <span class="row-value">${firstAutor.manager_name || '-'} | ${firstAutor.manager_phone || '-'}</span>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="card-row">
+              <span class="row-label">дата начала</span>
+              <span class="row-value" style="margin-right: 24px;">${formatDate(client.start_date)}</span>
+              <span class="row-label">дата завершения</span>
+              <span class="row-value">${formatDate(client.end_date)}</span>
+            </div>
+
+            <!-- Row 4: Platforms Block -->
+            <div class="platforms-container">
+              ${relatedAutors.map(aut => `
+                <div class="platform-item">
+                  <div class="platform-name">${aut.platform || '-'}</div>
+                  <div class="platform-stats">
+                    <div class="stat-item">Создана: <span class="stat-count">${aut.count_created || 0}</span></div>
+                    <div class="stat-item">В работе: <span class="stat-count">${aut.count_in_progress || 0}</span></div>
+                    <div class="stat-item">Проверка: <span class="stat-count">${aut.count_review || 0}</span></div>
+                    <div class="stat-item">Завершено: <span class="stat-count">${aut.count_completed || 0}</span></div>
+                  </div>
+                </div>
+              `).join('')}
+              ${relatedAutors.length === 0 ? '<div style="color: var(--text-muted); font-size: 13px;">Нет данных по площадкам</div>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (e) {
+      console.error("Error loading orders:", e);
+      ordersListContainer.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заказов.</p>';
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('ru-RU');
+  }
+
+  // --- EXISTING LOGIC ---
 
   function bindEvents() {
       openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
@@ -273,10 +481,7 @@
     let processedTasks = 0;
     const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
     
-    // 1. Получаем последний индивидуальный номер
     let lastOrderNumber = await getLastOrderNumber();
-    
-    // 2. Получаем последний ГРУППОВОЙ номер
     let groupNumber = await getLastGroupNumber();
     
     const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
@@ -296,7 +501,7 @@
             insertData.push({
               manager_login: user.login, manager_name: `${user.first_name} ${user.last_name}`, manager_phone: user.phone,
               order_number: lastOrderNumber, 
-              order_number_general: groupNumber, // <--- Добавляем групповой номер
+              order_number_general: groupNumber, 
               client_name: clientName, client_inn: clientInn,
               start_date: startDate, end_date: endDate, platform: src.platform, link: src.link,
               documents: docs, status: 'создана'
@@ -314,46 +519,25 @@
         }
       }
       document.getElementById('progressPercent').textContent = 'Готово!';
-      setTimeout(() => { alert('Задания созданы!'); closeTaskModal(); }, 500);
+      setTimeout(() => { alert('Задания созданы!'); closeTaskModal(); loadAndRenderOrders(); }, 500); // Reload cards
     } catch (err) { console.error(err); alert('Ошибка: ' + err.message); resetForm(); }
   }
 
-  // --- Функции генерации номеров ---
-
   async function getLastOrderNumber() {
     const { data, error } = await sbClient.from('reviews_order').select('order_number').order('order_number', { ascending: false }).limit(1).maybeSingle();
-    if (error) { console.error("Ошибка получения order_number:", error); return 'AA-00000'; }
+    if (error) { console.error("Error:", error); return 'AA-00000'; }
     if (!data || !data.order_number) return 'AA-00000';
     return data.order_number;
   }
 
-  // НОВАЯ ФУНКЦИЯ: Получение последнего группового номера
   async function getLastGroupNumber() {
     const { data, error } = await sbClient.from('reviews_order').select('order_number_general').order('order_number_general', { ascending: false }).limit(1).maybeSingle();
-    
-    if (error) { console.error("Ошибка получения group number:", error); return 'group-A00001'; }
-    
-    // Если записей нет или поле пустое, возвращаем начальное значение
-    if (!data || !data.order_number_general) return 'group-A00001';
-
-    // Парсим текущий номер: "group-A00011" -> "A", "00011"
-    const current = data.order_number_general; 
-    if (!current.startsWith('group-')) return 'group-A00001'; // Защита от некорректного формата
-
-    const clean = current.replace('group-', ''); // "A00011"
-    const letter = clean.substring(0, 1); // "A"
-    const numStr = clean.substring(1); // "00011"
-    let num = parseInt(numStr, 10);
-    
-    // Увеличиваем число
+    if (error || !data || !data.order_number_general) return 'group-A00001';
+    const clean = data.order_number_general.replace('group-', '');
+    const letter = clean.substring(0, 1);
+    let num = parseInt(clean.substring(1), 10);
     num++;
-    
-    // Если число превысило лимит, меняем букву (аналогично order_number)
-    if (num > 99999) {
-        const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
-        return `group-${nextLetter}00001`;
-    }
-
+    if (num > 99999) { const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1); return `group-${nextLetter}00001`; }
     return `group-${letter}${String(num).padStart(5, '0')}`;
   }
 
