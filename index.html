@@ -24,11 +24,7 @@
       --tab-active: #ffffff;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -38,36 +34,23 @@
       overflow-x: hidden;
     }
 
-    /* Background */
     .bg-pattern {
-      position: fixed;
-      inset: 0;
-      background-image: 
-        radial-gradient(circle at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0,0,0,0.03) 0%, transparent 40%);
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
     }
 
-    /* Auth Modal */
+    /* Auth Overlay */
     .auth-overlay {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
       z-index: 100;
-      background: rgba(248, 249, 250, 0.8);
+      background: rgba(248, 249, 250, 0.9);
       backdrop-filter: blur(8px);
-      opacity: 0;
-      visibility: hidden;
+      opacity: 0; visibility: hidden;
       transition: opacity 0.4s ease, visibility 0.4s ease;
     }
-
-    .auth-overlay.visible {
-      opacity: 1;
-      visibility: visible;
-    }
+    .auth-overlay.visible { opacity: 1; visibility: visible; }
 
     .auth-modal {
       background: var(--bg-card);
@@ -79,103 +62,64 @@
       transform: scale(0.95) translateY(20px);
       position: relative;
     }
+    .auth-overlay.visible .auth-modal { transform: scale(1) translateY(0); }
+    .auth-modal.is-register { width: 480px; }
 
-    .auth-overlay.visible .auth-modal {
-      transform: scale(1) translateY(0);
-    }
+    .modal-header { padding: 24px 24px 0; position: relative; }
 
-    .auth-modal.is-register {
-      width: 480px;
-    }
-
-    .modal-header {
-      padding: 24px 24px 0;
-      position: relative;
-    }
-
-    /* Main Tab Container (Login / Register) */
+    /* Main Tabs */
     .tab-container {
       position: relative;
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      display: flex; flex-direction: row; align-items: flex-start;
       padding: 2px;
       background-color: var(--tab-bg);
       border-radius: 10px;
     }
-
     .tab-container .indicator {
-      content: "";
-      width: 50%;
-      height: 36px;
+      width: 50%; height: 36px;
       background: var(--tab-active);
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      z-index: 9;
+      position: absolute; top: 2px; left: 2px; z-index: 9;
       border: 0.5px solid rgba(0, 0, 0, 0.04);
-      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12);
       border-radius: 8px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
     .tab-container .tab {
-      width: 50%;
-      height: 36px;
-      position: absolute;
-      z-index: 99;
-      outline: none;
-      opacity: 0;
-      cursor: pointer;
+      width: 50%; height: 36px;
+      position: absolute; z-index: 99;
+      outline: none; opacity: 0; cursor: pointer;
     }
-
     .tab-container .tab_label {
-      width: 50%;
-      height: 36px;
-      position: relative;
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 0;
-      font-size: 14px;
-      font-weight: 500;
+      width: 50%; height: 36px;
+      position: relative; z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
       transition: color 0.3s ease;
     }
+    .tab-container .tab:checked + .tab_label { color: var(--text-primary); }
+    .tab-container .tab--register:checked ~ .indicator { left: 50%; }
 
-    .tab-container .tab:checked + .tab_label {
-      color: var(--text-primary);
-    }
-
-    .tab-container .tab--register:checked ~ .indicator {
-      left: 50%;
-    }
-
-    /* Sub Tab Container (Author / Manager) */
-    /* Positioned absolutely under Register button */
+    /* Sub Tabs (Positioned under Register) */
     .sub-tab-container {
       position: absolute;
-      top: calc(100% + 12px); /* Right under the main tabs */
-      right: 24px; /* Align with right edge (padding) */
-      width: calc(50% - 26px); /* Match width of Register button */
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      top: calc(100% + 12px);
+      right: 24px; /* Align right edge */
+      width: calc(50% - 26px); /* Width of Register button */
+      display: flex; flex-direction: row; align-items: flex-start;
       padding: 2px;
       background-color: var(--tab-bg);
       border-radius: 8px;
       z-index: 10;
       
-      /* Hidden state */
+      /* Hidden by default */
       opacity: 0;
       transform: translateY(-10px);
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    /* Visible state - triggered by parent class */
+    /* Visible when parent has .is-register */
     .auth-modal.is-register .sub-tab-container {
       opacity: 1;
       transform: translateY(0);
@@ -183,472 +127,199 @@
     }
 
     .sub-tab-container .indicator {
-      width: 50%;
-      height: 28px;
+      width: 50%; height: 28px;
       background: var(--tab-active);
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      z-index: 9;
+      position: absolute; top: 2px; left: 2px; z-index: 9;
       border: 0.5px solid rgba(0, 0, 0, 0.04);
       box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
       border-radius: 6px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
     }
-
-    .sub-tab-container .sub-tab {
-      width: 50%;
-      height: 28px;
-      position: absolute;
-      z-index: 99;
-      outline: none;
-      opacity: 0;
-      cursor: pointer;
-    }
-
+    .sub-tab-container .sub-tab { width: 50%; height: 28px; position: absolute; z-index: 99; opacity: 0; cursor: pointer; }
     .sub-tab-container .sub-tab_label {
-      width: 50%;
-      height: 28px;
-      position: relative;
-      z-index: 999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 500;
+      width: 50%; height: 28px;
+      position: relative; z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
       transition: color 0.3s ease;
     }
-
-    .sub-tab-container .sub-tab:checked + .sub-tab_label {
-      color: var(--text-primary);
-    }
-
-    .sub-tab-container .sub-tab--manager:checked ~ .indicator {
-      left: 50%;
-    }
+    .sub-tab-container .sub-tab:checked + .sub-tab_label { color: var(--text-primary); }
+    .sub-tab-container .sub-tab--manager:checked ~ .indicator { left: 50%; }
 
     /* Modal Body */
     .modal-body {
       padding: 24px;
-      padding-top: 28px; /* Space for sub-tabs if needed */
+      padding-top: 28px; 
       transition: padding 0.3s ease;
     }
-    
-    .auth-modal.is-register .modal-body {
-      padding-top: 56px; /* Extra space for sub-tabs */
-    }
+    .auth-modal.is-register .modal-body { padding-top: 56px; } /* Space for sub-tabs */
 
-    /* Form Container Logic */
+    /* Forms Wrapper - IMPORTANT */
     .forms-wrapper {
       position: relative;
+      width: 100%;
     }
 
+    /* Auth Form Common */
     .auth-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: flex; flex-direction: column; gap: 16px; width: 100%;
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
     }
 
-    /* Login Form State */
+    /* --- Default State (Login Visible) --- */
     .login-form {
-      opacity: 1;
-      transform: translateX(0);
       position: relative;
-      pointer-events: auto;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+      z-index: 2;
     }
-
-    /* Register Form State */
     .register-form {
-      display: flex; /* Keep flex layout but hidden */
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       opacity: 0;
-      transform: translateX(20px);
-      pointer-events: none;
+      visibility: hidden;
+      transform: translateX(30px);
+      z-index: 1;
+      pointer-events: none; /* Prevent interaction */
     }
 
-    /* Switched State */
+    /* --- Register State (Register Visible) --- */
     .auth-modal.is-register .login-form {
-      opacity: 0;
-      transform: translateX(-20px);
-      pointer-events: none;
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+      top: 0; left: 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-30px);
+      z-index: 1;
+      pointer-events: none;
     }
-
     .auth-modal.is-register .register-form {
+      position: relative;
       opacity: 1;
+      visibility: visible;
       transform: translateX(0);
-      position: relative;
+      z-index: 2;
       pointer-events: auto;
-      width: 100%;
     }
 
-    /* Form Elements */
-    .input-container {
-      position: relative;
-      width: 100%;
-    }
-
+    /* Inputs */
+    .input-container { position: relative; width: 100%; }
     .styled_input_bar {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-family: 'Inter', sans-serif;
+      width: 100%; padding: 14px 16px;
+      font-size: 15px; font-family: 'Inter', sans-serif;
       border: 1.5px solid var(--border-color);
       border-radius: 12px;
       background-color: var(--bg-primary);
       color: var(--text-primary);
       outline: none;
       transition: all 0.3s ease;
-      box-sizing: border-box;
     }
-
-    .styled_input_bar::placeholder {
-      color: transparent;
-    }
-
+    .styled_input_bar::placeholder { color: transparent; }
     .styled_input_bar:focus {
       border-color: var(--accent);
       background-color: var(--bg-card);
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     }
-
     .input-label {
-      position: absolute;
-      left: 16px;
-      top: 50%;
+      position: absolute; left: 16px; top: 50%;
       transform: translateY(-50%);
-      font-size: 15px;
-      font-family: 'Inter', sans-serif;
+      font-size: 15px; font-family: 'Inter', sans-serif;
       color: var(--text-muted);
       pointer-events: none;
       transition: all 0.3s ease;
       background: transparent;
       padding: 0 4px;
     }
-
     .styled_input_bar:focus + .input-label,
     .styled_input_bar:not(:placeholder-shown) + .input-label {
-      top: 0;
-      left: 12px;
-      font-size: 12px;
-      font-weight: 500;
+      top: 0; left: 12px;
+      font-size: 12px; font-weight: 500;
       background-color: var(--bg-card);
-    }
-    
-    .styled_input_bar:focus + .input-label {
       color: var(--accent);
     }
 
+    /* Buttons */
     .submit-btn {
-      width: 100%;
-      padding: 14px 24px;
+      width: 100%; padding: 14px 24px;
       background: var(--accent);
       color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
       margin-top: 8px;
     }
-
-    .submit-btn:hover {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .submit-btn:disabled {
-      background: var(--text-muted);
-      cursor: not-allowed;
-      transform: none;
-    }
-
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .submit-btn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; }
     .submit-btn .loader {
-      display: none;
-      width: 20px;
-      height: 20px;
+      display: none; width: 20px; height: 20px;
       border: 2px solid rgba(255,255,255,0.3);
       border-top-color: white;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-
     .submit-btn.loading .btn-text { visibility: hidden; }
-    .submit-btn.loading .loader {
-      display: block;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-
+    .submit-btn.loading .loader { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
     @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-    /* Banner */
+    /* Banners */
     .banner {
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      line-height: 1.5;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      opacity: 0;
-      transform: translateY(-10px);
-      max-height: 0;
-      overflow: hidden;
-      padding: 0 16px;
-      margin: 0;
+      padding: 0 16px; margin: 0;
+      border-radius: 10px; font-size: 13px; line-height: 1.5;
+      display: flex; align-items: flex-start; gap: 10px;
+      opacity: 0; max-height: 0; overflow: hidden;
       transition: all 0.3s ease;
     }
-
     .banner.visible {
-      opacity: 1;
-      transform: translateY(0);
-      max-height: 100px;
-      padding: 12px 16px;
-      margin-bottom: 8px;
+      opacity: 1; max-height: 100px; padding: 12px 16px; margin-bottom: 8px;
     }
-
-    .banner.warning {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #92400e;
-    }
-
-    .banner.success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #065f46;
-    }
-    
+    .banner.warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #92400e; }
+    .banner.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #065f46; }
     .banner svg { flex-shrink: 0; margin-top: 1px; }
 
-    /* App Container */
-    .app-container {
-      display: none;
-      min-height: 100vh;
-    }
-
+    /* App Layout */
+    .app-container { display: none; min-height: 100vh; }
     .app-container.visible { display: flex; }
-
-    /* Sidebar */
-    .sidebar {
-      width: 260px;
-      background: var(--bg-card);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      z-index: 50;
-      transform: translateX(-100%);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .sidebar.visible { transform: translateX(0); }
-
-    .sidebar-header {
-      padding: 24px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--accent);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 16px 12px;
-      overflow-y: auto;
-    }
-
-    .nav-section-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0 12px;
-      margin-bottom: 8px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 10px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .nav-item:hover {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .nav-item.active {
-      background: rgba(0, 0, 0, 0.05);
-      color: var(--text-primary);
-    }
-
-    .nav-item svg {
-      width: 20px;
-      height: 20px;
-      opacity: 0.7;
-    }
     
+    .sidebar {
+      width: 260px; background: var(--bg-card); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+      transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.visible { transform: translateX(0); }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-color); }
+    .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+    
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; font-size: 14px; font-weight: 500; }
+    .nav-item:hover { background: var(--bg-primary); color: var(--text-primary); }
+    .nav-item.active { background: rgba(0, 0, 0, 0.05); color: var(--text-primary); }
+    .nav-item svg { width: 20px; height: 20px; opacity: 0.7; }
     .nav-item.active svg { opacity: 1; }
 
-    .sidebar-footer {
-      padding: 16px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 10px;
-      background: var(--bg-primary);
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: var(--accent);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
+    .sidebar-footer { padding: 16px; border-top: 1px solid var(--border-color); }
+    .user-info { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: var(--bg-primary); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
     .user-details { flex: 1; min-width: 0; }
-
-    .user-name {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
+    .user-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-role { font-size: 12px; color: var(--text-muted); }
+    .logout-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+    .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--error); }
 
-    .logout-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
+    .main-content { flex: 1; margin-left: 260px; }
+    .content-wrapper { max-width: 1240px; margin: 0 auto; padding: 32px; min-height: 100vh; }
+    .page-container { background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); min-height: calc(100vh - 64px); padding: 32px; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .page-container.visible { opacity: 1; transform: translateY(0); }
+    .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
 
-    .logout-btn:hover {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--error);
-    }
-
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      margin-left: 260px;
-    }
-
-    .content-wrapper {
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 32px;
-      min-height: 100vh;
-    }
-
-    .page-container {
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      min-height: calc(100vh - 64px);
-      padding: 32px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .page-container.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .page-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 24px;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.mobile-open { transform: translateX(0); }
-      .main-content { margin-left: 0; }
-    }
-
-    @media (max-width: 640px) {
-      .auth-modal { width: calc(100% - 32px); margin: 16px; }
-      .auth-modal.is-register { width: calc(100% - 32px); }
-      /* Stack sub-tabs on small screens */
-      .sub-tab-container { width: 100%; position: relative; top: auto; right: auto; margin-top: 16px; }
-      .auth-modal.is-register .modal-body { padding-top: 24px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
+    @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } }
+    @media (max-width: 640px) { .auth-modal { width: calc(100% - 32px); } .auth-modal.is-register { width: calc(100% - 32px); } .sub-tab-container { width: 100%; position: relative; top: auto; right: auto; margin-top: 16px; } .auth-modal.is-register .modal-body { padding-top: 24px; } }
   </style>
 </head>
 <body>
@@ -658,7 +329,7 @@
   <div class="auth-overlay visible" id="authOverlay">
     <div class="auth-modal" id="authModal">
       <div class="modal-header">
-        <!-- Main Tabs: Login / Register -->
+        <!-- Main Tabs -->
         <div class="tab-container">
           <input type="radio" name="authTab" id="tabLogin" class="tab tab--login" checked />
           <label class="tab_label" for="tabLogin">Вход</label>
@@ -669,7 +340,7 @@
           <div class="indicator"></div>
         </div>
         
-        <!-- Sub Tabs: Author / Manager (Positioned under Register) -->
+        <!-- Sub Tabs (Author/Manager) -->
         <div class="sub-tab-container" id="subTabContainer">
           <input type="radio" name="roleTab" id="roleAuthor" class="sub-tab sub-tab--author" checked />
           <label class="sub-tab_label" for="roleAuthor">Автор</label>
@@ -698,16 +369,13 @@
             
             <div class="banner warning" id="loginBanner">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
               <span id="loginBannerText">Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.</span>
             </div>
             
             <button type="submit" class="submit-btn" id="loginBtn">
-              <span class="btn-text">Войти</span>
-              <div class="loader"></div>
+              <span class="btn-text">Войти</span><div class="loader"></div>
             </button>
           </form>
           
@@ -735,15 +403,13 @@
             
             <div class="banner success" id="registerBanner">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
               <span>Регистрация успешно завершена. Ожидайте подтверждения.</span>
             </div>
             
             <button type="submit" class="submit-btn" id="registerBtn">
-              <span class="btn-text">Зарегистрироваться</span>
-              <div class="loader"></div>
+              <span class="btn-text">Зарегистрироваться</span><div class="loader"></div>
             </button>
           </form>
           
@@ -754,15 +420,12 @@
 
   <!-- App Container -->
   <div class="app-container" id="appContainer">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo">
           <div class="logo-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
+              <path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path>
             </svg>
           </div>
           <span>Платформа</span>
@@ -771,65 +434,32 @@
       
       <nav class="sidebar-nav">
         <div class="nav-section-title">Навигация</div>
-        
         <div class="nav-item active" data-page="modal1" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="9" y1="21" x2="9" y2="9"></line>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
           <span>Страница 1</span>
         </div>
-        
         <div class="nav-item" data-page="modal2" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
           <span>Страница 2</span>
         </div>
-        
         <div class="nav-item" data-page="modal3" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="20" x2="18" y2="10"></line>
-            <line x1="12" y1="20" x2="12" y2="4"></line>
-            <line x1="6" y1="20" x2="6" y2="14"></line>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
           <span>Страница 3</span>
         </div>
-        
         <div class="nav-item" data-page="modal4" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Страница 4</span>
         </div>
-        
         <div class="nav-item" data-page="modal5" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
           <span>Страница 5</span>
         </div>
-        
         <div class="nav-item" data-page="modal6" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polygon points="10 8 16 12 10 16 10 8"></polygon>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
           <span>Страница 6</span>
         </div>
-        
         <div class="nav-item" data-page="modal7" tabindex="0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           <span>Страница 7</span>
         </div>
       </nav>
@@ -842,44 +472,32 @@
             <div class="user-role" id="userRole">Автор</div>
           </div>
           <button class="logout-btn" id="logoutBtn" title="Выйти">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </button>
         </div>
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
       <div class="content-wrapper">
         <div class="page-container visible" id="pageContainer">
           <h1 class="page-title" id="pageTitle">Страница 1</h1>
-          <div class="page-content" id="pageContent">
-            <p>Содержимое страницы будет загружено сюда.</p>
-          </div>
+          <div class="page-content" id="pageContent"><p>Содержимое страницы будет загружено сюда.</p></div>
         </div>
       </div>
     </main>
   </div>
 
   <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
+    // Configuration
     const SUPABASE_URL = 'YOUR_SUPABASE_URL';
     const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    
     let supabase = null;
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
-    
-    // ============================================
-    // DOM ELEMENTS
-    // ============================================
+
+    // Elements
     const authModal = document.getElementById('authModal');
     const authOverlay = document.getElementById('authOverlay');
     const tabLogin = document.getElementById('tabLogin');
@@ -889,60 +507,34 @@
     const appContainer = document.getElementById('appContainer');
     const sidebar = document.getElementById('sidebar');
     const pageContainer = document.getElementById('pageContainer');
-    
-    // ============================================
-    // TAB SWITCHING LOGIC
-    // ============================================
-    
+
+    // Tab Switching Logic
     tabLogin.addEventListener('change', () => {
-      if (tabLogin.checked) {
-        authModal.classList.remove('is-register');
-      }
+      if (tabLogin.checked) authModal.classList.remove('is-register');
     });
-    
+
     tabRegister.addEventListener('change', () => {
-      if (tabRegister.checked) {
-        authModal.classList.add('is-register');
-      }
+      if (tabRegister.checked) authModal.classList.add('is-register');
     });
-    
-    // ============================================
-    // PHONE MASK
-    // ============================================
+
+    // Phone Mask
     const regPhone = document.getElementById('regPhone');
-    
     regPhone.addEventListener('input', (e) => {
       let value = e.target.value.replace(/\D/g, '');
-      
       if (value.length > 0) {
-        if (value[0] === '8' || value[0] === '7') {
-          value = value.substring(1);
-        }
-        
+        if (value[0] === '8' || value[0] === '7') value = value.substring(1);
         let formatted = '+7';
-        if (value.length > 0) {
-          formatted += ' (' + value.substring(0, 3);
-        }
-        if (value.length > 3) {
-          formatted += ') ' + value.substring(3, 6);
-        }
-        if (value.length > 6) {
-          formatted += ' -' + value.substring(6, 8);
-        }
-        if (value.length > 8) {
-          formatted += '-' + value.substring(8, 10);
-        }
-        
+        if (value.length > 0) formatted += ' (' + value.substring(0, 3);
+        if (value.length > 3) formatted += ') ' + value.substring(3, 6);
+        if (value.length > 6) formatted += ' -' + value.substring(6, 8);
+        if (value.length > 8) formatted += '-' + value.substring(8, 10);
         e.target.value = formatted;
       }
     });
-    
-    // ============================================
-    // AUTH HANDLERS
-    // ============================================
-    
+
+    // Auth Logic
     let currentUser = null;
-    
+
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -953,7 +545,6 @@
       if (!username || !password) return;
       
       if (!supabase) {
-        // Demo mode
         currentUser = { first_name: 'Демо', last_name: 'Пользователь', user_type: 'Автор' };
         showApp();
         return;
@@ -961,48 +552,23 @@
       
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
-      
       try {
-        const { data, error } = await supabase
-          .from('reviews_users')
-          .select('*')
-          .eq('phone', username)
-          .single();
-        
-        if (error || !data) {
-          showLoginBanner('Пользователь не найден');
-          loginBtn.classList.remove('loading');
-          loginBtn.disabled = false;
-          return;
-        }
-        
-        if (data.status !== 'подтверждено') {
-          showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.');
-          loginBtn.classList.remove('loading');
-          loginBtn.disabled = false;
-          return;
-        }
-        
+        const { data, error } = await supabase.from('reviews_users').select('*').eq('phone', username).single();
+        if (error || !data) { showLoginBanner('Пользователь не найден'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
+        if (data.status !== 'подтверждено') { showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
         currentUser = data;
         await supabase.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
-        
-        loginBtn.classList.remove('loading');
-        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading'); loginBtn.disabled = false;
         showApp();
-        
-      } catch (err) {
-        console.error(err);
-        loginBtn.classList.remove('loading');
-        loginBtn.disabled = false;
-      }
+      } catch (err) { console.error(err); loginBtn.classList.remove('loading'); loginBtn.disabled = false; }
     }
-    
+
     function showLoginBanner(msg) {
       const banner = document.getElementById('loginBanner');
       document.getElementById('loginBannerText').textContent = msg;
       banner.classList.add('visible');
     }
-    
+
     async function handleRegister(e) {
       e.preventDefault();
       const phone = document.getElementById('regPhone').value.trim();
@@ -1013,45 +579,25 @@
       const registerBtn = document.getElementById('registerBtn');
       const registerBanner = document.getElementById('registerBanner');
       
-      if (!supabase) {
-        alert('Supabase не настроен');
-        return;
-      }
+      if (!supabase) { alert('Supabase не настроен'); return; }
       
       registerBtn.classList.add('loading');
       registerBtn.disabled = true;
-      
       try {
         const { error } = await supabase.from('reviews_users').insert([{
           phone, first_name: firstName, last_name: lastName, city,
           user_type: role, status: 'создана', created_at: new Date().toISOString()
         }]);
-        
         if (error) throw error;
-        
         registerBanner.classList.add('visible');
-        registerBtn.classList.remove('loading');
-        registerBtn.disabled = false;
-        
+        registerBtn.classList.remove('loading'); registerBtn.disabled = false;
         setTimeout(() => {
-          registerForm.reset();
-          registerBanner.classList.remove('visible');
-          tabLogin.checked = true;
-          authModal.classList.remove('is-register');
+          registerForm.reset(); registerBanner.classList.remove('visible');
+          tabLogin.checked = true; authModal.classList.remove('is-register');
         }, 3000);
-        
-      } catch (err) {
-        console.error(err);
-        alert('Ошибка регистрации');
-        registerBtn.classList.remove('loading');
-        registerBtn.disabled = false;
-      }
+      } catch (err) { console.error(err); alert('Ошибка регистрации'); registerBtn.classList.remove('loading'); registerBtn.disabled = false; }
     }
-    
-    // ============================================
-    // APP UI
-    // ============================================
-    
+
     function showApp() {
       authOverlay.classList.remove('visible');
       setTimeout(() => {
@@ -1060,21 +606,19 @@
         updateUserUI();
       }, 400);
     }
-    
+
     function hideApp() {
       sidebar.classList.remove('visible');
       setTimeout(() => {
         appContainer.classList.remove('visible');
         setTimeout(() => {
           authOverlay.classList.add('visible');
-          loginForm.reset();
-          registerForm.reset();
-          tabLogin.checked = true;
-          authModal.classList.remove('is-register');
+          loginForm.reset(); registerForm.reset();
+          tabLogin.checked = true; authModal.classList.remove('is-register');
         }, 100);
       }, 400);
     }
-    
+
     function updateUserUI() {
       if (currentUser) {
         const initials = (currentUser.first_name?.[0] || '') + (currentUser.last_name?.[0] || '');
@@ -1083,48 +627,33 @@
         document.getElementById('userRole').textContent = currentUser.user_type || 'Автор';
       }
     }
-    
-    // ============================================
-    // NAVIGATION
-    // ============================================
-    
+
+    // Navigation
     const navItems = document.querySelectorAll('.nav-item');
     let currentPage = 'modal1';
-    
-    navItems.forEach(item => {
-      item.addEventListener('click', () => navigateToPage(item.dataset.page, item));
-    });
-    
+    navItems.forEach(item => item.addEventListener('click', () => navigateToPage(item.dataset.page, item)));
+
     async function navigateToPage(page, item) {
       if (currentPage === page) return;
       navItems.forEach(nav => nav.classList.remove('active'));
       item.classList.add('active');
-      
       pageContainer.classList.remove('visible');
-      
       setTimeout(async () => {
         currentPage = page;
         const pageNum = page.replace('modal', '');
         document.getElementById('pageTitle').textContent = `Страница ${pageNum}`;
-        
         try {
           const res = await fetch(`${page}.html`);
           document.getElementById('pageContent').innerHTML = res.ok ? await res.text() : `<p>Контент страницы ${pageNum}</p>`;
-        } catch {
-          document.getElementById('pageContent').innerHTML = `<p>Контент страницы ${pageNum}</p>`;
-        }
-        
+        } catch { document.getElementById('pageContent').innerHTML = `<p>Контент страницы ${pageNum}</p>`; }
         setTimeout(() => pageContainer.classList.add('visible'), 50);
       }, 300);
     }
-    
-    // ============================================
-    // INIT
-    // ============================================
+
+    // Init
     loginForm.addEventListener('submit', handleLogin);
     registerForm.addEventListener('submit', handleRegister);
     document.getElementById('logoutBtn').addEventListener('click', hideApp);
-    
   </script>
 </body>
 </html>
