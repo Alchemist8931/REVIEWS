@@ -46,7 +46,7 @@
       width: 800px;
       max-width: 95vw;
       max-height: 90vh;
-      overflow-y: auto; /* Скролл всего окна, если контента много */
+      overflow-y: auto;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
       transform: scale(0.9);
       transition: transform 0.3s ease;
@@ -59,10 +59,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky; /* Заголовок остается сверху при скролле */
-      top: 0;
-      background: var(--bg-card);
-      z-index: 10;
     }
     .task-modal-title { font-size: 20px; font-weight: 700; }
     .close-modal-btn {
@@ -124,7 +120,7 @@
     .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
     /* Поля формы - Floating Label Fix */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
     
     .input-group { 
       position: relative; 
@@ -187,24 +183,29 @@
     }
     .input-group input[type="date"]:focus + label { color: var(--accent); }
 
-    /* Блок источников - УБРАНЫ ОГРАНИЧЕНИЯ ВЫСОТЫ И СКРОЛЛ */
+    /* Блок источников - ИСПРАВЛЕНИЕ Z-INDEX */
     .sources-section {
       display: flex;
       gap: 20px;
       background: var(--bg-primary);
       border-radius: 12px;
       padding: 16px;
+      position: relative;
+      z-index: 2; /* Поднять секцию выше */
     }
     
+    /* ИСПРАВЛЕНИЕ: Список источников должен быть выше счетчика */
     .sources-list { 
       flex: 2; 
       display: flex; 
       flex-direction: column; 
       gap: 12px; 
-      /* УБРАНО: max-height */
-      /* УБРАНО: overflow-y */
-      /* УБРАНО: padding-right */
-      /* УБРАНО: z-index трюки */
+      max-height: 250px; 
+      overflow-y: auto; 
+      padding-right: 8px;
+      position: relative;
+      z-index: 10; /* Гарантируем, что список выше счетчика */
+      background: transparent; /* Фон прозрачный, чтобы не перекрывать ничего лишнего */
     }
     
     .source-item {
@@ -215,6 +216,8 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+      position: relative;
+      z-index: 5;
     }
     
     .source-item input { 
@@ -226,19 +229,18 @@
       background: var(--bg-card);
       box-sizing: border-box;
       height: 36px;
-      flex-shrink: 0; /* Запрещаем сжимать инпуты */
+      position: relative;
+      z-index: 6; /* Инпуты самые верхние */
     }
     
     .source-item input:focus {
         border-color: var(--accent);
     }
     
-    /* Ширина инпутов фиксированная через flex-basis для надежности */
-    .source-item .input-platform { flex: 1 1 auto; min-width: 100px; }
-    .source-item .input-count { flex: 0 0 65px; text-align: center; }
-    .source-item .input-link { flex: 1 1 auto; min-width: 100px; }
+    .source-item .input-platform { flex: 1; min-width: 80px; }
+    .source-item .input-count { width: 65px; text-align: center; }
+    .source-item .input-link { flex: 1; min-width: 80px; }
 
-    /* Убираем стрелочки у числа */
     .source-item input[type="number"]::-webkit-outer-spin-button,
     .source-item input[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -257,8 +259,10 @@
       margin-left: 4px;
       flex-shrink: 0;
       height: 36px;
+      z-index: 7;
     }
     
+    /* Счетчик опускаем ниже слоем */
     .total-counter {
       flex: 1;
       background: white;
@@ -269,11 +273,13 @@
       align-items: center;
       justify-content: center;
       border: 1px solid var(--border-color);
-      min-width: 120px;
+      position: relative;
+      z-index: 1; /* Ниже, чем sources-list (z-index: 10) */
+      pointer-events: none; /* Чтобы вообще не перехватывал клики, если вдруг налезет */
     }
     
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
-    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; pointer-events: none; }
+    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); pointer-events: none; }
 
     .add-source-btn {
       margin-top: 4px;
@@ -295,9 +301,6 @@
       display: flex;
       justify-content: flex-end;
       gap: 12px;
-      position: sticky;
-      bottom: 0;
-      background: var(--bg-card);
     }
     .btn-cancel {
       padding: 10px 20px;
