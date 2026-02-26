@@ -321,43 +321,49 @@
         let data = null;
         let error = null;
 
-        // Стратегия 1: Пробуем найти по логину
-        // .eq автоматически экранирует специальные символы (точки, собаки)
+        // Стратегия 1: Поиск по логину (ilike - нечувствителен к регистру)
+        // ИСПОЛЬЗУЕМ ILIKE вместо EQ, чтобы Igor@... находил igor@...
+        console.log(`[Login] Попытка входа: ${username}`);
+        
         let res = await supabaseClient
           .from('reviews_users')
           .select('*')
-          .eq('login', username)
-          .maybeSingle(); // maybeSingle не выдает ошибку, если 0 строк
+          .ilike('login', username)
+          .maybeSingle(); 
         
+        console.log('[Login] Результат поиска по логину:', res);
+
         if (res.data) {
             data = res.data;
         } else {
             // Стратегия 2: Если не нашли по логину, ищем по телефону
+            // Телефон ищем точно (eq)
             res = await supabaseClient
               .from('reviews_users')
               .select('*')
               .eq('phone', username)
               .maybeSingle();
             
+            console.log('[Login] Результат поиска по телефону:', res);
+            
             if (res.data) {
                 data = res.data;
             } else {
-                // Если и тут пусто, значит ошибка
                 error = res.error || { message: "Not found" };
             }
         }
         
-        // Обработка ошибок БД (не путать с "не найдено")
-        if (res && res.error && res.error.code !== 'PGRST116') {
+        // Обработка ошибок БД
+        if (res && res.error) {
              console.error("Supabase DB error:", res.error);
-             showLoginBanner('Ошибка соединения с БД: ' + res.error.message);
+             showLoginBanner('Ошибка БД: ' + res.error.message + '. Проверьте политики RLS.');
              loginBtn.classList.remove('loading'); 
              loginBtn.disabled = false; 
              return;
         }
 
         if (!data) { 
-          showLoginBanner('Пользователь не найден'); 
+          showLoginBanner('Пользователь не найден. Проверьте логин или выполните SQL скрипт из ответа.'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
@@ -389,7 +395,7 @@
         
       } catch (err) { 
         console.error("Critical error:", err); 
-        showLoginBanner('Критическая ошибка: ' + err.message);
+        showLoginBanner('Критическая ошибка JS: ' + err.message);
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false; 
       }
