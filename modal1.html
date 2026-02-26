@@ -1,0 +1,611 @@
+<!-- modal1.html -->
+<div id="taskAppContainer" class="task-app">
+  <style>
+    /* Scoped Styles for modal1.html */
+    .task-app {
+      font-family: 'SN Pro', sans-serif;
+      color: var(--text-primary);
+    }
+    
+    /* Кнопка создания задания */
+    .create-task-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 15px;
+    }
+    .create-task-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    
+    /* Модальное окно создания */
+    .task-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .task-modal-overlay.visible { opacity: 1; visibility: visible; }
+    
+    .task-modal {
+      background: var(--bg-card);
+      border-radius: 20px;
+      width: 800px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    .task-modal-overlay.visible .task-modal { transform: scale(1); }
+    
+    .task-modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task-modal-title { font-size: 20px; font-weight: 700; }
+    .close-modal-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .close-modal-btn:hover { background: #e0e0e0; }
+    
+    .task-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    
+    /* Блок загрузки файлов */
+    .upload-section {
+      display: flex;
+      gap: 16px;
+      height: 200px;
+    }
+    .dropzone {
+      flex: 1;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--bg-primary);
+    }
+    .dropzone.dragover { border-color: var(--accent); background: #f0f0f0; }
+    .dropzone-icon { width: 40px; height: 40px; margin-bottom: 12px; color: var(--text-muted); }
+    
+    .file-list-container {
+      flex: 1;
+      border: 1.5px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      overflow-y: auto;
+      background: white;
+    }
+    .file-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; }
+    
+    /* Поля формы */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .input-group { position: relative; }
+    .input-group.filled label, .input-group input:focus + label {
+      top: 0; font-size: 12px; background: white; padding: 0 4px; color: var(--accent); left: 12px;
+    }
+    .input-group label {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); transition: 0.2s; pointer-events: none;
+    }
+    .input-group input {
+      width: 100%; padding: 14px 16px; border: 1.5px solid var(--border-color);
+      border-radius: 10px; outline: none; font-size: 14px; background: transparent;
+    }
+    .input-group input:focus { border-color: var(--accent); }
+
+    /* Блок источников */
+    .sources-section {
+      display: flex;
+      gap: 16px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .sources-list { flex: 2; display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; padding-right: 8px; }
+    .source-item {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr 40px;
+      gap: 8px;
+      align-items: center;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .source-item input { border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 13px; width: 100%; }
+    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; }
+    
+    .add-source-btn {
+      margin-top: auto;
+      padding: 8px;
+      background: transparent;
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+    .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
+    
+    .total-counter {
+      flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+    }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
+
+    /* Футер модалки */
+    .task-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .btn-cancel {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-submit {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      position: relative;
+      min-width: 120px;
+    }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    /* Прелоадер создания */
+    .creation-progress {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    .progress-bar-container {
+      width: 100%; height: 8px;
+      background: var(--border-color);
+      border-radius: 4px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+    .progress-details {
+      width: 100%;
+      margin-top: 16px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .progress-item { margin-bottom: 4px; }
+    .progress-item.done { color: var(--success); }
+  </style>
+
+  <!-- Верхнее модальное окно -->
+  <div style="margin-bottom: 24px;">
+    <button id="openModalBtn" class="create-task-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Создать задание
+    </button>
+  </div>
+
+  <!-- Модальное окно формы -->
+  <div id="taskModalOverlay" class="task-modal-overlay">
+    <div class="task-modal" onclick="event.stopPropagation()">
+      <div class="task-modal-header">
+        <h3 class="task-modal-title">Форма создания заданий на условиях договора</h3>
+        <button class="close-modal-btn" onclick="closeTaskModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Body Form -->
+      <div id="formContainer" class="task-modal-body">
+        <!-- Блок 2: Загрузка документов -->
+        <div class="upload-section">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            </div>
+            <p>Перетащите файлы сюда<br><span style="font-size:12px; color: var(--text-muted);">или нажмите для выбора</span></p>
+            <input type="file" id="fileInput" multiple style="display:none">
+          </div>
+          <div class="file-list-container">
+            <div class="file-list-title">Загруженные файлы</div>
+            <div id="fileList"></div>
+          </div>
+        </div>
+
+        <!-- Блок 3: Клиент -->
+        <div class="form-grid">
+          <div class="input-group">
+            <input type="text" id="clientName" required>
+            <label>Наименование клиента</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="clientInn" required>
+            <label>ИНН клиента</label>
+          </div>
+        </div>
+
+        <!-- Блок 4: Даты -->
+        <div class="form-grid">
+          <div class="input-group">
+            <input type="date" id="startDate" required>
+            <label style="top: -8px; font-size: 12px; background: white; padding: 0 4px; left: 12px;">Дата начала</label>
+          </div>
+          <div class="input-group">
+            <input type="date" id="endDate" required>
+            <label style="top: -8px; font-size: 12px; background: white; padding: 0 4px; left: 12px;">Дата завершения</label>
+          </div>
+        </div>
+
+        <!-- Блок 5: Источники -->
+        <div class="sources-section">
+          <div class="sources-list" id="sourcesList">
+            <!-- Поля источников будут добавляться динамически -->
+          </div>
+          <div class="total-counter">
+            <span class="total-label">Всего заданий</span>
+            <span class="total-value" id="totalTasks">0</span>
+          </div>
+        </div>
+        <button class="add-source-btn" onclick="addSourceRow()">+ Добавить площадку</button>
+
+      </div>
+
+      <!-- Прелоадер -->
+      <div id="progressContainer" class="creation-progress">
+        <h4>Создание заданий...</h4>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div id="progressPercent" style="font-weight:600; margin-bottom:10px;">0%</div>
+        <div class="progress-details" id="progressDetails"></div>
+      </div>
+
+      <div class="task-modal-footer" id="modalFooter">
+        <button class="btn-cancel" onclick="closeTaskModal()">Отмена</button>
+        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Создать задание</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // ЛОГИКА MODAL1
+  // ==========================================
+
+  // Доступ к глобальным переменным из index.html
+  const sbClient = window.parent.supabaseClient;
+  const user = window.parent.currentUser;
+
+  let uploadedFiles = [];
+  let sources = [];
+
+  // Элементы
+  const overlay = document.getElementById('taskModalOverlay');
+  const openBtn = document.getElementById('openModalBtn');
+  const formContainer = document.getElementById('formContainer');
+  const progressContainer = document.getElementById('progressContainer');
+  const modalFooter = document.getElementById('modalFooter');
+  const fileInput = document.getElementById('fileInput');
+  const dropzone = document.getElementById('dropzone');
+  const sourcesList = document.getElementById('sourcesList');
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', () => {
+      // Добавляем первую строку источника при загрузке
+      addSourceRow();
+  });
+
+  // Открытие/Закрытие
+  openBtn.addEventListener('click', () => {
+    overlay.classList.add('visible');
+    resetForm();
+  });
+
+  function closeTaskModal() {
+    overlay.classList.remove('visible');
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeTaskModal();
+  });
+
+  //Dropzone Logic
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+  function handleFiles(files) {
+    Array.from(files).forEach(file => {
+      uploadedFiles.push(file);
+    });
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById('fileList');
+    list.innerHTML = uploadedFiles.map((file, idx) => `
+      <div class="file-item">
+        <span>${file.name}</span>
+        <span class="file-item-remove" onclick="removeFile(${idx})">✕</span>
+      </div>
+    `).join('');
+  }
+
+  function removeFile(idx) {
+    uploadedFiles.splice(idx, 1);
+    renderFileList();
+  }
+
+  // Sources Logic
+  function addSourceRow() {
+    const id = Date.now();
+    sources.push({ id, platform: '', count: 0, link: '' });
+    renderSources();
+  }
+
+  function removeSourceRow(id) {
+    sources = sources.filter(s => s.id !== id);
+    renderSources();
+    updateTotal();
+  }
+
+  function updateSource(id, field, value) {
+    const src = sources.find(s => s.id === id);
+    if (src) src[field] = value;
+    if (field === 'count') updateTotal();
+  }
+
+  function renderSources() {
+    sourcesList.innerHTML = sources.map(s => `
+      <div class="source-item">
+        <input type="text" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
+        <input type="number" placeholder="Кол-во" value="${s.count || ''}" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
+        <input type="text" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
+        <button onclick="removeSourceRow(${s.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function updateTotal() {
+    const total = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
+    document.getElementById('totalTasks').textContent = total;
+  }
+
+  function resetForm() {
+    formContainer.style.display = 'flex';
+    progressContainer.style.display = 'none';
+    modalFooter.style.display = 'flex';
+    uploadedFiles = [];
+    renderFileList();
+    sources = [];
+    addSourceRow();
+    document.getElementById('clientName').value = '';
+    document.getElementById('clientInn').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    updateTotal();
+  }
+
+  // ==========================================
+  // SUBMISSION LOGIC
+  // ==========================================
+
+  async function handleSubmit() {
+    if (!user) return alert('Пользователь не определен');
+
+    const clientName = document.getElementById('clientName').value;
+    const clientInn = document.getElementById('clientInn').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!clientName || !clientInn || !startDate || !endDate) return alert('Заполните все поля клиента и даты');
+    if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте хотя бы одну площадку с количеством заданий');
+
+    // UI Switch
+    formContainer.style.display = 'none';
+    modalFooter.style.display = 'none';
+    progressContainer.style.display = 'flex';
+
+    const totalTasks = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
+    let processedTasks = 0;
+
+    // Prepare Files (simulation - just names)
+    const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
+
+    // Get Last Order Number
+    let lastNumber = await getLastOrderNumber();
+    
+    const progressDetails = document.getElementById('progressDetails');
+    progressDetails.innerHTML = '';
+
+    try {
+      for (const src of sources) {
+        const count = parseInt(src.count) || 0;
+        if (count === 0) continue;
+
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'progress-item';
+        itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: 0 из ${count}`;
+        progressDetails.appendChild(itemDiv);
+
+        let insertedCount = 0;
+        const batchSize = 10; // Insert in batches
+        const batches = Math.ceil(count / batchSize);
+
+        for (let b = 0; b < batches; b++) {
+          const currentBatchSize = Math.min(batchSize, count - insertedCount);
+          const insertData = [];
+
+          for (let i = 0; i < currentBatchSize; i++) {
+            lastNumber = incrementOrderNumber(lastNumber);
+            insertData.push({
+              manager_login: user.login,
+              manager_name: `${user.first_name} ${user.last_name}`,
+              manager_phone: user.phone,
+              order_number: lastNumber,
+              client_name: clientName,
+              client_inn: clientInn,
+              start_date: startDate,
+              end_date: endDate,
+              platform: src.platform,
+              link: src.link,
+              documents: docs,
+              status: 'создана'
+            });
+          }
+
+          // Insert Batch
+          const { error } = await sbClient.from('reviews_order').insert(insertData);
+          if (error) throw error;
+
+          insertedCount += currentBatchSize;
+          processedTasks += currentBatchSize;
+
+          // Update UI
+          itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: ${insertedCount} из ${count}`;
+          if (insertedCount === count) itemDiv.classList.add('done');
+          
+          const percent = Math.round((processedTasks / totalTasks) * 100);
+          document.getElementById('progressFill').style.width = percent + '%';
+          document.getElementById('progressPercent').textContent = percent + '%';
+          
+          // Small delay for UX
+          await new Promise(r => setTimeout(r, 50));
+        }
+      }
+
+      // Finish
+      document.getElementById('progressPercent').textContent = 'Готово!';
+      setTimeout(() => {
+        alert('Задания успешно созданы!');
+        closeTaskModal();
+      }, 500);
+
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка при создании: ' + err.message);
+      resetForm();
+    }
+  }
+
+  // ==========================================
+  // ORDER NUMBER GENERATOR
+  // ==========================================
+
+  async function getLastOrderNumber() {
+    const { data, error } = await sbClient
+      .from('reviews_order')
+      .select('order_number')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data || !data.order_number) return 'AA-00000'; // Start from AA-00001
+    return data.order_number;
+  }
+
+  function incrementOrderNumber(current) {
+    // Format: LL-DDDDD
+    let letters = current.substring(0, 2);
+    let digits = parseInt(current.substring(3));
+
+    digits++;
+    if (digits > 99999) {
+      digits = 1;
+      letters = incrementLetters(letters);
+    }
+
+    const digitStr = String(digits).padStart(5, '0');
+    return `${letters}-${digitStr}`;
+  }
+
+  function incrementLetters(str) {
+    let arr = str.split('');
+    let i = arr.length - 1;
+    
+    while (i >= 0) {
+      if (arr[i] === 'Z') {
+        arr[i] = 'A';
+        i--;
+      } else {
+        arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1);
+        return arr.join('');
+      }
+    }
+    return 'AA'; // Reset if ZZ
+  }
+
+</script>
