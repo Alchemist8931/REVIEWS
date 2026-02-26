@@ -124,10 +124,8 @@
     
     .input-group { 
       position: relative; 
-      margin-bottom: 0; /* Сброс лишних отступов */
     }
     
-    /* Стили INPUT */
     .input-group input {
       width: 100%; 
       padding: 14px 16px; 
@@ -139,6 +137,7 @@
       color: var(--text-primary);
       outline: none; 
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
     /* Важно: прозрачный плейсхолдер для работы CSS селектора :placeholder-shown */
     .input-group input::placeholder { color: transparent; }
@@ -164,7 +163,7 @@
       padding: 0 4px;
     }
     
-    /* Анимация поднятия лейбла при фокусе ИЛИ если поле заполнено */
+    /* Анимация поднятия лейбла */
     .input-group input:focus + label,
     .input-group input:not(:placeholder-shown) + label {
       top: 0; 
@@ -176,7 +175,6 @@
     }
 
     /* Специфичные стили для DATE INPUT */
-    /* У date input нет плейсхолдера, поэтому лейбл всегда должен быть сверху */
     .input-group input[type="date"] + label,
     .input-group input[type="date"]:focus + label {
       top: 0; 
@@ -184,16 +182,14 @@
       font-size: 12px; 
       font-weight: 500;
       background-color: var(--bg-card);
-      color: var(--text-muted); /* Не подсвечиваем акцентом, как при фокусе текста, просто серый */
+      color: var(--text-muted);
     }
-    .input-group input[type="date"]:focus + label {
-       color: var(--accent);
-    }
+    .input-group input[type="date"]:focus + label { color: var(--accent); }
 
     /* Блок источников */
     .sources-section {
       display: flex;
-      gap: 16px;
+      gap: 20px; /* Чуть увеличим отступ */
       background: var(--bg-primary);
       border-radius: 12px;
       padding: 16px;
@@ -208,16 +204,16 @@
       padding-right: 8px; 
     }
     
+    /* ИСПРАВЛЕНИЕ: Flexbox вместо Grid для надежности */
     .source-item {
-      display: grid;
-      /* Исправленная сетка: 1fr 80px 1fr auto */
-      grid-template-columns: 1fr 80px 1fr auto;
+      display: flex;
       gap: 8px;
       align-items: center;
       background: white;
       padding: 8px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
+      position: relative; /* Для z-index контекста */
     }
     
     /* Инпуты внутри источника */
@@ -226,14 +222,27 @@
       padding: 8px; 
       border-radius: 6px; 
       font-size: 13px; 
-      width: 100%; 
-      min-width: 0; /* Важно для Grid */
       outline: none;
       background: var(--bg-card);
+      box-sizing: border-box;
+      height: 36px; /* Фиксированная высота */
+      position: relative;
+      z-index: 2; /* Поверх всего */
+      flex-shrink: 0; /* Не сжимать */
     }
-    .source-item input:focus {
-        border-color: var(--accent);
+    
+    /* Распределение ширины */
+    .source-item .input-platform { flex: 1; min-width: 100px; }
+    .source-item .input-count { width: 70px; text-align: center; }
+    .source-item .input-link { flex: 1; min-width: 100px; }
+
+    /* Убираем стрелочки у числа */
+    .source-item input[type="number"]::-webkit-outer-spin-button,
+    .source-item input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
+    .source-item input[type="number"] { -moz-appearance: textfield; }
     
     .source-item button { 
       background: transparent; 
@@ -242,8 +251,10 @@
       cursor: pointer; 
       font-size: 18px; 
       line-height: 1;
-      padding: 4px;
+      padding: 0 4px;
       margin-left: 4px;
+      flex-shrink: 0;
+      height: 36px; /* Совпадает с высотой инпута */
     }
     
     .add-source-btn {
@@ -372,7 +383,6 @@
         <!-- Блок 3: Клиент -->
         <div class="form-grid">
           <div class="input-group">
-            <!-- Добавлен placeholder=" " -->
             <input type="text" id="clientName" required placeholder=" ">
             <label for="clientName">Наименование клиента</label>
           </div>
@@ -454,10 +464,7 @@
 
   function bindEvents() {
       openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
-      
-      // Закрытие по клику на оверлей
       overlay.onclick = (e) => { if (e.target === overlay) closeTaskModal(); };
-
       dropzone.onclick = () => fileInput.click();
       dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
       dropzone.ondragleave = () => dropzone.classList.remove('dragover');
@@ -509,11 +516,12 @@
   }
 
   function renderSources() {
+    // ИСПРАВЛЕНО: Добавлены классы для правильного распределения ширины
     sourcesList.innerHTML = sources.map(s => `
       <div class="source-item">
-        <input type="text" placeholder="Площадка (Avito)" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
-        <input type="number" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
-        <input type="text" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
+        <input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
+        <input type="number" class="input-count" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
+        <input type="text" class="input-link" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
         <button type="button" onclick="removeSourceRow(${s.id})">✕</button>
       </div>
     `).join('');
