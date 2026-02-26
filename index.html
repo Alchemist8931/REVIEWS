@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Платформа авторов</title>
+  <title>Платформа учета и автоматизации</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -355,12 +355,12 @@
           <!-- Login Form -->
           <form class="auth-form login-form" id="loginForm">
             <div class="input-container">
-              <input type="text" class="styled_input_bar" id="loginUsername" placeholder=" " autocomplete="username" />
+              <input type="text" class="styled_input_bar" id="loginUsername" name="username" placeholder=" " autocomplete="username" />
               <label class="input-label" for="loginUsername">Логин</label>
             </div>
             
             <div class="input-container">
-              <input type="password" class="styled_input_bar" id="loginPassword" placeholder=" " autocomplete="current-password" />
+              <input type="password" class="styled_input_bar" id="loginPassword" name="password" placeholder=" " autocomplete="current-password" />
               <label class="input-label" for="loginPassword">Пароль</label>
             </div>
             
@@ -396,6 +396,18 @@
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="regCity" placeholder=" " />
               <label class="input-label" for="regCity">Город проживания</label>
+            </div>
+            
+            <!-- NEW: Login Field -->
+            <div class="input-container">
+              <input type="text" class="styled_input_bar" id="regLogin" name="username" placeholder=" " autocomplete="username" />
+              <label class="input-label" for="regLogin">Логин</label>
+            </div>
+            
+            <!-- NEW: Password Field -->
+            <div class="input-container">
+              <input type="password" class="styled_input_bar" id="regPassword" name="new-password" placeholder=" " autocomplete="new-password" />
+              <label class="input-label" for="regPassword">Пароль</label>
             </div>
             
             <div class="banner success" id="registerBanner">
@@ -487,13 +499,12 @@
 
   <script>
     // ==========================================
-    // ИСПРАВЛЕНИЕ: Переименовали переменную, чтобы избежать конфликта с window.supabase
+    // CONFIGURATION
     // ==========================================
     const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZHdsbWd3bGpqd3B1YXdsc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTQxNDksImV4cCI6MjA4MzAzMDE0OX0.rrIznUflWydylTnUZvOxOkeF9eMp91qNN4Bjq2gXRL8";
     
-    let supabaseClient = null; // ИЗМЕНЕНО ИМЯ ПЕРЕМЕННОЙ
-
+    let supabaseClient = null;
     if (SUPABASE_URL && SUPABASE_ANON_KEY) {
       try {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -548,7 +559,6 @@
       
       if (!username || !password) return;
       
-      // Используем supabaseClient вместо supabase
       if (!supabaseClient) {
         console.warn("Supabase не инициализирован, используется демо-режим");
         currentUser = { first_name: 'Демо', last_name: 'Пользователь', user_type: 'Автор' };
@@ -559,19 +569,36 @@
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
       try {
-        const { data, error } = await supabaseClient.from('reviews_users').select('*').eq('phone', username).single();
+        // Ищем пользователя по логину ИЛИ телефону (для совместимости)
+        // Предполагается, что колонка 'login' существует
+        const { data, error } = await supabaseClient
+          .from('reviews_users')
+          .select('*')
+          .or(`login.eq.${username},phone.eq.${username}`)
+          .single();
+
         if (error || !data) { 
           showLoginBanner('Пользователь не найден'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
+
+        // Проверка пароля (в реальном проекте сравнение хешей)
+        if (data.password_hash !== password) {
+          showLoginBanner('Неверный пароль'); 
+          loginBtn.classList.remove('loading'); 
+          loginBtn.disabled = false; 
+          return;
+        }
+
         if (data.status !== 'подтверждено') { 
           showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
+        
         currentUser = data;
         await supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
         loginBtn.classList.remove('loading'); 
@@ -596,6 +623,11 @@
       const firstName = document.getElementById('regFirstName').value.trim();
       const lastName = document.getElementById('regLastName').value.trim();
       const city = document.getElementById('regCity').value.trim();
+      
+      // NEW: Get Login and Password
+      const login = document.getElementById('regLogin').value.trim();
+      const password = document.getElementById('regPassword').value;
+
       const role = document.getElementById('roleAuthor').checked ? 'Автор' : 'Менеджер';
       const registerBtn = document.getElementById('registerBtn');
       const registerBanner = document.getElementById('registerBanner');
@@ -606,15 +638,28 @@
       registerBtn.disabled = true;
       try {
         const { error } = await supabaseClient.from('reviews_users').insert([{
-          phone, first_name: firstName, last_name: lastName, city,
-          user_type: role, status: 'создана', created_at: new Date().toISOString()
+          phone, 
+          first_name: firstName, 
+          last_name: lastName, 
+          city,
+          login, // NEW: Save login
+          password_hash: password, // NEW: Save password
+          user_type: role, 
+          status: 'создана', 
+          created_at: new Date().toISOString()
         }]);
+        
         if (error) throw error;
+        
         registerBanner.classList.add('visible');
-        registerBtn.classList.remove('loading'); registerBtn.disabled = false;
+        registerBtn.classList.remove('loading'); 
+        registerBtn.disabled = false;
+        
         setTimeout(() => {
-          registerForm.reset(); registerBanner.classList.remove('visible');
-          tabLogin.checked = true; authModal.classList.remove('is-register');
+          registerForm.reset(); 
+          registerBanner.classList.remove('visible');
+          tabLogin.checked = true; 
+          authModal.classList.remove('is-register');
         }, 3000);
       } catch (err) { 
         console.error(err); 
