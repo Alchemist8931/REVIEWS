@@ -59,6 +59,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 10;
     }
     .task-modal-title { font-size: 20px; font-weight: 700; }
     .close-modal-btn {
@@ -78,11 +82,7 @@
     .task-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
     
     /* Блок загрузки файлов */
-    .upload-section {
-      display: flex;
-      gap: 16px;
-      height: 200px;
-    }
+    .upload-section { display: flex; gap: 16px; height: 200px; }
     .dropzone {
       flex: 1;
       border: 2px dashed var(--border-color);
@@ -107,105 +107,62 @@
       background: white;
     }
     .file-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
-    .file-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px;
-      background: var(--bg-primary);
-      border-radius: 6px;
-      margin-bottom: 4px;
-      font-size: 13px;
-    }
+    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
     .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
     /* Поля формы - Floating Label Fix */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
     
-    .input-group { 
-      position: relative; 
-    }
+    .input-group { position: relative; }
     
     .input-group input {
-      width: 100%; 
-      padding: 14px 16px; 
-      font-size: 15px; 
-      font-family: 'SN Pro', sans-serif; 
-      border: 1.5px solid var(--border-color);
-      border-radius: 10px; 
-      background: var(--bg-card); 
-      color: var(--text-primary);
-      outline: none; 
-      transition: all 0.3s ease;
+      width: 100%; padding: 14px 16px; font-size: 15px; font-family: 'SN Pro', sans-serif; border: 1.5px solid var(--border-color);
+      border-radius: 10px; background: var(--bg-card); color: var(--text-primary);
+      outline: none; transition: all 0.3s ease;
       box-sizing: border-box;
     }
     .input-group input::placeholder { color: transparent; }
-    
-    .input-group input:focus {
-      border-color: var(--accent);
-      background: var(--bg-card); 
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-    }
-    
+    .input-group input:focus { border-color: var(--accent); background: var(--bg-card); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
     .input-group label {
-      position: absolute; 
-      left: 16px; 
-      top: 50%;
+      position: absolute; left: 16px; top: 50%;
       transform: translateY(-50%);
-      font-size: 15px; 
-      font-family: 'SN Pro', sans-serif;
+      font-size: 15px; font-family: 'SN Pro', sans-serif;
       color: var(--text-muted);
       pointer-events: none;
       transition: all 0.2s ease;
       background: transparent;
       padding: 0 4px;
     }
-    
-    .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
-      top: 0; 
-      left: 12px;
-      font-size: 12px; 
-      font-weight: 500;
+    .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label {
+      top: 0; left: 12px;
+      font-size: 12px; font-weight: 500;
       background-color: var(--bg-card);
       color: var(--accent);
     }
 
     /* Date inputs specific */
-    .input-group input[type="date"] + label,
-    .input-group input[type="date"]:focus + label {
-      top: 0; 
-      left: 12px;
-      font-size: 12px; 
-      font-weight: 500;
+    .input-group input[type="date"] + label, .input-group input[type="date"]:focus + label {
+      top: 0; left: 12px;
+      font-size: 12px; font-weight: 500;
       background-color: var(--bg-card);
       color: var(--text-muted);
     }
     .input-group input[type="date"]:focus + label { color: var(--accent); }
 
-    /* Блок источников - ИСПРАВЛЕНИЕ Z-INDEX */
+    /* Блок источников */
     .sources-section {
       display: flex;
       gap: 20px;
       background: var(--bg-primary);
       border-radius: 12px;
       padding: 16px;
-      position: relative;
-      z-index: 2; /* Поднять секцию выше */
     }
-    
-    /* ИСПРАВЛЕНИЕ: Список источников должен быть выше счетчика */
     .sources-list { 
       flex: 2; 
       display: flex; 
       flex-direction: column; 
       gap: 12px; 
-      max-height: 250px; 
-      overflow-y: auto; 
-      padding-right: 8px;
-      position: relative;
-      z-index: 10; /* Гарантируем, что список выше счетчика */
-      background: transparent; /* Фон прозрачный, чтобы не перекрывать ничего лишнего */
+      /* УБРАНО max-height и overflow-y */
     }
     
     .source-item {
@@ -216,81 +173,39 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      position: relative;
-      z-index: 5;
     }
     
     .source-item input { 
-      border: 1px solid var(--border-color); 
-      padding: 8px; 
-      border-radius: 6px; 
-      font-size: 13px; 
-      outline: none;
-      background: var(--bg-card);
-      box-sizing: border-box;
-      height: 36px;
-      position: relative;
-      z-index: 6; /* Инпуты самые верхние */
+      border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 13px; outline: none;
+      background: var(--bg-card); box-sizing: border-box; height: 36px;
     }
-    
-    .source-item input:focus {
-        border-color: var(--accent);
-    }
+    .source-item input:focus { border-color: var(--accent); }
     
     .source-item .input-platform { flex: 1; min-width: 80px; }
     .source-item .input-count { width: 65px; text-align: center; }
     .source-item .input-link { flex: 1; min-width: 80px; }
 
-    .source-item input[type="number"]::-webkit-outer-spin-button,
-    .source-item input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
+    .source-item input[type="number"]::-webkit-outer-spin-button, .source-item input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .source-item input[type="number"] { -moz-appearance: textfield; }
     
-    .source-item button { 
-      background: transparent; 
-      border: none; 
-      color: var(--error); 
-      cursor: pointer; 
-      font-size: 18px; 
-      line-height: 1;
-      padding: 0 4px;
-      margin-left: 4px;
-      flex-shrink: 0;
-      height: 36px;
-      z-index: 7;
-    }
+    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin-left: 4px; flex-shrink: 0; height: 36px; }
     
-    /* Счетчик опускаем ниже слоем */
     .total-counter {
       flex: 1;
       background: white;
       border-radius: 10px;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       border: 1px solid var(--border-color);
-      position: relative;
-      z-index: 1; /* Ниже, чем sources-list (z-index: 10) */
-      pointer-events: none; /* Чтобы вообще не перехватывал клики, если вдруг налезет */
     }
-    
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; pointer-events: none; }
-    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); pointer-events: none; }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
+    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
 
     .add-source-btn {
-      margin-top: 4px;
-      padding: 10px;
-      background: transparent;
-      border: 1px dashed var(--border-color);
-      border-radius: 8px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-size: 13px;
-      text-align: center;
+      margin-top: 4px; padding: 10px; background: transparent;
+      border: 1px dashed var(--border-color); border-radius: 8px;
+      cursor: pointer; color: var(--text-secondary); font-size: 13px; text-align: center;
     }
     .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
     
@@ -298,59 +213,18 @@
     .task-modal-footer {
       padding: 16px 24px;
       border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
+      display: flex; justify-content: flex-end; gap: 12px;
+      position: sticky; bottom: 0; background: var(--bg-card);
     }
-    .btn-cancel {
-      padding: 10px 20px;
-      background: transparent;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .btn-submit {
-      padding: 10px 20px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      position: relative;
-      min-width: 120px;
-    }
+    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; font-weight: 500; }
+    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* Прелоадер создания */
-    .creation-progress {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-    }
-    .progress-bar-container {
-      width: 100%; height: 8px;
-      background: var(--border-color);
-      border-radius: 4px;
-      margin: 20px 0;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--success);
-      width: 0%;
-      transition: width 0.2s ease;
-    }
-    .progress-details {
-      width: 100%;
-      margin-top: 16px;
-      max-height: 150px;
-      overflow-y: auto;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
+    /* Прелоадер */
+    .creation-progress { display: none; flex-direction: column; align-items: center; padding: 40px; }
+    .progress-bar-container { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin: 20px 0; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.2s ease; }
+    .progress-details { width: 100%; margin-top: 16px; max-height: 150px; overflow-y: auto; font-size: 13px; color: var(--text-secondary); }
     .progress-item { margin-bottom: 4px; }
     .progress-item.done { color: var(--success); font-weight: 500; }
   </style>
@@ -378,9 +252,7 @@
         <!-- Блок 2: Загрузка документов -->
         <div class="upload-section">
           <div class="dropzone" id="dropzone">
-            <div class="dropzone-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            </div>
+            <div class="dropzone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
             <p>Перетащите файлы сюда<br><span style="font-size:12px; color: var(--text-muted);">или нажмите для выбора</span></p>
             <input type="file" id="fileInput" multiple style="display:none">
           </div>
@@ -392,48 +264,28 @@
 
         <!-- Блок 3: Клиент -->
         <div class="form-grid">
-          <div class="input-group">
-            <input type="text" id="clientName" required placeholder=" ">
-            <label for="clientName">Наименование клиента</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="clientInn" required placeholder=" ">
-            <label for="clientInn">ИНН клиента</label>
-          </div>
+          <div class="input-group"><input type="text" id="clientName" required placeholder=" "><label for="clientName">Наименование клиента</label></div>
+          <div class="input-group"><input type="text" id="clientInn" required placeholder=" "><label for="clientInn">ИНН клиента</label></div>
         </div>
 
         <!-- Блок 4: Даты -->
         <div class="form-grid">
-          <div class="input-group">
-            <input type="date" id="startDate" required>
-            <label for="startDate">Дата начала</label>
-          </div>
-          <div class="input-group">
-            <input type="date" id="endDate" required>
-            <label for="endDate">Дата завершения</label>
-          </div>
+          <div class="input-group"><input type="date" id="startDate" required><label for="startDate">Дата начала</label></div>
+          <div class="input-group"><input type="date" id="endDate" required><label for="endDate">Дата завершения</label></div>
         </div>
 
         <!-- Блок 5: Источники -->
         <div class="sources-section">
-          <div class="sources-list" id="sourcesList">
-            <!-- Поля источников добавляются динамически -->
-          </div>
-          <div class="total-counter">
-            <span class="total-label">Всего заданий</span>
-            <span class="total-value" id="totalTasks">0</span>
-          </div>
+          <div class="sources-list" id="sourcesList"></div>
+          <div class="total-counter"><span class="total-label">Всего заданий</span><span class="total-value" id="totalTasks">0</span></div>
         </div>
         <button class="add-source-btn" onclick="addSourceRow()">+ Добавить площадку</button>
-
       </div>
 
       <!-- Прелоадер -->
       <div id="progressContainer" class="creation-progress">
         <h4>Создание заданий...</h4>
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="progressFill"></div>
-        </div>
+        <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill"></div></div>
         <div id="progressPercent" style="font-weight:600; margin-bottom:10px;">0%</div>
         <div class="progress-details" id="progressDetails"></div>
       </div>
@@ -450,7 +302,6 @@
   // ==========================================
   // ЛОГИКА MODAL1
   // ==========================================
-
   const sbClient = window.supabaseClient;
   const user = window.currentUser;
 
@@ -467,10 +318,7 @@
   const dropzone = document.getElementById('dropzone');
   const sourcesList = document.getElementById('sourcesList');
 
-  function initPage() {
-      addSourceRow();
-      bindEvents();
-  }
+  function initPage() { addSourceRow(); bindEvents(); }
 
   function bindEvents() {
       openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
@@ -482,183 +330,77 @@
       fileInput.onchange = (e) => handleFiles(e.target.files);
   }
 
-  function closeTaskModal() {
-    overlay.classList.remove('visible');
-  }
+  function closeTaskModal() { overlay.classList.remove('visible'); }
+  function handleFiles(files) { Array.from(files).forEach(file => uploadedFiles.push(file)); renderFileList(); }
+  function renderFileList() { const list = document.getElementById('fileList'); list.innerHTML = uploadedFiles.map((file, idx) => `<div class="file-item"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span><span class="file-item-remove" onclick="removeFile(${idx})">✕</span></div>`).join(''); }
+  function removeFile(idx) { uploadedFiles.splice(idx, 1); renderFileList(); }
 
-  function handleFiles(files) {
-    Array.from(files).forEach(file => uploadedFiles.push(file));
-    renderFileList();
-  }
-
-  function renderFileList() {
-    const list = document.getElementById('fileList');
-    list.innerHTML = uploadedFiles.map((file, idx) => `
-      <div class="file-item">
-        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span>
-        <span class="file-item-remove" onclick="removeFile(${idx})">✕</span>
-      </div>
-    `).join('');
-  }
-
-  function removeFile(idx) {
-    uploadedFiles.splice(idx, 1);
-    renderFileList();
-  }
-
-  // Sources Logic
-  function addSourceRow() {
-    const id = ++sourceIdCounter;
-    sources.push({ id, platform: '', count: 0, link: '' });
-    renderSources();
-  }
-
-  function removeSourceRow(id) {
-    sources = sources.filter(s => s.id !== id);
-    renderSources();
-    updateTotal();
-  }
-
-  function updateSource(id, field, value) {
-    const src = sources.find(s => s.id === id);
-    if (src) src[field] = value;
-    if (field === 'count') updateTotal();
-  }
-
-  function renderSources() {
-    sourcesList.innerHTML = sources.map(s => `
-      <div class="source-item">
-        <input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
-        <input type="number" class="input-count" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
-        <input type="text" class="input-link" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
-        <button type="button" onclick="removeSourceRow(${s.id})">✕</button>
-      </div>
-    `).join('');
-  }
-
-  function updateTotal() {
-    const total = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
-    document.getElementById('totalTasks').textContent = total;
-  }
+  function addSourceRow() { const id = ++sourceIdCounter; sources.push({ id, platform: '', count: 0, link: '' }); renderSources(); }
+  function removeSourceRow(id) { sources = sources.filter(s => s.id !== id); renderSources(); updateTotal(); }
+  function updateSource(id, field, value) { const src = sources.find(s => s.id === id); if (src) src[field] = value; if (field === 'count') updateTotal(); }
+  function renderSources() { sourcesList.innerHTML = sources.map(s => `<div class="source-item"><input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)"><input type="number" class="input-count" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)"><input type="text" class="input-link" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)"><button type="button" onclick="removeSourceRow(${s.id})">✕</button></div>`).join(''); }
+  function updateTotal() { const total = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0); document.getElementById('totalTasks').textContent = total; }
 
   function resetForm() {
-    formContainer.style.display = 'flex';
-    progressContainer.style.display = 'none';
-    modalFooter.style.display = 'flex';
-    uploadedFiles = [];
-    renderFileList();
-    sources = [];
-    sourceIdCounter = 0;
-    addSourceRow();
-    document.getElementById('clientName').value = '';
-    document.getElementById('clientInn').value = '';
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
-    updateTotal();
+    formContainer.style.display = 'flex'; progressContainer.style.display = 'none'; modalFooter.style.display = 'flex';
+    uploadedFiles = []; renderFileList(); sources = []; sourceIdCounter = 0; addSourceRow();
+    document.getElementById('clientName').value = ''; document.getElementById('clientInn').value = '';
+    document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; updateTotal();
   }
-
-  // ==========================================
-  // SUBMISSION LOGIC
-  // ==========================================
 
   async function handleSubmit() {
     if (!user) return alert('Пользователь не определен');
-
     const clientName = document.getElementById('clientName').value;
     const clientInn = document.getElementById('clientInn').value;
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
-
     if (!clientName || !clientInn || !startDate || !endDate) return alert('Заполните все поля клиента и даты');
-    if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте хотя бы одну площадку с количеством заданий');
+    if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте площадки');
 
-    formContainer.style.display = 'none';
-    modalFooter.style.display = 'none';
-    progressContainer.style.display = 'flex';
-
+    formContainer.style.display = 'none'; modalFooter.style.display = 'none'; progressContainer.style.display = 'flex';
     const totalTasks = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
     let processedTasks = 0;
-
     const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
     let lastNumber = await getLastOrderNumber();
-    
-    const progressDetails = document.getElementById('progressDetails');
-    progressDetails.innerHTML = '';
+    const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
 
     try {
       for (const src of sources) {
-        const count = parseInt(src.count) || 0;
-        if (count === 0) continue;
-
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'progress-item';
-        itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: 0 из ${count}`;
-        progressDetails.appendChild(itemDiv);
-
-        let insertedCount = 0;
-        const batchSize = 10;
-        const batches = Math.ceil(count / batchSize);
+        const count = parseInt(src.count) || 0; if (count === 0) continue;
+        const itemDiv = document.createElement('div'); itemDiv.className = 'progress-item';
+        itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: 0 из ${count}`; progressDetails.appendChild(itemDiv);
+        let insertedCount = 0; const batchSize = 10; const batches = Math.ceil(count / batchSize);
 
         for (let b = 0; b < batches; b++) {
           const currentBatchSize = Math.min(batchSize, count - insertedCount);
           const insertData = [];
-
           for (let i = 0; i < currentBatchSize; i++) {
             lastNumber = incrementOrderNumber(lastNumber);
             insertData.push({
-              manager_login: user.login,
-              manager_name: `${user.first_name} ${user.last_name}`,
-              manager_phone: user.phone,
-              order_number: lastNumber,
-              client_name: clientName,
-              client_inn: clientInn,
-              start_date: startDate,
-              end_date: endDate,
-              platform: src.platform,
-              link: src.link,
-              documents: docs,
-              status: 'создана'
+              manager_login: user.login, manager_name: `${user.first_name} ${user.last_name}`, manager_phone: user.phone,
+              order_number: lastNumber, client_name: clientName, client_inn: clientInn,
+              start_date: startDate, end_date: endDate, platform: src.platform, link: src.link,
+              documents: docs, status: 'создана'
             });
           }
-
           const { error } = await sbClient.from('reviews_order').insert(insertData);
           if (error) throw error;
-
-          insertedCount += currentBatchSize;
-          processedTasks += currentBatchSize;
-
+          insertedCount += currentBatchSize; processedTasks += currentBatchSize;
           itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: ${insertedCount} из ${count}`;
           if (insertedCount === count) itemDiv.classList.add('done');
-          
           const percent = Math.round((processedTasks / totalTasks) * 100);
           document.getElementById('progressFill').style.width = percent + '%';
           document.getElementById('progressPercent').textContent = percent + '%';
-          
           await new Promise(r => setTimeout(r, 50));
         }
       }
-
       document.getElementById('progressPercent').textContent = 'Готово!';
-      setTimeout(() => {
-        alert('Задания успешно созданы!');
-        closeTaskModal();
-      }, 500);
-
-    } catch (err) {
-      console.error(err);
-      alert('Ошибка при создании: ' + err.message);
-      resetForm();
-    }
+      setTimeout(() => { alert('Задания созданы!'); closeTaskModal(); }, 500);
+    } catch (err) { console.error(err); alert('Ошибка: ' + err.message); resetForm(); }
   }
 
   async function getLastOrderNumber() {
-    const { data, error } = await sbClient
-      .from('reviews_order')
-      .select('order_number')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
+    const { data, error } = await sbClient.from('reviews_order').select('order_number').order('created_at', { ascending: false }).limit(1).single();
     if (error || !data || !data.order_number) return 'AA-00000';
     return data.order_number;
   }
@@ -666,34 +408,18 @@
   function incrementOrderNumber(current) {
     let letters = current.substring(0, 2);
     let digits = parseInt(current.substring(3));
-
     digits++;
-    if (digits > 99999) {
-      digits = 1;
-      letters = incrementLetters(letters);
-    }
-
-    const digitStr = String(digits).padStart(5, '0');
-    return `${letters}-${digitStr}`;
+    if (digits > 99999) { digits = 1; letters = incrementLetters(letters); }
+    return `${letters}-${String(digits).padStart(5, '0')}`;
   }
 
   function incrementLetters(str) {
-    let arr = str.split('');
-    let i = arr.length - 1;
-    
+    let arr = str.split(''); let i = arr.length - 1;
     while (i >= 0) {
-      if (arr[i] === 'Z') {
-        arr[i] = 'A';
-        i--;
-      } else {
-        arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1);
-        return arr.join('');
-      }
+      if (arr[i] === 'Z') { arr[i] = 'A'; i--; } else { arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1); return arr.join(''); }
     }
     return 'AA';
   }
 
-  // Запуск инициализации
   initPage();
-
 </script>
