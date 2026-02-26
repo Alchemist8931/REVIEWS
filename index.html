@@ -40,17 +40,32 @@
       pointer-events: none; z-index: 0;
     }
 
-    /* Auth Overlay */
+    /* Auth Overlay - ИСПРАВЛЕНИЕ ПРОБЛЕМЫ КЛИКОВ */
     .auth-overlay {
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
       z-index: 100;
       background: rgba(248, 249, 250, 0.9);
       backdrop-filter: blur(8px);
-      opacity: 0; visibility: hidden;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
+      
+      /* Скрываем: делаем прозрачным, невидимым и НЕ активным для событий */
+      opacity: 0; 
+      visibility: hidden;
+      pointer-events: none; /* ГЛАВНОЕ ИСПРАВЛЕНИЕ */
+      
+      /* Правильный переход: opacity меняется плавно, visibility меняется мгновенно после завершения */
+      transition: opacity 0.4s ease, visibility 0s linear 0.4s;
     }
-    .auth-overlay.visible { opacity: 1; visibility: visible; }
+    
+    /* Показываем */
+    .auth-overlay.visible { 
+      opacity: 1; 
+      visibility: visible; 
+      pointer-events: auto; /* Включаем клики */
+      
+      /* При появлении visibility меняется мгновенно (0s delay), opacity плавно */
+      transition: opacity 0.4s ease, visibility 0s linear 0s;
+    }
 
     .auth-modal {
       background: var(--bg-card);
@@ -266,7 +281,6 @@
     const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZHdsbWd3bGpqd3B1YXdsc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTQxNDksImV4cCI6MjA4MzAzMDE0OX0.rrIznUflWydylTnUZvOxOkeF9eMp91qNN4Bjq2gXRL8";
     
-    // ИСПРАВЛЕНИЕ: Присоединяем переменные к window, чтобы они были доступны в загружаемых скриптах
     window.supabaseClient = null;
     window.currentUser = null;
 
@@ -337,7 +351,7 @@
         if ((data.password_hash || '').toLowerCase() !== password.toLowerCase()) { showLoginBanner('Неверный пароль'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
         if (data.status !== 'подтверждено') { showLoginBanner('Учетная запись ожидает подтверждения.'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
         
-        window.currentUser = data; // Сохраняем в глобальную переменную
+        window.currentUser = data;
         await window.supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
         
         loginBtn.classList.remove('loading'); loginBtn.disabled = false;
@@ -388,7 +402,7 @@
         setTimeout(() => sidebar.classList.add('visible'), 100);
         updateUserUI();
         
-        // ИСПРАВЛЕНИЕ: Загружаем начальную страницу при входе
+        // Загружаем начальную страницу
         const initialItem = document.querySelector('.nav-item.active');
         if (initialItem) navigateToPage(initialItem.dataset.page, initialItem);
         
@@ -444,26 +458,20 @@
           const res = await fetch(`${page}.html`);
           if (res.ok) {
             const htmlText = await res.text();
-            
-            // ИСПРАВЛЕНИЕ: Ручная обработка скриптов
-            // Создаем временный контейнер для парсинга
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlText;
             
-            // 1. Извлекаем все скрипты
             const scripts = tempDiv.querySelectorAll('script');
-            scripts.forEach(script => script.remove()); // Удаляем их из HTML
+            scripts.forEach(script => script.remove());
             
-            // 2. Вставляем очищенный HTML (без скриптов)
             pageContent.innerHTML = tempDiv.innerHTML;
             
-            // 3. Создаем и выполняем скрипты заново
             scripts.forEach(oldScript => {
               const newScript = document.createElement('script');
               if(oldScript.src) newScript.src = oldScript.src;
               else newScript.textContent = oldScript.textContent;
-              document.body.appendChild(newScript); // Выполняем скрипт
-              newScript.remove(); // Удаляем, чтобы не засорять DOM
+              document.body.appendChild(newScript);
+              // newScript.remove(); // Можно раскомментировать, если скрипты конфликтуют
             });
             
           } else {
