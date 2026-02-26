@@ -231,7 +231,7 @@
   function handleFiles(files) { Array.from(files).forEach(file => uploadedFiles.push(file)); renderFileList(); }
   function renderFileList() { const list = document.getElementById('fileList'); list.innerHTML = uploadedFiles.map((file, idx) => `<div class="file-item"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span><span class="file-item-remove" onclick="removeFile(${idx})">✕</span></div>`).join(''); }
   
-  // Делаем функции глобальными для onclick
+  // Global functions for onclick
   window.removeFile = function(idx) { uploadedFiles.splice(idx, 1); renderFileList(); };
   window.addSourceRow = function() { const id = ++sourceIdCounter; sources.push({ id, platform: '', count: 0, link: '' }); renderSources(); };
   window.removeSourceRow = function(id) { sources = sources.filter(s => s.id !== id); renderSources(); updateTotal(); };
@@ -273,8 +273,11 @@
     let processedTasks = 0;
     const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
     
-    // ИСПРАВЛЕНО: Получаем последний номер, сортируя по самому номеру, а не по дате
-    let lastNumber = await getLastOrderNumber();
+    // 1. Получаем последний индивидуальный номер
+    let lastOrderNumber = await getLastOrderNumber();
+    
+    // 2. Получаем последний ГРУППОВОЙ номер
+    let groupNumber = await getLastGroupNumber();
     
     const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
 
@@ -289,10 +292,12 @@
           const currentBatchSize = Math.min(batchSize, count - insertedCount);
           const insertData = [];
           for (let i = 0; i < currentBatchSize; i++) {
-            lastNumber = incrementOrderNumber(lastNumber);
+            lastOrderNumber = incrementOrderNumber(lastOrderNumber);
             insertData.push({
               manager_login: user.login, manager_name: `${user.first_name} ${user.last_name}`, manager_phone: user.phone,
-              order_number: lastNumber, client_name: clientName, client_inn: clientInn,
+              order_number: lastOrderNumber, 
+              order_number_general: groupNumber, // <--- Добавляем групповой номер
+              client_name: clientName, client_inn: clientInn,
               start_date: startDate, end_date: endDate, platform: src.platform, link: src.link,
               documents: docs, status: 'создана'
             });
@@ -313,14 +318,43 @@
     } catch (err) { console.error(err); alert('Ошибка: ' + err.message); resetForm(); }
   }
 
+  // --- Функции генерации номеров ---
+
   async function getLastOrderNumber() {
-    // ИСПРАВЛЕНО: Сортировка по order_number DESC
-    // Это гарантированно вернет самый последний номер (например AA-00010), так как '10' > '09'
     const { data, error } = await sbClient.from('reviews_order').select('order_number').order('order_number', { ascending: false }).limit(1).maybeSingle();
-    
-    if (error) { console.error("Ошибка получения номера:", error); return 'AA-00000'; }
+    if (error) { console.error("Ошибка получения order_number:", error); return 'AA-00000'; }
     if (!data || !data.order_number) return 'AA-00000';
     return data.order_number;
+  }
+
+  // НОВАЯ ФУНКЦИЯ: Получение последнего группового номера
+  async function getLastGroupNumber() {
+    const { data, error } = await sbClient.from('reviews_order').select('order_number_general').order('order_number_general', { ascending: false }).limit(1).maybeSingle();
+    
+    if (error) { console.error("Ошибка получения group number:", error); return 'group-A00001'; }
+    
+    // Если записей нет или поле пустое, возвращаем начальное значение
+    if (!data || !data.order_number_general) return 'group-A00001';
+
+    // Парсим текущий номер: "group-A00011" -> "A", "00011"
+    const current = data.order_number_general; 
+    if (!current.startsWith('group-')) return 'group-A00001'; // Защита от некорректного формата
+
+    const clean = current.replace('group-', ''); // "A00011"
+    const letter = clean.substring(0, 1); // "A"
+    const numStr = clean.substring(1); // "00011"
+    let num = parseInt(numStr, 10);
+    
+    // Увеличиваем число
+    num++;
+    
+    // Если число превысило лимит, меняем букву (аналогично order_number)
+    if (num > 99999) {
+        const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
+        return `group-${nextLetter}00001`;
+    }
+
+    return `group-${letter}${String(num).padStart(5, '0')}`;
   }
 
   function incrementOrderNumber(current) {
