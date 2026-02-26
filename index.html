@@ -101,25 +101,23 @@
     .tab-container .tab:checked + .tab_label { color: var(--text-primary); }
     .tab-container .tab--register:checked ~ .indicator { left: 50%; }
 
-    /* Sub Tabs (Positioned under Register) */
+    /* Sub Tabs */
     .sub-tab-container {
       position: absolute;
       top: calc(100% + 12px);
-      right: 24px; /* Align right edge */
-      width: calc(50% - 26px); /* Width of Register button */
+      right: 24px; 
+      width: calc(50% - 26px); 
       display: flex; flex-direction: row; align-items: flex-start;
       padding: 2px;
       background-color: var(--tab-bg);
       border-radius: 8px;
       z-index: 10;
-      
-      /* Hidden by default */
       opacity: 0;
       transform: translateY(-10px);
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* Visible when parent has .is-register */
+    
     .auth-modal.is-register .sub-tab-container {
       opacity: 1;
       transform: translateY(0);
@@ -154,21 +152,20 @@
       padding-top: 28px; 
       transition: padding 0.3s ease;
     }
-    .auth-modal.is-register .modal-body { padding-top: 56px; } /* Space for sub-tabs */
+    .auth-modal.is-register .modal-body { padding-top: 56px; }
 
-    /* Forms Wrapper - IMPORTANT */
+    /* Forms Wrapper */
     .forms-wrapper {
       position: relative;
       width: 100%;
     }
 
-    /* Auth Form Common */
     .auth-form {
       display: flex; flex-direction: column; gap: 16px; width: 100%;
       transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
     }
 
-    /* --- Default State (Login Visible) --- */
+    /* Login Default State */
     .login-form {
       position: relative;
       opacity: 1;
@@ -183,10 +180,10 @@
       visibility: hidden;
       transform: translateX(30px);
       z-index: 1;
-      pointer-events: none; /* Prevent interaction */
+      pointer-events: none;
     }
 
-    /* --- Register State (Register Visible) --- */
+    /* Register Active State */
     .auth-modal.is-register .login-form {
       position: absolute;
       top: 0; left: 0;
@@ -489,12 +486,20 @@
   </div>
 
   <script>
-    // Configuration
+    // ==========================================
+    // ИСПРАВЛЕНИЕ: Переименовали переменную, чтобы избежать конфликта с window.supabase
+    // ==========================================
     const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZHdsbWd3bGpqd3B1YXdsc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTQxNDksImV4cCI6MjA4MzAzMDE0OX0.rrIznUflWydylTnUZvOxOkeF9eMp91qNN4Bjq2gXRL8";
-    let supabase = null;
-    if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let supabaseClient = null; // ИЗМЕНЕНО ИМЯ ПЕРЕМЕННОЙ
+
+    if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch(e) {
+        console.error("Ошибка инициализации Supabase:", e);
+      }
     }
 
     // Elements
@@ -540,11 +545,12 @@
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
       const loginBtn = document.getElementById('loginBtn');
-      const loginBanner = document.getElementById('loginBanner');
       
       if (!username || !password) return;
       
-      if (!supabase) {
+      // Используем supabaseClient вместо supabase
+      if (!supabaseClient) {
+        console.warn("Supabase не инициализирован, используется демо-режим");
         currentUser = { first_name: 'Демо', last_name: 'Пользователь', user_type: 'Автор' };
         showApp();
         return;
@@ -553,14 +559,29 @@
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
       try {
-        const { data, error } = await supabase.from('reviews_users').select('*').eq('phone', username).single();
-        if (error || !data) { showLoginBanner('Пользователь не найден'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
-        if (data.status !== 'подтверждено') { showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
+        const { data, error } = await supabaseClient.from('reviews_users').select('*').eq('phone', username).single();
+        if (error || !data) { 
+          showLoginBanner('Пользователь не найден'); 
+          loginBtn.classList.remove('loading'); 
+          loginBtn.disabled = false; 
+          return; 
+        }
+        if (data.status !== 'подтверждено') { 
+          showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.'); 
+          loginBtn.classList.remove('loading'); 
+          loginBtn.disabled = false; 
+          return; 
+        }
         currentUser = data;
-        await supabase.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
-        loginBtn.classList.remove('loading'); loginBtn.disabled = false;
+        await supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
+        loginBtn.classList.remove('loading'); 
+        loginBtn.disabled = false;
         showApp();
-      } catch (err) { console.error(err); loginBtn.classList.remove('loading'); loginBtn.disabled = false; }
+      } catch (err) { 
+        console.error(err); 
+        loginBtn.classList.remove('loading'); 
+        loginBtn.disabled = false; 
+      }
     }
 
     function showLoginBanner(msg) {
@@ -579,12 +600,12 @@
       const registerBtn = document.getElementById('registerBtn');
       const registerBanner = document.getElementById('registerBanner');
       
-      if (!supabase) { alert('Supabase не настроен'); return; }
+      if (!supabaseClient) { alert('Supabase не настроен'); return; }
       
       registerBtn.classList.add('loading');
       registerBtn.disabled = true;
       try {
-        const { error } = await supabase.from('reviews_users').insert([{
+        const { error } = await supabaseClient.from('reviews_users').insert([{
           phone, first_name: firstName, last_name: lastName, city,
           user_type: role, status: 'создана', created_at: new Date().toISOString()
         }]);
@@ -595,7 +616,12 @@
           registerForm.reset(); registerBanner.classList.remove('visible');
           tabLogin.checked = true; authModal.classList.remove('is-register');
         }, 3000);
-      } catch (err) { console.error(err); alert('Ошибка регистрации'); registerBtn.classList.remove('loading'); registerBtn.disabled = false; }
+      } catch (err) { 
+        console.error(err); 
+        alert('Ошибка регистрации: ' + (err.message || JSON.stringify(err))); 
+        registerBtn.classList.remove('loading'); 
+        registerBtn.disabled = false; 
+      }
     }
 
     function showApp() {
