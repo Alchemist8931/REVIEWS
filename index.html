@@ -252,8 +252,8 @@
     <main class="main-content">
       <div class="content-wrapper">
         <div class="page-container visible" id="pageContainer">
-          <h1 class="page-title" id="pageTitle">Страница 1</h1>
-          <div class="page-content" id="pageContent"><p>Содержимое страницы будет загружено сюда.</p></div>
+          <h1 class="page-title" id="pageTitle">Загрузка...</h1>
+          <div class="page-content" id="pageContent"><p>Загрузка содержимого...</p></div>
         </div>
       </div>
     </main>
@@ -261,15 +261,18 @@
 
   <script>
     // ==========================================
-    // CONFIGURATION
+    // CONFIGURATION & GLOBALS
     // ==========================================
     const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZHdsbWd3bGpqd3B1YXdsc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTQxNDksImV4cCI6MjA4MzAzMDE0OX0.rrIznUflWydylTnUZvOxOkeF9eMp91qNN4Bjq2gXRL8";
     
-    let supabaseClient = null;
+    // ИСПРАВЛЕНИЕ: Присоединяем переменные к window, чтобы они были доступны в загружаемых скриптах
+    window.supabaseClient = null;
+    window.currentUser = null;
+
     if (SUPABASE_URL && SUPABASE_ANON_KEY) {
       try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       } catch(e) {
         console.error("Ошибка инициализации Supabase:", e);
       }
@@ -303,9 +306,7 @@
       }
     });
 
-    let currentUser = null;
-
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВХОДА
+    // LOGIN LOGIC
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -317,92 +318,34 @@
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
       
-      console.log("========================================");
-      console.log("START LOGIN PROCESS");
-      
       try {
         let data = null;
-        
-        // 1. Поиск по логину (без учета регистра)
-        let res = await supabaseClient
+        let res = await window.supabaseClient
           .from('reviews_users')
           .select('*')
           .ilike('login', username)
           .maybeSingle(); 
 
-        if (res.data) {
-            data = res.data;
-            console.log("User found by LOGIN.");
-        } else {
-            // 2. Поиск по телефону
-            res = await supabaseClient
-              .from('reviews_users')
-              .select('*')
-              .eq('phone', username)
-              .maybeSingle();
-            
-            if (res.data) {
-                data = res.data;
-                console.log("User found by PHONE.");
-            }
+        if (res.data) data = res.data;
+        else {
+          res = await window.supabaseClient.from('reviews_users').select('*').eq('phone', username).maybeSingle();
+          if (res.data) data = res.data;
         }
         
-        // Проверка на ошибки БД
-        if (res.error) {
-             console.error("Supabase Error:", res.error);
-             showLoginBanner('Ошибка БД: ' + res.error.message);
-             loginBtn.classList.remove('loading'); 
-             loginBtn.disabled = false; 
-             return;
-        }
-
-        // Если пользователь не найден
-        if (!data) { 
-          showLoginBanner('Пользователь не найден'); 
-          loginBtn.classList.remove('loading'); 
-          loginBtn.disabled = false; 
-          return; 
-        }
-
-        // === ИСПРАВЛЕНИЕ ПРОВЕРКИ ПАРОЛЯ ===
-        // Приводим оба значения к нижнему регистру перед сравнением
-        const dbPass = (data.password_hash || '').toLowerCase();
-        const inputPass = password.toLowerCase();
-
-        console.log("Checking password (ignore case)...");
-
-        if (dbPass !== inputPass) {
-          console.error("RESULT: Wrong password.");
-          showLoginBanner('Неверный пароль'); 
-          loginBtn.classList.remove('loading'); 
-          loginBtn.disabled = false; 
-          return;
-        }
-
-        // Проверка статуса
-        if (data.status !== 'подтверждено') { 
-          showLoginBanner('Учетная запись ожидает подтверждения.'); 
-          loginBtn.classList.remove('loading'); 
-          loginBtn.disabled = false; 
-          return; 
-        }
+        if (res.error) { showLoginBanner('Ошибка БД'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
+        if (!data) { showLoginBanner('Пользователь не найден'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
+        if ((data.password_hash || '').toLowerCase() !== password.toLowerCase()) { showLoginBanner('Неверный пароль'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
+        if (data.status !== 'подтверждено') { showLoginBanner('Учетная запись ожидает подтверждения.'); loginBtn.classList.remove('loading'); loginBtn.disabled = false; return; }
         
-        // Успех
-        console.log("SUCCESS: Login successful!");
-        currentUser = data;
+        window.currentUser = data; // Сохраняем в глобальную переменную
+        await window.supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
         
-        // Обновление времени входа
-        await supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
-        
-        loginBtn.classList.remove('loading'); 
-        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading'); loginBtn.disabled = false;
         showApp();
-        
       } catch (err) { 
         console.error("CRITICAL JS ERROR:", err); 
-        showLoginBanner('Критическая ошибка: ' + err.message);
-        loginBtn.classList.remove('loading'); 
-        loginBtn.disabled = false; 
+        showLoginBanner('Критическая ошибка');
+        loginBtn.classList.remove('loading'); loginBtn.disabled = false; 
       }
     }
 
@@ -427,27 +370,15 @@
       registerBtn.classList.add('loading');
       registerBtn.disabled = true;
       try {
-        const { error } = await supabaseClient.from('reviews_users').insert([{
+        const { error } = await window.supabaseClient.from('reviews_users').insert([{
           phone, first_name: firstName, last_name: lastName, city,
           login, password_hash: password, user_type: role, status: 'создана', created_at: new Date().toISOString()
         }]);
-        
         if (error) throw error;
-        
         registerBanner.classList.add('visible');
-        registerBtn.classList.remove('loading'); 
-        registerBtn.disabled = false;
-        
-        setTimeout(() => {
-          registerForm.reset(); registerBanner.classList.remove('visible');
-          tabLogin.checked = true; authModal.classList.remove('is-register');
-        }, 3000);
-      } catch (err) { 
-        console.error(err); 
-        alert('Ошибка регистрации: ' + (err.message || JSON.stringify(err))); 
-        registerBtn.classList.remove('loading'); 
-        registerBtn.disabled = false; 
-      }
+        registerBtn.classList.remove('loading'); registerBtn.disabled = false;
+        setTimeout(() => { registerForm.reset(); registerBanner.classList.remove('visible'); tabLogin.checked = true; authModal.classList.remove('is-register'); }, 3000);
+      } catch (err) { alert('Ошибка регистрации: ' + (err.message || JSON.stringify(err))); registerBtn.classList.remove('loading'); registerBtn.disabled = false; }
     }
 
     function showApp() {
@@ -456,6 +387,11 @@
         appContainer.classList.add('visible');
         setTimeout(() => sidebar.classList.add('visible'), 100);
         updateUserUI();
+        
+        // ИСПРАВЛЕНИЕ: Загружаем начальную страницу при входе
+        const initialItem = document.querySelector('.nav-item.active');
+        if (initialItem) navigateToPage(initialItem.dataset.page, initialItem);
+        
       }, 400);
     }
 
@@ -472,35 +408,75 @@
     }
 
     function updateUserUI() {
-      if (currentUser) {
-        const initials = (currentUser.first_name?.[0] || '') + (currentUser.last_name?.[0] || '');
+      if (window.currentUser) {
+        const u = window.currentUser;
+        const initials = (u.first_name?.[0] || '') + (u.last_name?.[0] || '');
         document.getElementById('userAvatar').textContent = initials.toUpperCase() || 'П';
-        document.getElementById('userName').textContent = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
-        document.getElementById('userRole').textContent = currentUser.user_type || 'Автор';
+        document.getElementById('userName').textContent = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+        document.getElementById('userRole').textContent = u.user_type || 'Автор';
       }
     }
 
-    // Navigation
+    // ==========================================
+    // NAVIGATION & SCRIPT LOADING FIX
+    // ==========================================
     const navItems = document.querySelectorAll('.nav-item');
-    let currentPage = 'modal1';
+    let currentPage = '';
     const pageContainer = document.getElementById('pageContainer');
+    const pageContent = document.getElementById('pageContent');
+    const pageTitle = document.getElementById('pageTitle');
 
-    navItems.forEach(item => item.addEventListener('click', () => {
-      if (currentPage === item.dataset.page) return;
+    navItems.forEach(item => item.addEventListener('click', () => navigateToPage(item.dataset.page, item)));
+
+    async function navigateToPage(page, item) {
+      if (currentPage === page) return;
+      
       navItems.forEach(nav => nav.classList.remove('active'));
       item.classList.add('active');
       pageContainer.classList.remove('visible');
+      
       setTimeout(async () => {
-        currentPage = item.dataset.page;
-        const pageNum = currentPage.replace('modal', '');
-        document.getElementById('pageTitle').textContent = `Страница ${pageNum}`;
+        currentPage = page;
+        const pageNum = page.replace('modal', '');
+        pageTitle.textContent = `Страница ${pageNum}`;
+        
         try {
-          const res = await fetch(`${currentPage}.html`);
-          document.getElementById('pageContent').innerHTML = res.ok ? await res.text() : `<p>Контент страницы ${pageNum}</p>`;
-        } catch { document.getElementById('pageContent').innerHTML = `<p>Контент страницы ${pageNum}</p>`; }
+          const res = await fetch(`${page}.html`);
+          if (res.ok) {
+            const htmlText = await res.text();
+            
+            // ИСПРАВЛЕНИЕ: Ручная обработка скриптов
+            // Создаем временный контейнер для парсинга
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlText;
+            
+            // 1. Извлекаем все скрипты
+            const scripts = tempDiv.querySelectorAll('script');
+            scripts.forEach(script => script.remove()); // Удаляем их из HTML
+            
+            // 2. Вставляем очищенный HTML (без скриптов)
+            pageContent.innerHTML = tempDiv.innerHTML;
+            
+            // 3. Создаем и выполняем скрипты заново
+            scripts.forEach(oldScript => {
+              const newScript = document.createElement('script');
+              if(oldScript.src) newScript.src = oldScript.src;
+              else newScript.textContent = oldScript.textContent;
+              document.body.appendChild(newScript); // Выполняем скрипт
+              newScript.remove(); // Удаляем, чтобы не засорять DOM
+            });
+            
+          } else {
+            pageContent.innerHTML = `<p>Ошибка загрузки</p>`;
+          }
+        } catch (err) {
+          console.error(err);
+          pageContent.innerHTML = `<p>Ошибка загрузки страницы</p>`;
+        }
+        
         setTimeout(() => pageContainer.classList.add('visible'), 50);
       }, 300);
-    }));
+    }
 
     // Init
     loginForm.addEventListener('submit', handleLogin);
