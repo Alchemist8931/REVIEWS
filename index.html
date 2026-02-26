@@ -305,7 +305,7 @@
 
     let currentUser = null;
 
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВХОДА
+    // ФУНКЦИЯ ВХОДА С ДЕТАЛЬНЫМ ЛОГИРОВАНИЕМ
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -317,61 +317,68 @@
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
       
+      console.log("========================================");
+      console.log("START LOGIN PROCESS");
+      console.log("Input Login:", username);
+      console.log("Input Pass:", password);
+      
       try {
         let data = null;
-        let error = null;
-
-        // Стратегия 1: Поиск по логину (ilike - нечувствителен к регистру)
-        // ИСПОЛЬЗУЕМ ILIKE вместо EQ, чтобы Igor@... находил igor@...
-        console.log(`[Login] Попытка входа: ${username}`);
         
+        // 1. Поиск по логину (без учета регистра)
         let res = await supabaseClient
           .from('reviews_users')
           .select('*')
           .ilike('login', username)
           .maybeSingle(); 
         
-        console.log('[Login] Результат поиска по логину:', res);
+        console.log("Search by login result:", res);
 
         if (res.data) {
             data = res.data;
+            console.log("User found by LOGIN.");
         } else {
-            // Стратегия 2: Если не нашли по логину, ищем по телефону
-            // Телефон ищем точно (eq)
+            // 2. Поиск по телефону
             res = await supabaseClient
               .from('reviews_users')
               .select('*')
               .eq('phone', username)
               .maybeSingle();
             
-            console.log('[Login] Результат поиска по телефону:', res);
+            console.log("Search by phone result:", res);
             
             if (res.data) {
                 data = res.data;
-            } else {
-                error = res.error || { message: "Not found" };
+                console.log("User found by PHONE.");
             }
         }
         
-        // Обработка ошибок БД
-        if (res && res.error) {
-             console.error("Supabase DB error:", res.error);
-             showLoginBanner('Ошибка БД: ' + res.error.message + '. Проверьте политики RLS.');
+        // Проверка на ошибки БД (кроме "не найдено")
+        if (res.error) {
+             console.error("Supabase Error:", res.error);
+             showLoginBanner('Ошибка БД: ' + res.error.message);
              loginBtn.classList.remove('loading'); 
              loginBtn.disabled = false; 
              return;
         }
 
+        // Если пользователь не найден
         if (!data) { 
-          showLoginBanner('Пользователь не найден. Проверьте логин или выполните SQL скрипт из ответа.'); 
+          console.warn("RESULT: User not found in DB.");
+          showLoginBanner('Пользователь не найден'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
 
-        // Проверка пароля
+        // Пользователь найден, проверяем пароль
+        console.log("Checking password...");
+        console.log("DB Pass Hash:", data.password_hash);
+        console.log("Input Pass:", password);
+        
         if (data.password_hash !== password) {
-          showLoginBanner('Неверный пароль'); 
+          console.error("RESULT: Wrong password.");
+          showLoginBanner('Неверный пароль. Проверьте раскладку и регистр.'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return;
@@ -379,13 +386,17 @@
 
         // Проверка статуса
         if (data.status !== 'подтверждено') { 
-          showLoginBanner('Учетная запись ожидает подтверждения администратором.'); 
+          console.warn("RESULT: Account not confirmed.");
+          showLoginBanner('Учетная запись ожидает подтверждения.'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
         
+        // Успех
+        console.log("SUCCESS: Login successful!");
         currentUser = data;
+        
         // Обновление времени входа
         await supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
         
@@ -394,8 +405,8 @@
         showApp();
         
       } catch (err) { 
-        console.error("Critical error:", err); 
-        showLoginBanner('Критическая ошибка JS: ' + err.message);
+        console.error("CRITICAL JS ERROR:", err); 
+        showLoginBanner('Критическая ошибка: ' + err.message);
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false; 
       }
