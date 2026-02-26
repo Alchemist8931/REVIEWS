@@ -120,7 +120,7 @@
     .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
     /* Поля формы - Floating Label Fix */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
     
     .input-group { 
       position: relative; 
@@ -139,7 +139,6 @@
       transition: all 0.3s ease;
       box-sizing: border-box;
     }
-    /* Важно: прозрачный плейсхолдер для работы CSS селектора :placeholder-shown */
     .input-group input::placeholder { color: transparent; }
     
     .input-group input:focus {
@@ -148,7 +147,6 @@
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     }
     
-    /* Стили LABEL */
     .input-group label {
       position: absolute; 
       left: 16px; 
@@ -163,7 +161,6 @@
       padding: 0 4px;
     }
     
-    /* Анимация поднятия лейбла */
     .input-group input:focus + label,
     .input-group input:not(:placeholder-shown) + label {
       top: 0; 
@@ -174,7 +171,7 @@
       color: var(--accent);
     }
 
-    /* Специфичные стили для DATE INPUT */
+    /* Date inputs specific */
     .input-group input[type="date"] + label,
     .input-group input[type="date"]:focus + label {
       top: 0; 
@@ -186,14 +183,18 @@
     }
     .input-group input[type="date"]:focus + label { color: var(--accent); }
 
-    /* Блок источников */
+    /* Блок источников - ИСПРАВЛЕНИЕ Z-INDEX */
     .sources-section {
       display: flex;
-      gap: 20px; /* Чуть увеличим отступ */
+      gap: 20px;
       background: var(--bg-primary);
       border-radius: 12px;
       padding: 16px;
+      position: relative;
+      z-index: 2; /* Поднять секцию выше */
     }
+    
+    /* ИСПРАВЛЕНИЕ: Список источников должен быть выше счетчика */
     .sources-list { 
       flex: 2; 
       display: flex; 
@@ -201,10 +202,12 @@
       gap: 12px; 
       max-height: 250px; 
       overflow-y: auto; 
-      padding-right: 8px; 
+      padding-right: 8px;
+      position: relative;
+      z-index: 10; /* Гарантируем, что список выше счетчика */
+      background: transparent; /* Фон прозрачный, чтобы не перекрывать ничего лишнего */
     }
     
-    /* ИСПРАВЛЕНИЕ: Flexbox вместо Grid для надежности */
     .source-item {
       display: flex;
       gap: 8px;
@@ -213,10 +216,10 @@
       padding: 8px;
       border-radius: 8px;
       border: 1px solid var(--border-color);
-      position: relative; /* Для z-index контекста */
+      position: relative;
+      z-index: 5;
     }
     
-    /* Инпуты внутри источника */
     .source-item input { 
       border: 1px solid var(--border-color); 
       padding: 8px; 
@@ -225,18 +228,19 @@
       outline: none;
       background: var(--bg-card);
       box-sizing: border-box;
-      height: 36px; /* Фиксированная высота */
+      height: 36px;
       position: relative;
-      z-index: 2; /* Поверх всего */
-      flex-shrink: 0; /* Не сжимать */
+      z-index: 6; /* Инпуты самые верхние */
     }
     
-    /* Распределение ширины */
-    .source-item .input-platform { flex: 1; min-width: 100px; }
-    .source-item .input-count { width: 70px; text-align: center; }
-    .source-item .input-link { flex: 1; min-width: 100px; }
+    .source-item input:focus {
+        border-color: var(--accent);
+    }
+    
+    .source-item .input-platform { flex: 1; min-width: 80px; }
+    .source-item .input-count { width: 65px; text-align: center; }
+    .source-item .input-link { flex: 1; min-width: 80px; }
 
-    /* Убираем стрелочки у числа */
     .source-item input[type="number"]::-webkit-outer-spin-button,
     .source-item input[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -254,9 +258,29 @@
       padding: 0 4px;
       margin-left: 4px;
       flex-shrink: 0;
-      height: 36px; /* Совпадает с высотой инпута */
+      height: 36px;
+      z-index: 7;
     }
     
+    /* Счетчик опускаем ниже слоем */
+    .total-counter {
+      flex: 1;
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      position: relative;
+      z-index: 1; /* Ниже, чем sources-list (z-index: 10) */
+      pointer-events: none; /* Чтобы вообще не перехватывал клики, если вдруг налезет */
+    }
+    
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; pointer-events: none; }
+    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); pointer-events: none; }
+
     .add-source-btn {
       margin-top: 4px;
       padding: 10px;
@@ -270,20 +294,6 @@
     }
     .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
     
-    .total-counter {
-      flex: 1;
-      background: white;
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border-color);
-    }
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
-    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
-
     /* Футер модалки */
     .task-modal-footer {
       padding: 16px 24px;
@@ -516,7 +526,6 @@
   }
 
   function renderSources() {
-    // ИСПРАВЛЕНО: Добавлены классы для правильного распределения ширины
     sourcesList.innerHTML = sources.map(s => `
       <div class="source-item">
         <input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
