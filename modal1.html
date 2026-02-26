@@ -1,13 +1,9 @@
 <!-- modal1.html -->
 <div id="taskAppContainer" class="task-app">
   <style>
-    /* Scoped Styles for modal1.html */
-    .task-app {
-      font-family: 'SN Pro', sans-serif;
-      color: var(--text-primary);
-    }
+    /* Scoped Styles */
+    .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
     
-    /* Кнопка создания */
     .create-task-btn {
       display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
       background: var(--accent); color: white; border-radius: 12px; font-weight: 600;
@@ -15,7 +11,6 @@
     }
     .create-task-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
     
-    /* Модальное окно */
     .task-modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center; z-index: 1000; 
@@ -47,7 +42,6 @@
     
     .task-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
     
-    /* Блок загрузки */
     .upload-section { display: flex; gap: 16px; height: 200px; }
     .dropzone {
       flex: 1; border: 2px dashed var(--border-color); border-radius: 12px;
@@ -65,7 +59,6 @@
     .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
     .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
-    /* Поля формы */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
     .input-group { position: relative; }
     .input-group input {
@@ -84,11 +77,9 @@
       top: 0; left: 12px; font-size: 12px; font-weight: 500;
       background-color: var(--bg-card); color: var(--accent);
     }
-    /* Date specific */
     .input-group input[type="date"] + label, .input-group input[type="date"]:focus + label { top: 0; left: 12px; font-size: 12px; font-weight: 500; background-color: var(--bg-card); color: var(--text-muted); }
     .input-group input[type="date"]:focus + label { color: var(--accent); }
 
-    /* Источники */
     .sources-section { display: flex; gap: 20px; background: var(--bg-primary); border-radius: 12px; padding: 16px; }
     .sources-list { flex: 2; display: flex; flex-direction: column; gap: 12px; }
     
@@ -124,7 +115,6 @@
     }
     .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
     
-    /* Footer */
     .task-modal-footer {
       padding: 16px 24px; border-top: 1px solid var(--border-color);
       display: flex; justify-content: flex-end; gap: 12px;
@@ -134,7 +124,6 @@
     .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; }
     .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* Progress */
     .creation-progress { display: none; flex-direction: column; align-items: center; padding: 40px; }
     .progress-bar-container { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin: 20px 0; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.2s ease; }
@@ -205,7 +194,6 @@
 </div>
 
 <script>
-// ИСПРАВЛЕНИЕ: Оборачиваем код в анонимную функцию (IIFE), чтобы избежать конфликтов переменных
 (function() {
   
   const sbClient = window.supabaseClient;
@@ -230,7 +218,6 @@
   }
 
   function bindEvents() {
-      // Сначала отвязываем старые события, чтобы не дублировать (простой способ через clone node не подходит, используем флаг или просто перезаписываем onclick)
       openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
       overlay.onclick = (e) => { if (e.target === overlay) closeTaskModal(); };
       dropzone.onclick = () => fileInput.click();
@@ -244,7 +231,7 @@
   function handleFiles(files) { Array.from(files).forEach(file => uploadedFiles.push(file)); renderFileList(); }
   function renderFileList() { const list = document.getElementById('fileList'); list.innerHTML = uploadedFiles.map((file, idx) => `<div class="file-item"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span><span class="file-item-remove" onclick="removeFile(${idx})">✕</span></div>`).join(''); }
   
-  // Делаем функции глобальными ТОЛЬКО если они нужны в onclick внутри HTML
+  // Делаем функции глобальными для onclick
   window.removeFile = function(idx) { uploadedFiles.splice(idx, 1); renderFileList(); };
   window.addSourceRow = function() { const id = ++sourceIdCounter; sources.push({ id, platform: '', count: 0, link: '' }); renderSources(); };
   window.removeSourceRow = function(id) { sources = sources.filter(s => s.id !== id); renderSources(); updateTotal(); };
@@ -286,7 +273,7 @@
     let processedTasks = 0;
     const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
     
-    // Используем maybeSingle() чтобы избежать ошибки 406, если таблица пуста
+    // ИСПРАВЛЕНО: Получаем последний номер, сортируя по самому номеру, а не по дате
     let lastNumber = await getLastOrderNumber();
     
     const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
@@ -327,8 +314,10 @@
   }
 
   async function getLastOrderNumber() {
-    // maybeSingle не вызовет ошибку 406, если строк 0
-    const { data, error } = await sbClient.from('reviews_order').select('order_number').order('created_at', { ascending: false }).limit(1).maybeSingle();
+    // ИСПРАВЛЕНО: Сортировка по order_number DESC
+    // Это гарантированно вернет самый последний номер (например AA-00010), так как '10' > '09'
+    const { data, error } = await sbClient.from('reviews_order').select('order_number').order('order_number', { ascending: false }).limit(1).maybeSingle();
+    
     if (error) { console.error("Ошибка получения номера:", error); return 'AA-00000'; }
     if (!data || !data.order_number) return 'AA-00000';
     return data.order_number;
@@ -352,5 +341,5 @@
 
   initPage();
 
-})(); // Конец IIFE
+})();
 </script>
