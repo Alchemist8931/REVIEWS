@@ -4,6 +4,65 @@
     /* Scoped Styles */
     .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
     
+    /* --- Tab Switcher --- */
+    .view-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+    }
+    
+    .tab-switcher {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      padding: 2px;
+      background-color: #e8e8e8; /* var(--tab-bg) */
+      border-radius: 10px;
+    }
+    .tab-switcher .indicator {
+      width: 50%;
+      height: 36px;
+      background: #ffffff; /* var(--tab-active) */
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      z-index: 9;
+      border: 0.5px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-switcher .tab-radio {
+      width: 50%;
+      height: 36px;
+      position: absolute;
+      z-index: 99;
+      outline: none;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .tab-switcher .tab-label {
+      width: 50%;
+      height: 36px;
+      position: relative;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280; /* var(--text-secondary) */
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .tab-switcher .tab-radio:checked + .tab-label {
+      color: #1a1a1a; /* var(--text-primary) */
+    }
+    .tab-switcher .tab-radio--my:checked ~ .indicator {
+      left: 50%;
+    }
+
     /* --- Card List Styles --- */
     .orders-list {
       display: flex;
@@ -44,7 +103,12 @@
       font-weight: 600;
       color: var(--text-secondary);
       border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
     }
+    /* Status specific colors */
+    .order-number-badge.status-new { background: rgba(0,0,0,0.05); color: var(--text-primary); }
+    .order-number-badge.status-progress { background: rgba(59, 130, 246, 0.1); color: #1d4ed8; border-color: rgba(59, 130, 246, 0.2); }
+    .order-number-badge.status-review { background: rgba(245, 158, 11, 0.1); color: #92400e; border-color: rgba(245, 158, 11, 0.3); }
 
     .card-row {
       display: flex;
@@ -53,22 +117,10 @@
       margin-bottom: 8px;
       font-size: 14px;
     }
-    .row-label {
-      color: var(--text-muted);
-      flex-shrink: 0;
-      min-width: 140px;
-    }
-    .row-value {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-    .row-value a {
-        color: var(--accent);
-        text-decoration: none;
-    }
-    .row-value a:hover {
-        text-decoration: underline;
-    }
+    .row-label { color: var(--text-muted); flex-shrink: 0; min-width: 140px; }
+    .row-value { color: var(--text-primary); font-weight: 500; }
+    .row-value a { color: var(--accent); text-decoration: none; }
+    .row-value a:hover { text-decoration: underline; }
 
     /* Action Block */
     .action-block {
@@ -96,25 +148,13 @@
       min-width: 140px;
       height: 40px;
     }
-    .action-btn.primary {
-      background: var(--accent);
-      color: white;
-    }
+    .action-btn.primary { background: var(--accent); color: white; }
     .action-btn.primary:hover { background: var(--accent-hover); }
-    .action-btn.secondary {
-      background: var(--success);
-      color: white;
-    }
-    .action-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .action-btn.loading {
-      pointer-events: none;
-    }
+    .action-btn.secondary { background: var(--success); color: white; }
+    .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .action-btn.loading { pointer-events: none; }
     .spinner {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border: 2px solid rgba(255,255,255,0.3);
       border-top-color: white;
       border-radius: 50%;
@@ -124,7 +164,7 @@
 
     /* Dropzone */
     .mini-dropzone {
-      display: none; /* Hidden initially */
+      display: none;
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
@@ -138,18 +178,28 @@
       transition: all 0.3s ease;
     }
     .mini-dropzone.visible { display: flex; }
-    .mini-dropzone.active {
-      border-color: var(--accent);
-      background: #f0f0f0;
-    }
+    .mini-dropzone.active { border-color: var(--accent); background: #f0f0f0; }
     .mini-dropzone svg { width: 16px; height: 16px; flex-shrink: 0; }
     .file-name { font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   </style>
 
+  <!-- Tab Switcher Header -->
+  <div class="view-header">
+    <div class="tab-switcher">
+      <input type="radio" name="viewTab" id="tabNew" class="tab-radio tab--new" checked />
+      <label class="tab-label" for="tabNew">Новые задания</label>
+      
+      <input type="radio" name="viewTab" id="tabMy" class="tab-radio tab--my" />
+      <label class="tab-label" for="tabMy">Мои задания</label>
+      
+      <div class="indicator"></div>
+    </div>
+  </div>
+
   <!-- Container for rendered cards -->
   <div id="ordersList" class="orders-list">
-    <!-- Cards will be injected here -->
+    <!-- Cards injected here -->
   </div>
 
 <script>
@@ -158,113 +208,197 @@
   const sbClient = window.supabaseClient;
   const user = window.currentUser;
 
+  let currentView = 'new'; // 'new' or 'my'
+  let tempFiles = {};
+
   async function initPage() {
-      await loadAndRenderCards();
+      bindEvents();
+      await loadData();
   }
 
-  // --- RENDERING CARDS ---
+  function bindEvents() {
+      document.getElementById('tabNew').addEventListener('change', () => switchView('new'));
+      document.getElementById('tabMy').addEventListener('change', () => switchView('my'));
+  }
 
-  async function loadAndRenderCards() {
+  function switchView(viewName) {
+      currentView = viewName;
+      loadData();
+  }
+
+  // --- DATA LOADING ---
+
+  async function loadData() {
+      if (currentView === 'new') {
+          await loadNewTasks();
+      } else {
+          await loadMyTasks();
+      }
+  }
+
+  // Logic: 
+  // 1. Get all potential tasks from 'reviews_order_autor_exercise' (status='создана')
+  // 2. Get busy pairs (group+platform) from 'reviews_order' where status != 'создана'
+  // 3. Filter list 1 by excluding list 2.
+  async function loadNewTasks() {
     const container = document.getElementById('ordersList');
-    
+    container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Загрузка...</p>';
+
     try {
-      // Fetch tasks that are created
-      const { data, error } = await sbClient
+      // 1. Get Candidates
+      const { data: candidates, error: err1 } = await sbClient
         .from('reviews_order_autor_exercise')
         .select('*')
-        .eq('status', 'создана')
-        .order('start_date', { ascending: true });
+        .eq('status', 'создана');
+      
+      if (err1) throw err1;
 
-      if (error) throw error;
+      // 2. Get Busy Pairs
+      // We need pairs where at least one record is NOT 'создана'
+      const { data: busyRows, error: err2 } = await sbClient
+        .from('reviews_order')
+        .select('order_number_general, platform')
+        .neq('status', 'создана');
+      
+      if (err2) throw err2;
 
-      if (!data || data.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px;">Нет доступных заданий для выполнения.</p>';
-        return;
-      }
+      // Create a Set of "busy keys" for fast lookup
+      const busyKeys = new Set(busyRows.map(r => `${r.order_number_general}::${r.platform}`));
 
-      container.innerHTML = data.map(card => {
-        return `
-          <div class="order-card" id="card-${card.order_number_general}-${sanitizeClass(card.platform)}">
-            <!-- Header -->
-            <div class="card-header">
-              <div class="client-info">
-                <div style="font-size: 12px; color: var(--text-muted);">Платформа: <b style="color: var(--text-primary);">${card.platform || '-'}</b></div>
-                <div style="font-size: 12px; color: var(--text-muted);">Группа: <b style="color: var(--text-primary);">${card.order_number_general || '-'}</b></div>
-              </div>
-              <div class="order-number-badge">${card.status || 'статус'}</div>
-            </div>
+      // 3. Filter
+      const availableTasks = candidates.filter(c => !busyKeys.has(`${c.order_number_general}::${c.platform}`));
 
-            <!-- Manager Row -->
-            <div class="card-row">
-              <span class="row-label">Менеджер:</span>
-              <span class="row-value">${card.manager_name || '-'} (${card.manager_phone || '-'})</span>
-            </div>
-
-            <!-- Dates Row -->
-            <div class="card-row">
-              <span class="row-label">Сроки:</span>
-              <span class="row-value">${formatDate(card.start_date)} — ${formatDate(card.end_date)}</span>
-            </div>
-
-            <!-- Link Row -->
-            <div class="card-row">
-              <span class="row-label">Ссылка:</span>
-              <span class="row-value"><a href="${card.link}" target="_blank">Перейти к объекту</a></span>
-            </div>
-
-            <!-- Action Block -->
-            <div class="action-block">
-              <!-- Initial Button -->
-              <button class="action-btn primary" id="btn-take-${card.order_number_general}-${sanitizeClass(card.platform)}" onclick="handleTakeToWork('${card.order_number_general}', '${card.platform}')">
-                <span class="btn-text">Взять в работу</span>
-              </button>
-              
-              <!-- Dropzone (Initially Hidden) -->
-              <div class="mini-dropzone" id="dropzone-${card.order_number_general}-${sanitizeClass(card.platform)}" onclick="triggerFileInput('${card.order_number_general}', '${card.platform}')" ondragover="handleDragOver(event, '${card.order_number_general}', '${card.platform}')" ondragleave="handleDragLeave(event, '${card.order_number_general}', '${card.platform}')" ondrop="handleDrop(event, '${card.order_number_general}', '${card.platform}')">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                 <span class="dz-text">Перетащите фото или клик</span>
-                 <input type="file" accept="image/*" style="display:none" id="input-${card.order_number_general}-${sanitizeClass(card.platform)}" onchange="handleFileSelect(event, '${card.order_number_general}', '${card.platform}')">
-              </div>
-
-              <!-- Submit Button (Initially Hidden) -->
-              <button class="action-btn secondary" id="btn-submit-${card.order_number_general}-${sanitizeClass(card.platform)}" style="display:none;" onclick="handleSubmitReview('${card.order_number_general}', '${card.platform}')" disabled>
-                <span class="btn-text">На проверку</span>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+      renderCards(availableTasks, 'new');
 
     } catch (e) {
       console.error(e);
-      container.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заданий.</p>';
+      container.innerHTML = '<p style="color:var(--error);">Ошибка загрузки.</p>';
     }
   }
 
-  function sanitizeClass(str) {
-    return str ? str.replace(/[^a-zA-Z0-9]/g, '-') : 'unknown';
+  async function loadMyTasks() {
+    const container = document.getElementById('ordersList');
+    container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Загрузка...</p>';
+
+    try {
+      const { data, error } = await sbClient
+        .from('reviews_order')
+        .select('*')
+        .eq('autor_phone', user.phone)
+        .in('status', ['в работе', 'на проверке']);
+      
+      if (error) throw error;
+
+      renderCards(data, 'my');
+
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<p style="color:var(--error);">Ошибка загрузки.</p>';
+    }
   }
 
-  function formatDate(dateStr) {
-    if (!dateStr) return '-';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('ru-RU');
+  // --- RENDERING ---
+
+  function renderCards(items, type) {
+    const container = document.getElementById('ordersList');
+    
+    if (!items || items.length === 0) {
+      container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 40px;">${type === 'new' ? 'Нет доступных заданий.' : 'У вас нет активных заданий.'}</p>`;
+      return;
+    }
+
+    container.innerHTML = items.map(item => {
+      const key = `${item.order_number_general}-${sanitizeClass(item.platform)}`;
+      const statusClass = item.status === 'в работе' ? 'status-progress' : (item.status === 'на проверке' ? 'status-review' : 'status-new');
+      
+      // Common Info
+      const manager = item.manager_name || '-';
+      const managerPhone = item.manager_phone || '-';
+      const dates = `${formatDate(item.start_date)} — ${formatDate(item.end_date)}`;
+      const link = item.link || '#';
+      const platform = item.platform || '-';
+      const group = item.order_number_general || '-';
+
+      // Action Block HTML generation
+      let actionHTML = '';
+      
+      if (type === 'new') {
+          // "New" tab: Always "Take to work"
+          actionHTML = `
+            <button class="action-btn primary" onclick="handleTakeToWork('${group}', '${platform}')">
+              <span class="btn-text">Взять в работу</span>
+            </button>
+          `;
+      } else {
+          // "My" tab: Check status
+          if (item.status === 'в работе') {
+              const hasFile = tempFiles[key];
+              const dzClass = hasFile ? 'visible' : 'visible'; // Always visible here
+              const dzContent = hasFile 
+                ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${hasFile.name}</span>`
+                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><span class="dz-text">Фото</span>`;
+              
+              actionHTML = `
+                <div class="mini-dropzone ${dzClass}" onclick="triggerFileInput('${group}', '${platform}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${group}', '${platform}')">
+                   ${dzContent}
+                   <input type="file" accept="image/*" style="display:none" id="input-${key}" onchange="handleFileSelect(event, '${group}', '${platform}')">
+                </div>
+                <button class="action-btn secondary" onclick="handleSubmitReview('${group}', '${platform}')" ${hasFile ? '' : 'disabled'}>
+                  <span class="btn-text">На проверку</span>
+                </button>
+              `;
+          } else if (item.status === 'на проверке') {
+              actionHTML = `<div style="width:100%; text-align:center; color:var(--warning); font-weight:600;">Ожидает проверки</div>`;
+          }
+      }
+
+      return `
+        <div class="order-card" id="card-${key}">
+          <div class="card-header">
+            <div class="client-info">
+              <div style="font-size: 12px; color: var(--text-muted);">Платформа: <b style="color: var(--text-primary);">${platform}</b></div>
+              <div style="font-size: 12px; color: var(--text-muted);">Группа: <b style="color: var(--text-primary);">${group}</b></div>
+            </div>
+            <div class="order-number-badge ${statusClass}">${item.status || 'статус'}</div>
+          </div>
+
+          <div class="card-row">
+            <span class="row-label">Менеджер:</span>
+            <span class="row-value">${manager} (${managerPhone})</span>
+          </div>
+
+          <div class="card-row">
+            <span class="row-label">Сроки:</span>
+            <span class="row-value">${dates}</span>
+          </div>
+
+          <div class="card-row">
+            <span class="row-label">Ссылка:</span>
+            <span class="row-value"><a href="${link}" target="_blank">Перейти к объекту</a></span>
+          </div>
+
+          <div class="action-block" id="action-${key}">
+            ${actionHTML}
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
-  // --- LOGIC ---
+  function sanitizeClass(str) { return str ? str.replace(/[^a-zA-Z0-9]/g, '-') : 'unknown'; }
+  function formatDate(dateStr) { if (!dateStr) return '-'; const d = new Date(dateStr); return d.toLocaleDateString('ru-RU'); }
 
-  // Global scope functions
+  // --- LOGIC HANDLERS ---
+
   window.handleTakeToWork = async function(groupNum, platform) {
-    const btnId = `btn-take-${groupNum}-${sanitizeClass(platform)}`;
-    const btn = document.getElementById(btnId);
+    const key = `${groupNum}-${sanitizeClass(platform)}`;
+    const btn = document.querySelector(`#card-${key} .action-btn`);
     
     if(!btn) return;
     btn.innerHTML = '<div class="spinner"></div>';
     btn.disabled = true;
 
     try {
-      // 1. Find the record to update
-      // We need the specific ID of one row that matches criteria
       const { data: targetRow, error: findError } = await sbClient
         .from('reviews_order')
         .select('id')
@@ -276,12 +410,11 @@
 
       if (findError) throw findError;
       if (!targetRow) {
-        alert('Задание уже занято другим автором или не найдено.');
-        btn.innerHTML = '<span class="btn-text">Ошибка</span>';
+        alert('Задание уже занято другим автором.');
+        btn.innerHTML = '<span class="btn-text">Недоступно</span>';
         return;
       }
 
-      // 2. Update the record
       const updateData = {
         status: 'в работе',
         autor_name: `${user.first_name} ${user.last_name}`,
@@ -296,97 +429,64 @@
 
       if (updateError) throw updateError;
 
-      // 3. Update UI
-      btn.style.display = 'none';
-      
-      const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
-      const dz = document.getElementById(dropzoneId);
-      dz.classList.add('visible');
-
-      const submitBtnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
-      const sBtn = document.getElementById(submitBtnId);
-      sBtn.style.display = 'inline-flex';
+      // Refresh view to move it to "My Tasks" or remove from "New"
+      await loadData();
 
     } catch (err) {
       console.error(err);
-      alert('Ошибка при взятии задания: ' + err.message);
+      alert('Ошибка: ' + err.message);
       btn.innerHTML = '<span class="btn-text">Взять в работу</span>';
       btn.disabled = false;
     }
   };
 
-  // File Handling
   window.triggerFileInput = function(groupNum, platform) {
-    const inputId = `input-${groupNum}-${sanitizeClass(platform)}`;
-    document.getElementById(inputId).click();
+    const key = `${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(`input-${key}`).click();
   };
 
-  window.handleDragOver = function(e, groupNum, platform) {
-    e.preventDefault();
-    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
-    document.getElementById(dropzoneId).classList.add('active');
-  };
-
-  window.handleDragLeave = function(e, groupNum, platform) {
-    e.preventDefault();
-    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
-    document.getElementById(dropzoneId).classList.remove('active');
-  };
+  window.handleDragOver = function(e) { e.preventDefault(); e.currentTarget.classList.add('active'); };
+  window.handleDragLeave = function(e) { e.preventDefault(); e.currentTarget.classList.remove('active'); };
 
   window.handleDrop = function(e, groupNum, platform) {
     e.preventDefault();
-    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
-    document.getElementById(dropzoneId).classList.remove('active');
-    
-    const files = e.dataTransfer.files;
-    if (files.length) {
-      processFile(files[0], groupNum, platform);
-    }
+    e.currentTarget.classList.remove('active');
+    if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0], groupNum, platform);
   };
 
   window.handleFileSelect = function(e, groupNum, platform) {
-    if (e.target.files.length) {
-      processFile(e.target.files[0], groupNum, platform);
-    }
+    if (e.target.files.length) processFile(e.target.files[0], groupNum, platform);
   };
 
   function processFile(file, groupNum, platform) {
-    if (!file.type.startsWith('image/')) {
-      alert('Пожалуйста, выберите изображение.');
-      return;
+    if (!file.type.startsWith('image/')) { alert('Выберите изображение.'); return; }
+    
+    const key = `${groupNum}-${sanitizeClass(platform)}`;
+    tempFiles[key] = file;
+    
+    // Re-render just the action block or whole card? Re-rendering card is easier to sync UI
+    // But to keep it simple, we update the dropzone content manually
+    const dz = document.querySelector(`#card-${key} .mini-dropzone`);
+    if(dz) {
+        dz.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${file.name}</span>`;
     }
 
-    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
-    const dz = document.getElementById(dropzoneId);
-    dz.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${file.name}</span>`;
-    
-    // Store file in global temp storage for submission
-    const key = `${groupNum}-${platform}`;
-    window.tempFiles = window.tempFiles || {};
-    window.tempFiles[key] = file;
-
-    // Enable submit button
-    const submitBtnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
-    document.getElementById(submitBtnId).disabled = false;
+    // Enable button
+    const btn = document.querySelector(`#card-${key} .action-btn.secondary`);
+    if(btn) btn.disabled = false;
   }
 
   window.handleSubmitReview = async function(groupNum, platform) {
-    const key = `${groupNum}-${platform}`;
-    const file = window.tempFiles ? window.tempFiles[key] : null;
+    const key = `${groupNum}-${sanitizeClass(platform)}`;
+    const file = tempFiles[key];
 
-    if (!file) {
-      alert('Сначала загрузите изображение.');
-      return;
-    }
+    if (!file) { alert('Сначала загрузите изображение.'); return; }
 
-    const btnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
-    const btn = document.getElementById(btnId);
-    
+    const btn = document.querySelector(`#card-${key} .action-btn.secondary`);
     btn.innerHTML = '<div class="spinner"></div>';
     btn.disabled = true;
 
     try {
-      // Find the record again (the one currently 'в работе')
       const { data: targetRow, error: findError } = await sbClient
         .from('reviews_order')
         .select('id')
@@ -397,11 +497,10 @@
         .maybeSingle();
 
       if (findError) throw findError;
-      if (!targetRow) throw new Error('Запись не найдена или уже обновлена.');
+      if (!targetRow) throw new Error('Запись не найдена.');
 
-      // Note: Real file upload to Storage would happen here.
-      // For now we just update status.
-      
+      // TODO: Upload file to Storage here if implemented
+
       const { error: updateError } = await sbClient
         .from('reviews_order')
         .update({ status: 'на проверке' })
@@ -409,24 +508,12 @@
 
       if (updateError) throw updateError;
 
-      // Update UI to show completion
-      const cardId = `card-${groupNum}-${sanitizeClass(platform)}`;
-      const card = document.getElementById(cardId);
-      
-      // Remove action block and show "Done" status
-      const actionBlock = card.querySelector('.action-block');
-      actionBlock.innerHTML = '<div style="width:100%; text-align:center; color:var(--success); font-weight:600;">Задание отправлено на проверку</div>';
-      
-      // Update badge
-      const badge = card.querySelector('.order-number-badge');
-      badge.textContent = 'на проверке';
-      badge.style.background = 'rgba(245, 158, 11, 0.1)';
-      badge.style.color = '#92400e';
-      badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      // Refresh list
+      await loadData();
 
     } catch (err) {
       console.error(err);
-      alert('Ошибка отправки: ' + err.message);
+      alert('Ошибка: ' + err.message);
       btn.innerHTML = '<span class="btn-text">На проверку</span>';
       btn.disabled = false;
     }
