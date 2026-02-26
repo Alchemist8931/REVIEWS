@@ -38,25 +38,13 @@
       overflow-x: hidden;
     }
 
-    /* Background pattern */
+    /* Background */
     .bg-pattern {
       position: fixed;
       inset: 0;
       background-image: 
         radial-gradient(circle at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(0,0,0,0.03) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(0,0,0,0.02) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .bg-grid {
-      position: fixed;
-      inset: 0;
-      background-image: 
-        linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
-      background-size: 40px 40px;
+        radial-gradient(circle at 80% 20%, rgba(0,0,0,0.03) 0%, transparent 40%);
       pointer-events: none;
       z-index: 0;
     }
@@ -69,6 +57,8 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
+      background: rgba(248, 249, 250, 0.8);
+      backdrop-filter: blur(8px);
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.4s ease, visibility 0.4s ease;
@@ -87,21 +77,23 @@
       width: 420px;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       transform: scale(0.95) translateY(20px);
+      position: relative;
     }
 
     .auth-overlay.visible .auth-modal {
       transform: scale(1) translateY(0);
     }
 
-    .auth-modal.expanded {
+    .auth-modal.is-register {
       width: 480px;
     }
 
     .modal-header {
       padding: 24px 24px 0;
+      position: relative;
     }
 
-    /* Tab Container */
+    /* Main Tab Container (Login / Register) */
     .tab-container {
       position: relative;
       display: flex;
@@ -161,31 +153,38 @@
       left: 50%;
     }
 
-    /* Sub Tabs */
+    /* Sub Tab Container (Author / Manager) */
+    /* Positioned absolutely under Register button */
     .sub-tab-container {
-      position: relative;
+      position: absolute;
+      top: calc(100% + 12px); /* Right under the main tabs */
+      right: 24px; /* Align with right edge (padding) */
+      width: calc(50% - 26px); /* Match width of Register button */
       display: flex;
       flex-direction: row;
       align-items: flex-start;
       padding: 2px;
       background-color: var(--tab-bg);
       border-radius: 8px;
-      margin-top: 16px;
-      overflow: hidden;
-      max-height: 0;
+      z-index: 10;
+      
+      /* Hidden state */
       opacity: 0;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .sub-tab-container.visible {
-      max-height: 50px;
+    /* Visible state - triggered by parent class */
+    .auth-modal.is-register .sub-tab-container {
       opacity: 1;
-      margin-top: 16px;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .sub-tab-container .indicator {
       width: 50%;
-      height: 30px;
+      height: 28px;
       background: var(--tab-active);
       position: absolute;
       top: 2px;
@@ -199,7 +198,7 @@
 
     .sub-tab-container .sub-tab {
       width: 50%;
-      height: 30px;
+      height: 28px;
       position: absolute;
       z-index: 99;
       outline: none;
@@ -209,13 +208,13 @@
 
     .sub-tab-container .sub-tab_label {
       width: 50%;
-      height: 30px;
+      height: 28px;
       position: relative;
       z-index: 999;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
@@ -233,33 +232,66 @@
     /* Modal Body */
     .modal-body {
       padding: 24px;
-      min-height: 200px;
-      transition: min-height 0.4s ease;
+      padding-top: 28px; /* Space for sub-tabs if needed */
+      transition: padding 0.3s ease;
+    }
+    
+    .auth-modal.is-register .modal-body {
+      padding-top: 56px; /* Extra space for sub-tabs */
     }
 
-    .modal-body.expanded {
-      min-height: 320px;
+    /* Form Container Logic */
+    .forms-wrapper {
+      position: relative;
     }
 
-    /* Form */
     .auth-form {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      width: 100%;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .form-section {
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-    }
-
-    .form-section.visible {
+    /* Login Form State */
+    .login-form {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
+      position: relative;
+      pointer-events: auto;
     }
 
-    /* Input Container */
+    /* Register Form State */
+    .register-form {
+      display: flex; /* Keep flex layout but hidden */
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transform: translateX(20px);
+      pointer-events: none;
+    }
+
+    /* Switched State */
+    .auth-modal.is-register .login-form {
+      opacity: 0;
+      transform: translateX(-20px);
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .auth-modal.is-register .register-form {
+      opacity: 1;
+      transform: translateX(0);
+      position: relative;
+      pointer-events: auto;
+      width: 100%;
+    }
+
+    /* Form Elements */
     .input-container {
       position: relative;
       width: 100%;
@@ -309,15 +341,13 @@
       left: 12px;
       font-size: 12px;
       font-weight: 500;
-      color: var(--text-primary);
       background-color: var(--bg-card);
     }
-
+    
     .styled_input_bar:focus + .input-label {
       color: var(--accent);
     }
 
-    /* Submit Button */
     .submit-btn {
       width: 100%;
       padding: 14px 24px;
@@ -341,15 +371,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
     .submit-btn:disabled {
       background: var(--text-muted);
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
     }
 
     .submit-btn .loader {
@@ -362,10 +387,7 @@
       animation: spin 0.8s linear infinite;
     }
 
-    .submit-btn.loading .btn-text {
-      visibility: hidden;
-    }
-
+    .submit-btn.loading .btn-text { visibility: hidden; }
     .submit-btn.loading .loader {
       display: block;
       position: absolute;
@@ -374,9 +396,7 @@
       transform: translate(-50%, -50%);
     }
 
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
     /* Banner */
     .banner {
@@ -389,14 +409,19 @@
       gap: 10px;
       opacity: 0;
       transform: translateY(-10px);
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 16px;
+      margin: 0;
       transition: all 0.3s ease;
-      display: none;
     }
 
     .banner.visible {
       opacity: 1;
       transform: translateY(0);
-      display: flex;
+      max-height: 100px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
     }
 
     .banner.warning {
@@ -405,22 +430,13 @@
       color: #92400e;
     }
 
-    .banner.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #991b1b;
-    }
-
     .banner.success {
       background: rgba(16, 185, 129, 0.1);
       border: 1px solid rgba(16, 185, 129, 0.3);
       color: #065f46;
     }
-
-    .banner svg {
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+    
+    .banner svg { flex-shrink: 0; margin-top: 1px; }
 
     /* App Container */
     .app-container {
@@ -428,9 +444,7 @@
       min-height: 100vh;
     }
 
-    .app-container.visible {
-      display: flex;
-    }
+    .app-container.visible { display: flex; }
 
     /* Sidebar */
     .sidebar {
@@ -448,9 +462,7 @@
       transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .sidebar.visible {
-      transform: translateX(0);
-    }
+    .sidebar.visible { transform: translateX(0); }
 
     .sidebar-header {
       padding: 24px;
@@ -460,7 +472,6 @@
     .logo {
       font-size: 20px;
       font-weight: 700;
-      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -481,10 +492,6 @@
       flex: 1;
       padding: 16px 12px;
       overflow-y: auto;
-    }
-
-    .nav-section {
-      margin-bottom: 24px;
     }
 
     .nav-section-title {
@@ -525,10 +532,8 @@
       height: 20px;
       opacity: 0.7;
     }
-
-    .nav-item.active svg {
-      opacity: 1;
-    }
+    
+    .nav-item.active svg { opacity: 1; }
 
     .sidebar-footer {
       padding: 16px;
@@ -557,24 +562,17 @@
       font-size: 14px;
     }
 
-    .user-details {
-      flex: 1;
-      min-width: 0;
-    }
+    .user-details { flex: 1; min-width: 0; }
 
     .user-name {
       font-size: 14px;
       font-weight: 600;
-      color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .user-role {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .user-role { font-size: 12px; color: var(--text-muted); }
 
     .logout-btn {
       width: 32px;
@@ -599,7 +597,6 @@
     .main-content {
       flex: 1;
       margin-left: 260px;
-      transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .content-wrapper {
@@ -628,111 +625,40 @@
     .page-title {
       font-size: 28px;
       font-weight: 700;
-      color: var(--text-primary);
       margin-bottom: 24px;
     }
 
-    .page-content {
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .stagger-1 { animation-delay: 0.1s; }
-    .stagger-2 { animation-delay: 0.2s; }
-    .stagger-3 { animation-delay: 0.3s; }
-    .stagger-4 { animation-delay: 0.4s; }
-    .stagger-5 { animation-delay: 0.5s; }
-    .stagger-6 { animation-delay: 0.6s; }
-    .stagger-7 { animation-delay: 0.7s; }
-
     /* Responsive */
     @media (max-width: 1024px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      
-      .sidebar.mobile-open {
-        transform: translateX(0);
-      }
-      
-      .main-content {
-        margin-left: 0;
-      }
-      
-      .content-wrapper {
-        padding: 16px;
-      }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
     }
 
     @media (max-width: 640px) {
-      .auth-modal {
-        width: calc(100% - 32px);
-        margin: 16px;
-      }
-      
-      .auth-modal.expanded {
-        width: calc(100% - 32px);
-      }
-      
-      .modal-header,
-      .modal-body {
-        padding: 16px;
-      }
+      .auth-modal { width: calc(100% - 32px); margin: 16px; }
+      .auth-modal.is-register { width: calc(100% - 32px); }
+      /* Stack sub-tabs on small screens */
+      .sub-tab-container { width: 100%; position: relative; top: auto; right: auto; margin-top: 16px; }
+      .auth-modal.is-register .modal-body { padding-top: 24px; }
     }
 
-    /* Focus states for accessibility */
-    .styled_input_bar:focus-visible,
-    .submit-btn:focus-visible,
-    .nav-item:focus-visible,
-    .logout-btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Background -->
   <div class="bg-pattern"></div>
-  <div class="bg-grid"></div>
 
   <!-- Auth Overlay -->
   <div class="auth-overlay visible" id="authOverlay">
     <div class="auth-modal" id="authModal">
       <div class="modal-header">
+        <!-- Main Tabs: Login / Register -->
         <div class="tab-container">
           <input type="radio" name="authTab" id="tabLogin" class="tab tab--login" checked />
           <label class="tab_label" for="tabLogin">Вход</label>
@@ -743,6 +669,7 @@
           <div class="indicator"></div>
         </div>
         
+        <!-- Sub Tabs: Author / Manager (Positioned under Register) -->
         <div class="sub-tab-container" id="subTabContainer">
           <input type="radio" name="roleTab" id="roleAuthor" class="sub-tab sub-tab--author" checked />
           <label class="sub-tab_label" for="roleAuthor">Автор</label>
@@ -754,85 +681,73 @@
         </div>
       </div>
       
-      <div class="modal-body" id="modalBody">
-        <!-- Login Form -->
-        <form class="auth-form" id="loginForm">
-          <div class="form-section visible">
+      <div class="modal-body">
+        <div class="forms-wrapper">
+          
+          <!-- Login Form -->
+          <form class="auth-form login-form" id="loginForm">
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="loginUsername" placeholder=" " autocomplete="username" />
               <label class="input-label" for="loginUsername">Логин</label>
             </div>
-          </div>
-          
-          <div class="form-section visible stagger-1">
+            
             <div class="input-container">
               <input type="password" class="styled_input_bar" id="loginPassword" placeholder=" " autocomplete="current-password" />
               <label class="input-label" for="loginPassword">Пароль</label>
             </div>
-          </div>
-          
-          <div class="banner warning" id="loginBanner">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span id="loginBannerText">Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.</span>
-          </div>
-          
-          <div class="form-section visible stagger-2">
+            
+            <div class="banner warning" id="loginBanner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span id="loginBannerText">Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.</span>
+            </div>
+            
             <button type="submit" class="submit-btn" id="loginBtn">
               <span class="btn-text">Войти</span>
               <div class="loader"></div>
             </button>
-          </div>
-        </form>
-        
-        <!-- Register Form -->
-        <form class="auth-form" id="registerForm" style="display: none;">
-          <div class="form-section">
+          </form>
+          
+          <!-- Register Form -->
+          <form class="auth-form register-form" id="registerForm">
             <div class="input-container">
               <input type="tel" class="styled_input_bar" id="regPhone" placeholder=" " maxlength="18" />
               <label class="input-label" for="regPhone">Телефон</label>
             </div>
-          </div>
-          
-          <div class="form-section stagger-1">
+            
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="regFirstName" placeholder=" " />
               <label class="input-label" for="regFirstName">Имя</label>
             </div>
-          </div>
-          
-          <div class="form-section stagger-2">
+            
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="regLastName" placeholder=" " />
               <label class="input-label" for="regLastName">Фамилия</label>
             </div>
-          </div>
-          
-          <div class="form-section stagger-3">
+            
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="regCity" placeholder=" " />
               <label class="input-label" for="regCity">Город проживания</label>
             </div>
-          </div>
-          
-          <div class="banner success" id="registerBanner">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span>Регистрация успешно завершена. Ожидайте подтверждения администратора.</span>
-          </div>
-          
-          <div class="form-section stagger-4">
+            
+            <div class="banner success" id="registerBanner">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span>Регистрация успешно завершена. Ожидайте подтверждения.</span>
+            </div>
+            
             <button type="submit" class="submit-btn" id="registerBtn">
               <span class="btn-text">Зарегистрироваться</span>
               <div class="loader"></div>
             </button>
-          </div>
-        </form>
+          </form>
+          
+        </div>
       </div>
     </div>
   </div>
@@ -855,69 +770,67 @@
       </div>
       
       <nav class="sidebar-nav">
-        <div class="nav-section">
-          <div class="nav-section-title">Навигация</div>
-          
-          <div class="nav-item active" data-page="modal1" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="3" y1="9" x2="21" y2="9"></line>
-              <line x1="9" y1="21" x2="9" y2="9"></line>
-            </svg>
-            <span>Страница 1</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal2" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
-            <span>Страница 2</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal3" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"></line>
-              <line x1="12" y1="20" x2="12" y2="4"></line>
-              <line x1="6" y1="20" x2="6" y2="14"></line>
-            </svg>
-            <span>Страница 3</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal4" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            <span>Страница 4</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal5" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-              <polyline points="2 17 12 22 22 17"></polyline>
-              <polyline points="2 12 12 17 22 12"></polyline>
-            </svg>
-            <span>Страница 5</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal6" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polygon points="10 8 16 12 10 16 10 8"></polygon>
-            </svg>
-            <span>Страница 6</span>
-          </div>
-          
-          <div class="nav-item" data-page="modal7" tabindex="0" role="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-            <span>Страница 7</span>
-          </div>
+        <div class="nav-section-title">Навигация</div>
+        
+        <div class="nav-item active" data-page="modal1" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          <span>Страница 1</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal2" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>Страница 2</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal3" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Страница 3</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal4" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Страница 4</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal5" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Страница 5</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal6" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+          <span>Страница 6</span>
+        </div>
+        
+        <div class="nav-item" data-page="modal7" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Страница 7</span>
         </div>
       </nav>
       
@@ -928,7 +841,7 @@
             <div class="user-name" id="userName">Пользователь</div>
             <div class="user-role" id="userRole">Автор</div>
           </div>
-          <button class="logout-btn" id="logoutBtn" title="Выйти" aria-label="Выйти из аккаунта">
+          <button class="logout-btn" id="logoutBtn" title="Выйти">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
@@ -956,105 +869,46 @@
     // ============================================
     // CONFIGURATION
     // ============================================
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
     
-    // Supabase Configuration
-    const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jZHdsbWd3bGpqd3B1YXdsc3NyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc0NTQxNDksImV4cCI6MjA4MzAzMDE0OX0.rrIznUflWydylTnUZvOxOkeF9eMp91qNN4Bjq2gXRL8";
-    
-    // Initialize Supabase
     let supabase = null;
     if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
     
     // ============================================
-    // STATE MANAGEMENT
-    // ============================================
-    
-    let currentUser = null;
-    let currentPage = 'modal1';
-    
-    // ============================================
     // DOM ELEMENTS
     // ============================================
-    
-    const authOverlay = document.getElementById('authOverlay');
     const authModal = document.getElementById('authModal');
-    const modalBody = document.getElementById('modalBody');
-    const subTabContainer = document.getElementById('subTabContainer');
+    const authOverlay = document.getElementById('authOverlay');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    const loginBanner = document.getElementById('loginBanner');
-    const loginBannerText = document.getElementById('loginBannerText');
-    const registerBanner = document.getElementById('registerBanner');
     const appContainer = document.getElementById('appContainer');
     const sidebar = document.getElementById('sidebar');
     const pageContainer = document.getElementById('pageContainer');
-    const pageTitle = document.getElementById('pageTitle');
-    const pageContent = document.getElementById('pageContent');
-    const userAvatar = document.getElementById('userAvatar');
-    const userName = document.getElementById('userName');
-    const userRole = document.getElementById('userRole');
     
     // ============================================
-    // TAB SWITCHING
+    // TAB SWITCHING LOGIC
     // ============================================
-    
-    const tabLogin = document.getElementById('tabLogin');
-    const tabRegister = document.getElementById('tabRegister');
     
     tabLogin.addEventListener('change', () => {
       if (tabLogin.checked) {
-        switchToLogin();
+        authModal.classList.remove('is-register');
       }
     });
     
     tabRegister.addEventListener('change', () => {
       if (tabRegister.checked) {
-        switchToRegister();
+        authModal.classList.add('is-register');
       }
     });
-    
-    function switchToLogin() {
-      authModal.classList.remove('expanded');
-      modalBody.classList.remove('expanded');
-      subTabContainer.classList.remove('visible');
-      loginForm.style.display = 'flex';
-      registerForm.style.display = 'none';
-      loginBanner.classList.remove('visible');
-      
-      // Animate form sections
-      const sections = loginForm.querySelectorAll('.form-section');
-      sections.forEach((section, i) => {
-        section.classList.remove('visible');
-        setTimeout(() => {
-          section.classList.add('visible');
-        }, i * 100);
-      });
-    }
-    
-    function switchToRegister() {
-      authModal.classList.add('expanded');
-      modalBody.classList.add('expanded');
-      subTabContainer.classList.add('visible');
-      loginForm.style.display = 'none';
-      registerForm.style.display = 'flex';
-      loginBanner.classList.remove('visible');
-      
-      // Animate form sections
-      const sections = registerForm.querySelectorAll('.form-section');
-      sections.forEach((section, i) => {
-        section.classList.remove('visible');
-        setTimeout(() => {
-          section.classList.add('visible');
-        }, i * 100);
-      });
-    }
     
     // ============================================
     // PHONE MASK
     // ============================================
-    
     const regPhone = document.getElementById('regPhone');
     
     regPhone.addEventListener('input', (e) => {
@@ -1084,35 +938,24 @@
     });
     
     // ============================================
-    // VALIDATION
+    // AUTH HANDLERS
     // ============================================
     
-    function validateName(value) {
-      return /^[a-zA-Zа-яА-ЯёЁ]+$/.test(value);
-    }
-    
-    function validatePhone(value) {
-      return /^\+7 \(\d{3}\) \d{3} -\d{2}-\d{2}$/.test(value);
-    }
-    
-    // ============================================
-    // AUTH FUNCTIONS
-    // ============================================
+    let currentUser = null;
     
     async function handleLogin(e) {
       e.preventDefault();
-      
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
       const loginBtn = document.getElementById('loginBtn');
+      const loginBanner = document.getElementById('loginBanner');
       
-      if (!username || !password) {
-        showLoginBanner('Заполните все поля', 'error');
-        return;
-      }
+      if (!username || !password) return;
       
       if (!supabase) {
-        showLoginBanner('Ошибка подключения к базе данных. Проверьте конфигурацию Supabase.', 'error');
+        // Demo mode
+        currentUser = { first_name: 'Демо', last_name: 'Пользователь', user_type: 'Автор' };
+        showApp();
         return;
       }
       
@@ -1120,7 +963,6 @@
       loginBtn.disabled = true;
       
       try {
-        // Поиск пользователя по телефону (логин) и проверка
         const { data, error } = await supabase
           .from('reviews_users')
           .select('*')
@@ -1128,79 +970,51 @@
           .single();
         
         if (error || !data) {
-          showLoginBanner('Пользователь не найден', 'error');
+          showLoginBanner('Пользователь не найден');
           loginBtn.classList.remove('loading');
           loginBtn.disabled = false;
           return;
         }
         
-        // Проверка пароля (в реальном приложении должно быть хеширование!)
-        // Здесь предполагаем, что пароль хранится в отдельном поле password
-        // Если у вас другая система авторизации, адаптируйте этот код
-        
-        // Проверка статуса
         if (data.status !== 'подтверждено') {
-          showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.', 'warning');
+          showLoginBanner('Пожалуйста, свяжитесь с администратором для подтверждения вашей учетной записи.');
           loginBtn.classList.remove('loading');
           loginBtn.disabled = false;
           return;
         }
         
-        // Успешный вход
         currentUser = data;
-        
-        // Обновление даты последнего входа
-        await supabase
-          .from('reviews_users')
-          .update({ last_login: new Date().toISOString() })
-          .eq('id', data.id);
+        await supabase.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
         
         loginBtn.classList.remove('loading');
         loginBtn.disabled = false;
-        
         showApp();
         
       } catch (err) {
-        console.error('Login error:', err);
-        showLoginBanner('Ошибка авторизации. Попробуйте позже.', 'error');
+        console.error(err);
         loginBtn.classList.remove('loading');
         loginBtn.disabled = false;
       }
     }
     
+    function showLoginBanner(msg) {
+      const banner = document.getElementById('loginBanner');
+      document.getElementById('loginBannerText').textContent = msg;
+      banner.classList.add('visible');
+    }
+    
     async function handleRegister(e) {
       e.preventDefault();
-      
       const phone = document.getElementById('regPhone').value.trim();
       const firstName = document.getElementById('regFirstName').value.trim();
       const lastName = document.getElementById('regLastName').value.trim();
       const city = document.getElementById('regCity').value.trim();
-      const roleAuthor = document.getElementById('roleAuthor');
+      const role = document.getElementById('roleAuthor').checked ? 'Автор' : 'Менеджер';
       const registerBtn = document.getElementById('registerBtn');
-      
-      // Validation
-      if (!validatePhone(phone)) {
-        alert('Введите корректный номер телефона');
-        return;
-      }
-      
-      if (!validateName(firstName)) {
-        alert('Имя должно содержать только буквы');
-        return;
-      }
-      
-      if (!validateName(lastName)) {
-        alert('Фамилия должна содержать только буквы');
-        return;
-      }
-      
-      if (!city) {
-        alert('Укажите город проживания');
-        return;
-      }
+      const registerBanner = document.getElementById('registerBanner');
       
       if (!supabase) {
-        alert('Ошибка подключения к базе данных. Проверьте конфигурацию Supabase.');
+        alert('Supabase не настроен');
         return;
       }
       
@@ -1208,79 +1022,47 @@
       registerBtn.disabled = true;
       
       try {
-        const userType = roleAuthor.checked ? 'Автор' : 'Менеджер';
+        const { error } = await supabase.from('reviews_users').insert([{
+          phone, first_name: firstName, last_name: lastName, city,
+          user_type: role, status: 'создана', created_at: new Date().toISOString()
+        }]);
         
-        const { data, error } = await supabase
-          .from('reviews_users')
-          .insert([{
-            phone: phone,
-            first_name: firstName,
-            last_name: lastName,
-            city: city,
-            user_type: userType,
-            status: 'создана',
-            created_at: new Date().toISOString()
-          }])
-          .select();
+        if (error) throw error;
         
-        if (error) {
-          console.error('Registration error:', error);
-          alert('Ошибка регистрации: ' + error.message);
-          registerBtn.classList.remove('loading');
-          registerBtn.disabled = false;
-          return;
-        }
-        
-        // Show success banner
         registerBanner.classList.add('visible');
         registerBtn.classList.remove('loading');
         registerBtn.disabled = false;
         
-        // Reset form after delay
         setTimeout(() => {
           registerForm.reset();
           registerBanner.classList.remove('visible');
           tabLogin.checked = true;
-          switchToLogin();
+          authModal.classList.remove('is-register');
         }, 3000);
         
       } catch (err) {
-        console.error('Registration error:', err);
-        alert('Ошибка регистрации. Попробуйте позже.');
+        console.error(err);
+        alert('Ошибка регистрации');
         registerBtn.classList.remove('loading');
         registerBtn.disabled = false;
       }
     }
     
-    function showLoginBanner(message, type) {
-      loginBannerText.textContent = message;
-      loginBanner.className = 'banner ' + type + ' visible';
-    }
-    
-    function handleLogout() {
-      currentUser = null;
-      hideApp();
-    }
-    
     // ============================================
-    // APP DISPLAY
+    // APP UI
     // ============================================
     
     function showApp() {
       authOverlay.classList.remove('visible');
-      
       setTimeout(() => {
         appContainer.classList.add('visible');
-        setTimeout(() => {
-          sidebar.classList.add('visible');
-          updateUserUI();
-        }, 100);
+        setTimeout(() => sidebar.classList.add('visible'), 100);
+        updateUserUI();
       }, 400);
     }
     
     function hideApp() {
       sidebar.classList.remove('visible');
-      
       setTimeout(() => {
         appContainer.classList.remove('visible');
         setTimeout(() => {
@@ -1288,7 +1070,7 @@
           loginForm.reset();
           registerForm.reset();
           tabLogin.checked = true;
-          switchToLogin();
+          authModal.classList.remove('is-register');
         }, 100);
       }, 400);
     }
@@ -1296,129 +1078,53 @@
     function updateUserUI() {
       if (currentUser) {
         const initials = (currentUser.first_name?.[0] || '') + (currentUser.last_name?.[0] || '');
-        userAvatar.textContent = initials.toUpperCase() || 'П';
-        userName.textContent = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Пользователь';
-        userRole.textContent = currentUser.user_type || 'Автор';
+        document.getElementById('userAvatar').textContent = initials.toUpperCase() || 'П';
+        document.getElementById('userName').textContent = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim();
+        document.getElementById('userRole').textContent = currentUser.user_type || 'Автор';
       }
     }
     
     // ============================================
-    // PAGE NAVIGATION
+    // NAVIGATION
     // ============================================
     
     const navItems = document.querySelectorAll('.nav-item');
+    let currentPage = 'modal1';
     
     navItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const page = item.dataset.page;
-        navigateToPage(page, item);
-      });
-      
-      item.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          const page = item.dataset.page;
-          navigateToPage(page, item);
-        }
-      });
+      item.addEventListener('click', () => navigateToPage(item.dataset.page, item));
     });
     
     async function navigateToPage(page, item) {
       if (currentPage === page) return;
-      
-      // Update active state
       navItems.forEach(nav => nav.classList.remove('active'));
       item.classList.add('active');
       
-      // Animate out
       pageContainer.classList.remove('visible');
       
       setTimeout(async () => {
         currentPage = page;
         const pageNum = page.replace('modal', '');
-        pageTitle.textContent = `Страница ${pageNum}`;
+        document.getElementById('pageTitle').textContent = `Страница ${pageNum}`;
         
-        // Try to load external content
         try {
-          const response = await fetch(`${page}.html`);
-          if (response.ok) {
-            const html = await response.text();
-            pageContent.innerHTML = html;
-          } else {
-            pageContent.innerHTML = `
-              <div style="padding: 40px; text-align: center; color: var(--text-muted);">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px; opacity: 0.5;">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="3" y1="9" x2="21" y2="9"></line>
-                  <line x1="9" y1="21" x2="9" y2="9"></line>
-                </svg>
-                <p style="font-size: 16px;">Контент страницы ${pageNum}</p>
-                <p style="font-size: 14px; margin-top: 8px;">Содержимое будет добавлено позже</p>
-              </div>
-            `;
-          }
-        } catch (err) {
-          pageContent.innerHTML = `
-            <div style="padding: 40px; text-align: center; color: var(--text-muted);">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 16px; opacity: 0.5;">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-              </svg>
-              <p style="font-size: 16px;">Контент страницы ${pageNum}</p>
-              <p style="font-size: 14px; margin-top: 8px;">Содержимое будет добавлено позже</p>
-            </div>
-          `;
+          const res = await fetch(`${page}.html`);
+          document.getElementById('pageContent').innerHTML = res.ok ? await res.text() : `<p>Контент страницы ${pageNum}</p>`;
+        } catch {
+          document.getElementById('pageContent').innerHTML = `<p>Контент страницы ${pageNum}</p>`;
         }
         
-        // Animate in
-        setTimeout(() => {
-          pageContainer.classList.add('visible');
-        }, 50);
-        
+        setTimeout(() => pageContainer.classList.add('visible'), 50);
       }, 300);
     }
     
     // ============================================
-    // EVENT LISTENERS
+    // INIT
     // ============================================
-    
     loginForm.addEventListener('submit', handleLogin);
     registerForm.addEventListener('submit', handleRegister);
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('logoutBtn').addEventListener('click', hideApp);
     
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    
-    function init() {
-      // Check if already logged in (session)
-      // For now, show login form
-      switchToLogin();
-      
-      // Demo mode warning
-      if (!supabase) {
-        console.warn('Supabase не настроен. Для работы авторизации укажите SUPABASE_URL и SUPABASE_ANON_KEY.');
-        
-        // Add demo functionality
-        document.getElementById('loginBtn').addEventListener('click', (e) => {
-          e.preventDefault();
-          // Demo login
-          currentUser = {
-            id: 'demo-id',
-            phone: document.getElementById('loginUsername').value || '+7 (999) 999-99-99',
-            first_name: 'Демо',
-            last_name: 'Пользователь',
-            user_type: 'Автор',
-            status: 'подтверждено'
-          };
-          showApp();
-        });
-      }
-    }
-    
-    // Start app
-    init();
   </script>
 </body>
 </html>
