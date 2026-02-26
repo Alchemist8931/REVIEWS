@@ -33,7 +33,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 1000; /* Выше чем основной layout */
       opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease;
@@ -116,7 +116,7 @@
       margin-bottom: 4px;
       font-size: 13px;
     }
-    .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; }
+    .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
     /* Поля формы */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -154,7 +154,7 @@
       border: 1px solid var(--border-color);
     }
     .source-item input { border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 13px; width: 100%; }
-    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; }
+    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 16px; }
     
     .add-source-btn {
       margin-top: auto;
@@ -281,11 +281,11 @@
         <!-- Блок 3: Клиент -->
         <div class="form-grid">
           <div class="input-group">
-            <input type="text" id="clientName" required>
+            <input type="text" id="clientName" required placeholder=" ">
             <label>Наименование клиента</label>
           </div>
           <div class="input-group">
-            <input type="text" id="clientInn" required>
+            <input type="text" id="clientInn" required placeholder=" ">
             <label>ИНН клиента</label>
           </div>
         </div>
@@ -336,17 +336,17 @@
 
 <script>
   // ==========================================
-  // ЛОГИКА MODAL1
+  // ЛОГИКА MODAL1 - ИСПРАВЛЕНО
   // ==========================================
 
-  // Доступ к глобальным переменным из index.html
-  const sbClient = window.parent.supabaseClient;
-  const user = window.parent.currentUser;
+  // Получаем доступ к глобальным переменным из index.html через window
+  const sbClient = window.supabaseClient;
+  const user = window.currentUser;
 
   let uploadedFiles = [];
   let sources = [];
 
-  // Элементы
+  // Элементы DOM
   const overlay = document.getElementById('taskModalOverlay');
   const openBtn = document.getElementById('openModalBtn');
   const formContainer = document.getElementById('formContainer');
@@ -356,41 +356,31 @@
   const dropzone = document.getElementById('dropzone');
   const sourcesList = document.getElementById('sourcesList');
 
-  // Инициализация
-  document.addEventListener('DOMContentLoaded', () => {
-      // Добавляем первую строку источника при загрузке
-      addSourceRow();
-  });
+  // Инициализация при загрузке страницы
+  function initPage() {
+      console.log("Modal1 initialized");
+      addSourceRow(); // Добавляем первую строку
+      bindEvents();
+  }
 
-  // Открытие/Закрытие
-  openBtn.addEventListener('click', () => {
-    overlay.classList.add('visible');
-    resetForm();
-  });
+  function bindEvents() {
+      // Удаляем старые обработчики, чтобы избежать дублирования (хотя при innerHTML они и так удаляются)
+      openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
+      
+      dropzone.onclick = () => fileInput.click();
+      dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
+      dropzone.ondragleave = () => dropzone.classList.remove('dragover');
+      dropzone.ondrop = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
+      fileInput.onchange = (e) => handleFiles(e.target.files);
+  }
 
   function closeTaskModal() {
     overlay.classList.remove('visible');
   }
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeTaskModal();
-  });
-
-  //Dropzone Logic
-  dropzone.addEventListener('click', () => fileInput.click());
-  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-  });
-  fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
+  // Dropzone Logic
   function handleFiles(files) {
-    Array.from(files).forEach(file => {
-      uploadedFiles.push(file);
-    });
+    Array.from(files).forEach(file => uploadedFiles.push(file));
     renderFileList();
   }
 
@@ -464,7 +454,7 @@
   // ==========================================
 
   async function handleSubmit() {
-    if (!user) return alert('Пользователь не определен');
+    if (!user) return alert('Пользователь не определен. Войдите заново.');
 
     const clientName = document.getElementById('clientName').value;
     const clientInn = document.getElementById('clientInn').value;
@@ -607,5 +597,8 @@
     }
     return 'AA'; // Reset if ZZ
   }
+
+  // Запуск инициализации сразу после загрузки скрипта
+  initPage();
 
 </script>
