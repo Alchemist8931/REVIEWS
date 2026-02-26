@@ -398,13 +398,13 @@
               <label class="input-label" for="regCity">Город проживания</label>
             </div>
             
-            <!-- NEW: Login Field -->
+            <!-- Login Field -->
             <div class="input-container">
               <input type="text" class="styled_input_bar" id="regLogin" name="username" placeholder=" " autocomplete="username" />
               <label class="input-label" for="regLogin">Логин</label>
             </div>
             
-            <!-- NEW: Password Field -->
+            <!-- Password Field -->
             <div class="input-container">
               <input type="password" class="styled_input_bar" id="regPassword" name="new-password" placeholder=" " autocomplete="new-password" />
               <label class="input-label" for="regPassword">Пароль</label>
@@ -568,22 +568,33 @@
       
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
+      
       try {
-        // FIX: Wrapped ${username} in quotes to handle dots and special chars
+        // ИСПРАВЛЕНО: Убраны лишние кавычки внутри .or()
+        // Синтаксис: .or('col1.eq.val,col2.eq.val')
         const { data, error } = await supabaseClient
           .from('reviews_users')
           .select('*')
-          .or(`login.eq."${username}",phone.eq."${username}"`)
+          .or(`login.eq.${username},phone.eq.${username}`)
           .single();
 
-        if (error || !data) { 
+        // Если ошибка БД или данных нет
+        if (error) {
+            console.error("Supabase error:", error);
+            showLoginBanner('Пользователь не найден (ошибка БД или RLS)'); 
+            loginBtn.classList.remove('loading'); 
+            loginBtn.disabled = false; 
+            return; 
+        }
+        
+        if (!data) { 
           showLoginBanner('Пользователь не найден'); 
           loginBtn.classList.remove('loading'); 
           loginBtn.disabled = false; 
           return; 
         }
 
-        // Проверка пароля (в реальном проекте сравнение хешей)
+        // Проверка пароля 
         if (data.password_hash !== password) {
           showLoginBanner('Неверный пароль'); 
           loginBtn.classList.remove('loading'); 
@@ -604,7 +615,8 @@
         loginBtn.disabled = false;
         showApp();
       } catch (err) { 
-        console.error(err); 
+        console.error("Catch error:", err); 
+        showLoginBanner('Ошибка соединения');
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false; 
       }
