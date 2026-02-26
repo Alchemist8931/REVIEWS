@@ -1,0 +1,439 @@
+<!-- modal2.html -->
+<div id="taskAppContainer" class="task-app">
+  <style>
+    /* Scoped Styles */
+    .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
+    
+    /* --- Card List Styles --- */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .order-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.3s ease;
+    }
+    .order-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .client-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .order-number-badge {
+      background: var(--bg-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .row-label {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      min-width: 140px;
+    }
+    .row-value {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .row-value a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+    .row-value a:hover {
+        text-decoration: underline;
+    }
+
+    /* Action Block */
+    .action-block {
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    /* Buttons */
+    .action-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
+      height: 40px;
+    }
+    .action-btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+    .action-btn.primary:hover { background: var(--accent-hover); }
+    .action-btn.secondary {
+      background: var(--success);
+      color: white;
+    }
+    .action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .action-btn.loading {
+      pointer-events: none;
+    }
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Dropzone */
+    .mini-dropzone {
+      display: none; /* Hidden initially */
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--bg-primary);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      flex-grow: 1;
+      transition: all 0.3s ease;
+    }
+    .mini-dropzone.visible { display: flex; }
+    .mini-dropzone.active {
+      border-color: var(--accent);
+      background: #f0f0f0;
+    }
+    .mini-dropzone svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .file-name { font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  </style>
+
+  <!-- Container for rendered cards -->
+  <div id="ordersList" class="orders-list">
+    <!-- Cards will be injected here -->
+  </div>
+
+<script>
+(function() {
+  
+  const sbClient = window.supabaseClient;
+  const user = window.currentUser;
+
+  async function initPage() {
+      await loadAndRenderCards();
+  }
+
+  // --- RENDERING CARDS ---
+
+  async function loadAndRenderCards() {
+    const container = document.getElementById('ordersList');
+    
+    try {
+      // Fetch tasks that are created
+      const { data, error } = await sbClient
+        .from('reviews_order_autor_exercise')
+        .select('*')
+        .eq('status', 'создана')
+        .order('start_date', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px;">Нет доступных заданий для выполнения.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(card => {
+        return `
+          <div class="order-card" id="card-${card.order_number_general}-${sanitizeClass(card.platform)}">
+            <!-- Header -->
+            <div class="card-header">
+              <div class="client-info">
+                <div style="font-size: 12px; color: var(--text-muted);">Платформа: <b style="color: var(--text-primary);">${card.platform || '-'}</b></div>
+                <div style="font-size: 12px; color: var(--text-muted);">Группа: <b style="color: var(--text-primary);">${card.order_number_general || '-'}</b></div>
+              </div>
+              <div class="order-number-badge">${card.status || 'статус'}</div>
+            </div>
+
+            <!-- Manager Row -->
+            <div class="card-row">
+              <span class="row-label">Менеджер:</span>
+              <span class="row-value">${card.manager_name || '-'} (${card.manager_phone || '-'})</span>
+            </div>
+
+            <!-- Dates Row -->
+            <div class="card-row">
+              <span class="row-label">Сроки:</span>
+              <span class="row-value">${formatDate(card.start_date)} — ${formatDate(card.end_date)}</span>
+            </div>
+
+            <!-- Link Row -->
+            <div class="card-row">
+              <span class="row-label">Ссылка:</span>
+              <span class="row-value"><a href="${card.link}" target="_blank">Перейти к объекту</a></span>
+            </div>
+
+            <!-- Action Block -->
+            <div class="action-block">
+              <!-- Initial Button -->
+              <button class="action-btn primary" id="btn-take-${card.order_number_general}-${sanitizeClass(card.platform)}" onclick="handleTakeToWork('${card.order_number_general}', '${card.platform}')">
+                <span class="btn-text">Взять в работу</span>
+              </button>
+              
+              <!-- Dropzone (Initially Hidden) -->
+              <div class="mini-dropzone" id="dropzone-${card.order_number_general}-${sanitizeClass(card.platform)}" onclick="triggerFileInput('${card.order_number_general}', '${card.platform}')" ondragover="handleDragOver(event, '${card.order_number_general}', '${card.platform}')" ondragleave="handleDragLeave(event, '${card.order_number_general}', '${card.platform}')" ondrop="handleDrop(event, '${card.order_number_general}', '${card.platform}')">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                 <span class="dz-text">Перетащите фото или клик</span>
+                 <input type="file" accept="image/*" style="display:none" id="input-${card.order_number_general}-${sanitizeClass(card.platform)}" onchange="handleFileSelect(event, '${card.order_number_general}', '${card.platform}')">
+              </div>
+
+              <!-- Submit Button (Initially Hidden) -->
+              <button class="action-btn secondary" id="btn-submit-${card.order_number_general}-${sanitizeClass(card.platform)}" style="display:none;" onclick="handleSubmitReview('${card.order_number_general}', '${card.platform}')" disabled>
+                <span class="btn-text">На проверку</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (e) {
+      console.error(e);
+      container.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заданий.</p>';
+    }
+  }
+
+  function sanitizeClass(str) {
+    return str ? str.replace(/[^a-zA-Z0-9]/g, '-') : 'unknown';
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('ru-RU');
+  }
+
+  // --- LOGIC ---
+
+  // Global scope functions
+  window.handleTakeToWork = async function(groupNum, platform) {
+    const btnId = `btn-take-${groupNum}-${sanitizeClass(platform)}`;
+    const btn = document.getElementById(btnId);
+    
+    if(!btn) return;
+    btn.innerHTML = '<div class="spinner"></div>';
+    btn.disabled = true;
+
+    try {
+      // 1. Find the record to update
+      // We need the specific ID of one row that matches criteria
+      const { data: targetRow, error: findError } = await sbClient
+        .from('reviews_order')
+        .select('id')
+        .eq('order_number_general', groupNum)
+        .eq('platform', platform)
+        .eq('status', 'создана')
+        .limit(1)
+        .maybeSingle();
+
+      if (findError) throw findError;
+      if (!targetRow) {
+        alert('Задание уже занято другим автором или не найдено.');
+        btn.innerHTML = '<span class="btn-text">Ошибка</span>';
+        return;
+      }
+
+      // 2. Update the record
+      const updateData = {
+        status: 'в работе',
+        autor_name: `${user.first_name} ${user.last_name}`,
+        autor_phone: user.phone,
+        autor_task: new Date().toISOString()
+      };
+
+      const { error: updateError } = await sbClient
+        .from('reviews_order')
+        .update(updateData)
+        .eq('id', targetRow.id);
+
+      if (updateError) throw updateError;
+
+      // 3. Update UI
+      btn.style.display = 'none';
+      
+      const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
+      const dz = document.getElementById(dropzoneId);
+      dz.classList.add('visible');
+
+      const submitBtnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
+      const sBtn = document.getElementById(submitBtnId);
+      sBtn.style.display = 'inline-flex';
+
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка при взятии задания: ' + err.message);
+      btn.innerHTML = '<span class="btn-text">Взять в работу</span>';
+      btn.disabled = false;
+    }
+  };
+
+  // File Handling
+  window.triggerFileInput = function(groupNum, platform) {
+    const inputId = `input-${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(inputId).click();
+  };
+
+  window.handleDragOver = function(e, groupNum, platform) {
+    e.preventDefault();
+    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(dropzoneId).classList.add('active');
+  };
+
+  window.handleDragLeave = function(e, groupNum, platform) {
+    e.preventDefault();
+    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(dropzoneId).classList.remove('active');
+  };
+
+  window.handleDrop = function(e, groupNum, platform) {
+    e.preventDefault();
+    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(dropzoneId).classList.remove('active');
+    
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      processFile(files[0], groupNum, platform);
+    }
+  };
+
+  window.handleFileSelect = function(e, groupNum, platform) {
+    if (e.target.files.length) {
+      processFile(e.target.files[0], groupNum, platform);
+    }
+  };
+
+  function processFile(file, groupNum, platform) {
+    if (!file.type.startsWith('image/')) {
+      alert('Пожалуйста, выберите изображение.');
+      return;
+    }
+
+    const dropzoneId = `dropzone-${groupNum}-${sanitizeClass(platform)}`;
+    const dz = document.getElementById(dropzoneId);
+    dz.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${file.name}</span>`;
+    
+    // Store file in global temp storage for submission
+    const key = `${groupNum}-${platform}`;
+    window.tempFiles = window.tempFiles || {};
+    window.tempFiles[key] = file;
+
+    // Enable submit button
+    const submitBtnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
+    document.getElementById(submitBtnId).disabled = false;
+  }
+
+  window.handleSubmitReview = async function(groupNum, platform) {
+    const key = `${groupNum}-${platform}`;
+    const file = window.tempFiles ? window.tempFiles[key] : null;
+
+    if (!file) {
+      alert('Сначала загрузите изображение.');
+      return;
+    }
+
+    const btnId = `btn-submit-${groupNum}-${sanitizeClass(platform)}`;
+    const btn = document.getElementById(btnId);
+    
+    btn.innerHTML = '<div class="spinner"></div>';
+    btn.disabled = true;
+
+    try {
+      // Find the record again (the one currently 'в работе')
+      const { data: targetRow, error: findError } = await sbClient
+        .from('reviews_order')
+        .select('id')
+        .eq('order_number_general', groupNum)
+        .eq('platform', platform)
+        .eq('status', 'в работе')
+        .limit(1)
+        .maybeSingle();
+
+      if (findError) throw findError;
+      if (!targetRow) throw new Error('Запись не найдена или уже обновлена.');
+
+      // Note: Real file upload to Storage would happen here.
+      // For now we just update status.
+      
+      const { error: updateError } = await sbClient
+        .from('reviews_order')
+        .update({ status: 'на проверке' })
+        .eq('id', targetRow.id);
+
+      if (updateError) throw updateError;
+
+      // Update UI to show completion
+      const cardId = `card-${groupNum}-${sanitizeClass(platform)}`;
+      const card = document.getElementById(cardId);
+      
+      // Remove action block and show "Done" status
+      const actionBlock = card.querySelector('.action-block');
+      actionBlock.innerHTML = '<div style="width:100%; text-align:center; color:var(--success); font-weight:600;">Задание отправлено на проверку</div>';
+      
+      // Update badge
+      const badge = card.querySelector('.order-number-badge');
+      badge.textContent = 'на проверке';
+      badge.style.background = 'rgba(245, 158, 11, 0.1)';
+      badge.style.color = '#92400e';
+      badge.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка отправки: ' + err.message);
+      btn.innerHTML = '<span class="btn-text">На проверку</span>';
+      btn.disabled = false;
+    }
+  };
+
+  initPage();
+
+})();
+</script>
+</div>
