@@ -67,7 +67,7 @@
 
     .modal-header { padding: 24px 24px 0; position: relative; }
 
-    /* Tabs & Inputs styles (same as before) */
+    /* Tabs & Inputs styles */
     .tab-container { position: relative; display: flex; flex-direction: row; align-items: flex-start; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
     .tab-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border: 0.5px solid rgba(0, 0, 0, 0.04); box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12); border-radius: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .tab-container .tab { width: 50%; height: 36px; position: absolute; z-index: 99; outline: none; opacity: 0; cursor: pointer; }
@@ -305,6 +305,7 @@
 
     let currentUser = null;
 
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ВХОДА
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -317,25 +318,44 @@
       loginBtn.disabled = true;
       
       try {
-        const { data, error } = await supabaseClient
+        let data = null;
+        let error = null;
+
+        // Стратегия 1: Пробуем найти по логину
+        // .eq автоматически экранирует специальные символы (точки, собаки)
+        let res = await supabaseClient
           .from('reviews_users')
           .select('*')
-          .or(`login.eq.${username},phone.eq.${username}`)
-          .single();
-
-        // ОБРАБОТКА ОШИБКИ RLS
-        if (error) {
-            console.error("Supabase error:", error);
-            if (error.code === 'PGRST116') {
-                showLoginBanner('Ошибка доступа к данным. Выполните SQL: ALTER TABLE reviews_users DISABLE ROW LEVEL SECURITY'); 
+          .eq('login', username)
+          .maybeSingle(); // maybeSingle не выдает ошибку, если 0 строк
+        
+        if (res.data) {
+            data = res.data;
+        } else {
+            // Стратегия 2: Если не нашли по логину, ищем по телефону
+            res = await supabaseClient
+              .from('reviews_users')
+              .select('*')
+              .eq('phone', username)
+              .maybeSingle();
+            
+            if (res.data) {
+                data = res.data;
             } else {
-                showLoginBanner('Ошибка соединения с БД');
+                // Если и тут пусто, значит ошибка
+                error = res.error || { message: "Not found" };
             }
-            loginBtn.classList.remove('loading'); 
-            loginBtn.disabled = false; 
-            return; 
         }
         
+        // Обработка ошибок БД (не путать с "не найдено")
+        if (res && res.error && res.error.code !== 'PGRST116') {
+             console.error("Supabase DB error:", res.error);
+             showLoginBanner('Ошибка соединения с БД: ' + res.error.message);
+             loginBtn.classList.remove('loading'); 
+             loginBtn.disabled = false; 
+             return;
+        }
+
         if (!data) { 
           showLoginBanner('Пользователь не найден'); 
           loginBtn.classList.remove('loading'); 
@@ -343,6 +363,7 @@
           return; 
         }
 
+        // Проверка пароля
         if (data.password_hash !== password) {
           showLoginBanner('Неверный пароль'); 
           loginBtn.classList.remove('loading'); 
@@ -350,6 +371,7 @@
           return;
         }
 
+        // Проверка статуса
         if (data.status !== 'подтверждено') { 
           showLoginBanner('Учетная запись ожидает подтверждения администратором.'); 
           loginBtn.classList.remove('loading'); 
@@ -358,13 +380,16 @@
         }
         
         currentUser = data;
+        // Обновление времени входа
         await supabaseClient.from('reviews_users').update({ last_login: new Date().toISOString() }).eq('id', data.id);
+        
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false;
         showApp();
+        
       } catch (err) { 
-        console.error("Catch error:", err); 
-        showLoginBanner('Критическая ошибка');
+        console.error("Critical error:", err); 
+        showLoginBanner('Критическая ошибка: ' + err.message);
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false; 
       }
