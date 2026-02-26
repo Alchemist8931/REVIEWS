@@ -551,7 +551,7 @@
     // Auth Logic
     let currentUser = null;
 
-    async function handleLogin(e) {
+        async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
@@ -569,12 +569,12 @@
       loginBtn.classList.add('loading');
       loginBtn.disabled = true;
       try {
-        // Ищем пользователя по логину ИЛИ телефону (для совместимости)
-        // Предполагается, что колонка 'login' существует
+        // ИСПРАВЛЕНИЕ: Добавлены двойные кавычки вокруг ${username}
+        // Это заставляет PostgREST воспринимать точку в email как часть строки, а не как оператор.
         const { data, error } = await supabaseClient
           .from('reviews_users')
           .select('*')
-          .or(`login.eq.${username},phone.eq.${username}`)
+          .or(`login.eq."${username}",phone.eq."${username}"`)
           .single();
 
         if (error || !data) { 
@@ -584,7 +584,7 @@
           return; 
         }
 
-        // Проверка пароля (в реальном проекте сравнение хешей)
+        // Проверка пароля
         if (data.password_hash !== password) {
           showLoginBanner('Неверный пароль'); 
           loginBtn.classList.remove('loading'); 
@@ -606,6 +606,7 @@
         showApp();
       } catch (err) { 
         console.error(err); 
+        showLoginBanner('Ошибка авторизации');
         loginBtn.classList.remove('loading'); 
         loginBtn.disabled = false; 
       }
