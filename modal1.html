@@ -21,14 +21,8 @@
     }
 
     .m1-root {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-      position: relative;
-      background: var(--bg-card);
-      font-family: 'SN Pro', sans-serif;
-      overflow: hidden;
+      display: flex; flex-direction: column; height: 100%; width: 100%;
+      position: relative; background: var(--bg-card); font-family: 'SN Pro', sans-serif; overflow: hidden;
     }
 
     /* === ШАПКА И ТАБЫ === */
@@ -180,9 +174,7 @@
       <div class="modal9-scroll-wrapper">
         <div class="modal9-window">
           <div class="modal9-content">
-            <div class="deals-grid" id="dealsList">
-              <!-- Карточки сделок будут здесь -->
-            </div>
+            <div class="deals-grid" id="dealsList"></div>
           </div>
         </div>
       </div>
@@ -239,7 +231,6 @@
           <div class="form-section-title">Данные клиента</div>
           <div class="form-grid">
             <div class="input-group span-2" style="position:relative;">
-              <!-- Поиск по клиенту реализован через Фамилию для примера -->
               <input type="text" class="input-field" id="dealLastName" placeholder=" " autocomplete="off">
               <label class="input-label">Фамилия</label>
               <div class="autocomplete-dropdown" id="clientDropdown"></div>
@@ -298,6 +289,9 @@
   </div>
 
   <script>
+  // Оборачиваем в IIFE, чтобы изолировать переменные и избежать ошибки "duplicate variable"
+  (function() {
+    
     const sb = window.supabaseClient;
 
     // === ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК ===
@@ -308,7 +302,7 @@
     tab1.addEventListener('change', () => { page1.classList.add('active'); page2.classList.remove('active'); });
     tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); });
 
-    // === ЭЛЕМЕНТЫ МОДALKИ ===
+    // === ЭЛЕМЕНТЫ МОДАЛКИ ===
     const modalOverlay = document.getElementById('dealModalOverlay');
     const openBtn = document.getElementById('openDealModalBtn');
     const closeBtn = document.getElementById('closeDealModalBtn');
@@ -331,7 +325,7 @@
       help: document.getElementById('dealHelp')
     };
 
-    // === ОТКРЫТИЕ/ЗАКРЫТИЕ МОДALKИ ===
+    // === ОТКРЫТИЕ/ЗАКРЫТИЕ МОДАЛКИ ===
     function toggleModal(show) {
       if (show) {
         modalOverlay.classList.add('visible');
@@ -363,7 +357,7 @@
       if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
 
       innTimeout = setTimeout(async () => {
-        // ИСПРАВЛЕНО: ilike('inn') вместо ilike('INN')
+        // ИСПРАВЛЕНО: используем 'inn' в нижнем регистре
         const { data } = await sb.from('reviews_counterparty').select('*').ilike('inn', `%${val}%`).limit(5);
         if (data && data.length > 0) {
           innDropdown.innerHTML = data.map(c => `
@@ -437,8 +431,6 @@
 
       try {
         // 1. Проверка и создание Контакта
-        // Логика: Если совпала Фамилия+Имя+Отчество, считаем что это тот же человек, обновляем данные.
-        // Иначе создаем нового.
         const lname = fields.lname.value.trim();
         const fname = fields.fname.value.trim();
         const mname = fields.mname.value.trim();
@@ -456,13 +448,11 @@
 
           if (existingContact) {
             client_id = existingContact.id;
-            // Можно обновить телефон/email если изменились
             await sb.from('reviews_human_contact').update({
               phone: fields.phone.value.trim(),
               email: fields.email.value.trim()
             }).eq('id', client_id);
           } else {
-            // Создаем нового
             const { data: newContact, error: contactErr } = await sb.from('reviews_human_contact').insert([{
               last_name: lname,
               first_name: fname,
@@ -477,17 +467,22 @@
         }
 
         // 2. Проверка и создание Контрагента
-        const inn = fields.inn.value.trim();
-        if (!inn) throw new Error("ИНН обязателен");
+        const innVal = fields.inn.value.trim();
+        if (!innVal) throw new Error("ИНН обязателен");
 
-        let { data: existingComp } = await sb.from('reviews_counterparty').select('INN').eq('INN', inn).maybeSingle();
+        let { data: existingComp } = await sb.from('reviews_counterparty').select('inn').eq('inn', innVal).maybeSingle();
         
         if (!existingComp) {
-          await sb.from('reviews_counterparty').insert([{
-            INN: inn,
-            OPF: fields.opf.value.trim(),
+          // ИСПРАВЛЕНО: используем ключи в нижнем регистре ('inn', 'opf')
+          const { error: compErr } = await sb.from('reviews_counterparty').insert([{
+            inn: innVal,
+            opf: fields.opf.value.trim(),
             name_company: fields.company.value.trim()
           }]);
+          if (compErr) {
+              // Выводим ошибку в консоль, но не останавливаем создание сделки
+              console.error("Ошибка создания контрагента (пропущено):", compErr);
+          }
         }
 
         // 3. Создание Сделки
@@ -496,8 +491,8 @@
           contract_number: fields.contractNum.value.trim(),
           contract_date: fields.contractDate.value || null,
           sum_deal: parseFloat(fields.sum.value) || 0,
-          inn: inn,
-          opf: fields.opf.value.trim(),
+          inn: innVal,                 // ИСПРАВЛЕНО: lower case
+          opf: fields.opf.value.trim(), // ИСПРАВЛЕНО: lower case
           name_company: fields.company.value.trim(),
           client_id: client_id,
           last_name: lname,
@@ -544,7 +539,7 @@
         return;
       }
 
-            container.innerHTML = data.map(deal => {
+      container.innerHTML = data.map(deal => {
         const date = new Date(deal.created_at).toLocaleString('ru-RU');
         const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
         return `
@@ -582,5 +577,6 @@
     // Инициализация загрузки при открытии страницы
     loadDeals();
 
+  })();
   </script>
 </div>
