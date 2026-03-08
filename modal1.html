@@ -200,7 +200,6 @@
         <button class="form-close" id="closeDealModalBtn">&times;</button>
       </div>
       <div class="form-body">
-        
         <div class="form-divider">
           <div class="form-section-title">Данные контрагента</div>
           <div class="form-grid">
@@ -268,7 +267,6 @@
             </div>
           </div>
         </div>
-
       </div>
       <div class="form-footer">
         <button class="btn-cancel" id="cancelDealBtn">Отмена</button>
@@ -282,7 +280,14 @@
 
   <script>
   (function() {
-    // Проверка доступности Supabase
+    // === ВАЖНОЕ ИСПРАВЛЕНИЕ LAYOUT ===
+    // Заставляем родительский контейнер из index.html иметь высоту 100%
+    const parentContainer = document.getElementById('pageContent');
+    if (parentContainer) {
+        parentContainer.style.height = '100%';
+        parentContainer.style.overflow = 'hidden';
+    }
+
     if (!window.supabaseClient) {
         console.error('Supabase client not found!');
         return;
@@ -445,13 +450,11 @@
         let { data: existingComp } = await sb.from('reviews_counterparty').select('inn').eq('inn', innVal).maybeSingle();
         
         if (!existingComp) {
-            // ИСПРАВЛЕНО: ключи в нижнем регистре для соответствия SQL
-            const { error: compErr } = await sb.from('reviews_counterparty').insert([{
+            await sb.from('reviews_counterparty').insert([{
                 inn: innVal,
                 opf: fields.opf.value.trim(),
                 name_company: fields.company.value.trim()
             }]);
-            if (compErr) console.error("Ошибка создания контрагента:", compErr);
         }
 
         // 3. Сделка
@@ -476,7 +479,7 @@
         if (dealErr) throw dealErr;
 
         toggleModal(false);
-        await loadDeals(); // Ждем завершения загрузки
+        await loadDeals();
 
       } catch (err) {
         alert("Ошибка создания: " + err.message);
@@ -538,7 +541,7 @@
 
       } catch (err) {
         console.error('Ошибка при загрузке сделок:', err);
-        container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных</div>';
+        container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных. Проверьте RLS политики в Supabase.</div>';
       }
     }
 
