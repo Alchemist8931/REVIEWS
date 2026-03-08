@@ -6,9 +6,17 @@
   <title>Платформа учета и автоматизации</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Шрифты из обоих проектов -->
   <link href="https://fonts.googleapis.com/css2?family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400&family=Material+Symbols+Outlined" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+
   <style>
     :root {
+      /* Основные переменные проекта */
       --bg-primary: #f8f9fa;
       --bg-card: #ffffff;
       --text-primary: #1a1a1a;
@@ -22,6 +30,22 @@
       --error: #ef4444;
       --tab-bg: #e8e8e8;
       --tab-active: #ffffff;
+      
+      /* Переменные из донорского проекта для интерфейса */
+      --bg: #e8e8e8;
+      --surface: #ffffff;
+      --accent-app: #fe7f2d;
+      --accent-bg: rgba(254, 127, 45, 0.12);
+      --muted: #4b5563;
+      --border: #dcdcdc;
+      --shadow: 0 18px 40px rgba(17, 17, 17, 0.08);
+      --nav-width: 84px;
+      --header-height: 40px;
+      --text: #151717;
+      --frame-gap: clamp(16px, 2vw, 28px);
+      --modal-width: 1360px;
+      --modal-padding: 16px;
+      --shell-height: calc(100vh - var(--header-height) - (var(--frame-gap) * 2) - 60px);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,36 +58,25 @@
       overflow-x: hidden;
     }
 
+    /* ================= AUTH STYLES (Ваш проект) ================= */
     .bg-pattern {
       position: fixed; inset: 0;
       background-image: radial-gradient(circle at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%);
       pointer-events: none; z-index: 0;
     }
 
-    /* Auth Overlay - ИСПРАВЛЕНИЕ ПРОБЛЕМЫ КЛИКОВ */
     .auth-overlay {
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      z-index: 100;
+      z-index: 1000; /* Повыше, чем app shell */
       background: rgba(248, 249, 250, 0.9);
       backdrop-filter: blur(8px);
-      
-      /* Скрываем: делаем прозрачным, невидимым и НЕ активным для событий */
-      opacity: 0; 
-      visibility: hidden;
-      pointer-events: none; /* ГЛАВНОЕ ИСПРАВЛЕНИЕ */
-      
-      /* Правильный переход: opacity меняется плавно, visibility меняется мгновенно после завершения */
+      opacity: 0; visibility: hidden; pointer-events: none;
       transition: opacity 0.4s ease, visibility 0s linear 0.4s;
     }
     
-    /* Показываем */
     .auth-overlay.visible { 
-      opacity: 1; 
-      visibility: visible; 
-      pointer-events: auto; /* Включаем клики */
-      
-      /* При появлении visibility меняется мгновенно (0s delay), opacity плавно */
+      opacity: 1; visibility: visible; pointer-events: auto;
       transition: opacity 0.4s ease, visibility 0s linear 0s;
     }
 
@@ -82,7 +95,6 @@
 
     .modal-header { padding: 24px 24px 0; position: relative; }
 
-    /* Tabs & Inputs styles */
     .tab-container { position: relative; display: flex; flex-direction: row; align-items: flex-start; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
     .tab-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border: 0.5px solid rgba(0, 0, 0, 0.04); box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12); border-radius: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .tab-container .tab { width: 50%; height: 36px; position: absolute; z-index: 99; outline: none; opacity: 0; cursor: pointer; }
@@ -131,47 +143,231 @@
     .banner.success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #065f46; }
     .banner svg { flex-shrink: 0; margin-top: 1px; }
 
-    /* App Layout */
-    .app-container { display: none; min-height: 100vh; }
-    .app-container.visible { display: flex; }
+    /* ================= APP STYLES (Донорский проект) ================= */
+    html, body {
+      overflow: hidden; /* Для корректной работы app-shell */
+    }
     
-    .sidebar { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .sidebar.visible { transform: translateX(0); }
-    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-color); }
-    .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-    .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+    body.app-active {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 var(--frame-gap) var(--frame-gap);
+    }
+
+    .page-frame {
+      width: min(calc(var(--nav-width) + var(--modal-width) + var(--frame-gap) * 3), 100%);
+      margin: 0 auto;
+      padding-top: var(--frame-gap);
+      display: grid;
+      gap: var(--frame-gap);
+    }
     
-    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-    .nav-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 0 12px; margin-bottom: 8px; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; font-size: 14px; font-weight: 500; }
-    .nav-item:hover { background: var(--bg-primary); color: var(--text-primary); }
-    .nav-item.active { background: rgba(0, 0, 0, 0.05); color: var(--text-primary); }
-    .nav-item svg { width: 20px; height: 20px; opacity: 0.7; }
-    .nav-item.active svg { opacity: 1; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: var(--header-height);
+      padding: var(--modal-padding);
+      position: relative;
+      background: var(--surface);
+      border-bottom: 1px solid #e2e8f0;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    }
+    
+    .header-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* Анимация кнопки Лого */
+    .buttonAA {
+      margin: 0; height: auto; background: transparent;
+      padding: 0; border: none; cursor: pointer;
+      --border-right: 6px;
+      --text-stroke-color: #212121;
+      --animation-color: #fe7f2d;
+      --fs-size: 1.5em;
+      letter-spacing: 3px;
+      text-decoration: none;
+      font-size: var(--fs-size);
+      font-family: "Arial";
+      position: relative;
+      text-transform: uppercase;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--text-stroke-color);
+    }
+    .hover-text {
+      position: absolute;
+      box-sizing: border-box;
+      content: attr(data-text);
+      color: var(--animation-color);
+      width: 0%;
+      inset: 0;
+      border-radius: 4px;
+      border-right: var(--border-right) solid var(--animation-color);
+      overflow: hidden;
+      transition: 0.5s;
+      -webkit-text-stroke: 1px var(--animation-color);
+    }
+    .buttonAA:hover .hover-text {
+      width: 100%;
+      filter: drop-shadow(0 0 23px var(--animation-color))
+    }
 
-    .sidebar-footer { padding: 16px; border-top: 1px solid var(--border-color); }
-    .user-info { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: var(--bg-primary); }
-    .user-avatar { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; }
-    .user-details { flex: 1; min-width: 0; }
-    .user-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role { font-size: 12px; color: var(--text-muted); }
-    .logout-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-    .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+    .compact-button {
+      height: var(--btn-height, 35px);
+      width: var(--btn-width, auto);
+      padding: var(--btn-padding, 0 18px);
+      border-radius: var(--btn-radius, 11px);
+      border: var(--btn-border, 0);
+      outline: none;
+      color: var(--btn-color, #ffffff);
+      font-size: var(--btn-font-size, 13px);
+      font-weight: var(--btn-font-weight, 700);
+      background: var(--btn-bg, linear-gradient(180deg, #363636 0%, #1B1B1B 50%, #000000 100%));
+      transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--btn-gap, 6px);
+      cursor: pointer;
+    }
+    .compact-button:hover {
+      box-shadow: var(--btn-hover-shadow, 0px 0px 0px 2px #FFFFFF, 0px 0px 0px 4px #0000003a);
+      transform: translateY(-1px);
+    }
+    
+    .card {
+      box-sizing: border-box;
+      width: 120px;
+      height: 28px;
+      background: rgba(226, 226, 226, 0.80);
+      border: 1px solid #676662;
+      box-shadow: 12px 17px 51px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(6px);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.5s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      font-weight: bolder;
+      color: black;
+      font-size: 13px;
+    }
+    .card:hover {
+      border: 1px solid #454845;
+      transform: scale(1.02);
+      background: black;
+      color: rgba(226, 226, 226, 0.80);
+    }
+    
+    /* App Shell Container */
+    .app-shell {
+      display: none;
+      width: 100%;
+      gap: var(--frame-gap);
+      grid-template-columns: var(--nav-width) 1fr;
+      background: transparent;
+      border-radius: 22px;
+      overflow: visible;
+      align-items: start;
+    }
+    .app-shell.active { display: grid; }
 
-    .main-content { flex: 1; margin-left: 260px; }
-    .content-wrapper { max-width: 1240px; margin: 0 auto; padding: 32px; min-height: 100vh; }
-    .page-container { background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); min-height: calc(100vh - 64px); padding: 32px; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    .page-container.visible { opacity: 1; transform: translateY(0); }
-    .page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+    /* Sidebar */
+    .sidebar {
+      background: #f8fafc;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 14px 10px;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: calc(var(--frame-gap) + var(--header-height));
+      align-self: start;
+      height: var(--shell-height);
+      overflow: hidden;
+    }
+    
+    .nav-group { width: 63px; display: grid; gap: 10px; }
+    
+    .nav-btn {
+      margin-bottom: 0;
+      --btn-width: 63px; --btn-height: 63px; --btn-padding: 0; --btn-radius: 14px;
+      --btn-bg: #ffffff; --btn-color: var(--text); --btn-border: 1.5px solid #ecedec;
+      --btn-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
+    .nav-btn:hover {
+      --btn-bg: #f4f6fb; --btn-border: 1.5px solid var(--accent-app); --btn-color: var(--accent-app);
+    }
+    .nav-btn.active {
+      --btn-bg: var(--accent-bg); --btn-border: 1.5px solid var(--accent-app); --btn-color: var(--accent-app);
+    }
 
-    @media (max-width: 1024px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } }
-    @media (max-width: 640px) { .auth-modal { width: calc(100% - 32px); } .auth-modal.is-register { width: calc(100% - 32px); } .sub-tab-container { width: 100%; position: relative; top: auto; right: auto; margin-top: 16px; } .auth-modal.is-register .modal-body { padding-top: 24px; } }
+    /* Content Area */
+    .content {
+      display: grid;
+      align-content: start;
+      gap: var(--frame-gap);
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    .content-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      height: var(--shell-height);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 100%;
+      overflow-y: auto;
+    }
+    
+    .hidden { display: none !important; }
+    
+    /* Status bar inside content */
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      background: #fff;
+      color: var(--muted);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.03);
+      margin-bottom: 20px;
+    }
+    .status .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent-app);
+      box-shadow: 0 0 0 6px rgba(254, 127, 45, 0.18);
+    }
+    
+    /* Helper classes */
+    .helper { color: var(--muted); font-size: 14px; }
   </style>
 </head>
 <body>
+
+  <!-- Background Pattern -->
   <div class="bg-pattern"></div>
 
-  <!-- Auth Overlay -->
+  <!-- ================= AUTH OVERLAY (Ваш проект) ================= -->
   <div class="auth-overlay visible" id="authOverlay">
     <div class="auth-modal" id="authModal">
       <div class="modal-header">
@@ -231,46 +427,66 @@
     </div>
   </div>
 
-  <!-- App Container -->
-  <div class="app-container" id="appContainer">
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg></div>
-          <span>Название компании</span>
-        </div>
+  <!-- ================= APP SHELL (Донорский проект) ================= -->
+  <div class="page-frame" id="appFrame" style="display: none;">
+    <header>
+      <button class="buttonAA" data-text="Awesome">
+        <span class="actual-text">&nbsp;RIVA_Development&nbsp;</span>
+        <span aria-hidden="true" class="hover-text">&nbsp;RIVA_Development&nbsp;</span>
+      </button>
+      <div class="header-actions">
+        <!-- Баланс скрыт по умолчанию, так как нет данных в reviews_users -->
+        <button id="balanceTrigger" class="balance-pill hidden compact-button" type="button" style="display:none;">
+          <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
+          Баланс: <span class="amount" id="balanceAmount">0 ₽</span>
+        </button>
+        <!-- Кнопка Вход/Выход -->
+        <button id="openAuth" class="card">Вход</button>
       </div>
-      <nav class="sidebar-nav">
-        <div class="nav-section-title">Навигация</div>
-        <div class="nav-item active" data-page="modal1" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg><span>Заказы</span></div>
-        <div class="nav-item" data-page="modal2" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><span>Задания</span></div>
-        <div class="nav-item" data-page="modal3" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg><span>Страница 3</span></div>
-        <div class="nav-item" data-page="modal4" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Страница 4</span></div>
-        <div class="nav-item" data-page="modal5" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg><span>Страница 5</span></div>
-        <div class="nav-item" data-page="modal6" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg><span>Страница 6</span></div>
-        <div class="nav-item" data-page="modal7" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>Страница 7</span></div>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">АП</div>
-          <div class="user-details">
-            <div class="user-name" id="userName">Пользователь</div>
-            <div class="user-role" id="userRole">Автор</div>
-          </div>
-          <button class="logout-btn" id="logoutBtn" title="Выйти">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-          </button>
-        </div>
-      </div>
-    </aside>
+    </header>
 
-    <main class="main-content">
-      <div class="content-wrapper">
-        <div class="page-container visible" id="pageContainer">
-          <h1 class="page-title" id="pageTitle">Загрузка...</h1>
-          <div class="page-content" id="pageContent"><p>Загрузка содержимого...</p></div>
+    <main>
+      <section id="appShell" class="app-shell" aria-live="polite">
+        <nav class="sidebar" aria-label="Навигация">
+          <div class="nav-group" id="group1-nav">
+            <div class="nav-title" style="display:none;">Group1</div>
+            <button class="nav-btn compact-button active" data-file="modal1.html" data-group="group1" aria-label="Заказы" title="Заказы">
+              <span class="material-symbols-outlined">lists</span>
+            </button>
+            <button class="nav-btn compact-button" data-file="modal2.html" data-group="group1" aria-label="Задания" title="Задания">
+              <span class="material-symbols-outlined">assignment</span>
+            </button>
+            <button class="nav-btn compact-button" data-file="modal3.html" data-group="group1" aria-label="Статистика" title="Статистика">
+              <span class="material-symbols-outlined">bar_chart</span>
+            </button>
+            <button class="nav-btn compact-button" data-file="modal4.html" data-group="group1" aria-label="Пользователи" title="Пользователи">
+              <span class="material-symbols-outlined">group</span>
+            </button>
+          </div>
+          
+          <div class="nav-group" id="group2-nav">
+            <button class="nav-btn compact-button" data-file="modal5.html" data-group="group2" aria-label="Настройки" title="Настройки">
+              <span class="material-symbols-outlined">settings</span>
+            </button>
+            <button class="nav-btn compact-button" data-file="modal6.html" data-group="group2" aria-label="Помощь" title="Помощь">
+              <span class="material-symbols-outlined">help</span>
+            </button>
+          </div>
+        </nav>
+        
+        <div class="content">
+          <div id="contentCard" class="content-card" role="region" aria-live="polite">
+            <div class="status">
+              <div class="dot"></div>
+              <span id="statusText">Выберите раздел в меню слева</span>
+            </div>
+            <div id="pageContent">
+              <h3>Добро пожаловать!</h3>
+              <p class="helper">Нажмите на иконки слева — соответствующий HTML-файл будет загружен и показан здесь.</p>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </main>
   </div>
 
@@ -299,8 +515,13 @@
     const tabRegister = document.getElementById('tabRegister');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
-    const appContainer = document.getElementById('appContainer');
-    const sidebar = document.getElementById('sidebar');
+    
+    // App Elements
+    const appFrame = document.getElementById('appFrame');
+    const appShell = document.getElementById('appShell');
+    const openAuthBtn = document.getElementById('openAuth');
+    const statusText = document.getElementById('statusText');
+    const pageContent = document.getElementById('pageContent');
 
     // Tab Switching
     tabLogin.addEventListener('change', () => { if (tabLogin.checked) authModal.classList.remove('is-register'); });
@@ -320,7 +541,9 @@
       }
     });
 
-    // LOGIN LOGIC
+    // ==========================================
+    // AUTH LOGIC
+    // ==========================================
     async function handleLogin(e) {
       e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
@@ -395,101 +618,108 @@
       } catch (err) { alert('Ошибка регистрации: ' + (err.message || JSON.stringify(err))); registerBtn.classList.remove('loading'); registerBtn.disabled = false; }
     }
 
+    // ==========================================
+    // APP LOGIC (INTEGRATED FROM DONOR)
+    // ==========================================
     function showApp() {
       authOverlay.classList.remove('visible');
+      document.body.classList.add('app-active');
+      
+      appFrame.style.display = 'grid';
+      
       setTimeout(() => {
-        appContainer.classList.add('visible');
-        setTimeout(() => sidebar.classList.add('visible'), 100);
-        updateUserUI();
+        appShell.classList.add('active');
         
-        // Загружаем начальную страницу
-        const initialItem = document.querySelector('.nav-item.active');
-        if (initialItem) navigateToPage(initialItem.dataset.page, initialItem);
+        // Update UI with user data
+        const u = window.currentUser;
+        const displayName = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.login;
+        statusText.textContent = `Здравствуйте, ${displayName}! Роль: ${u.user_type}. Выберите раздел.`;
         
-      }, 400);
+        openAuthBtn.textContent = "Выйти";
+        
+        // Load initial page
+        const firstBtn = document.querySelector('.nav-btn.active');
+        if (firstBtn) loadFragment(firstBtn.dataset.file, firstBtn.dataset.group);
+      }, 100);
     }
 
     function hideApp() {
-      sidebar.classList.remove('visible');
+      appShell.classList.remove('active');
+      document.body.classList.remove('app-active');
+      
       setTimeout(() => {
-        appContainer.classList.remove('visible');
-        setTimeout(() => {
-          authOverlay.classList.add('visible');
-          loginForm.reset(); registerForm.reset();
-          tabLogin.checked = true; authModal.classList.remove('is-register');
-        }, 100);
+        appFrame.style.display = 'none';
+        authOverlay.classList.add('visible');
+        loginForm.reset(); 
+        registerForm.reset();
+        tabLogin.checked = true; 
+        authModal.classList.remove('is-register');
+        openAuthBtn.textContent = "Вход";
       }, 400);
     }
 
-    function updateUserUI() {
-      if (window.currentUser) {
-        const u = window.currentUser;
-        const initials = (u.first_name?.[0] || '') + (u.last_name?.[0] || '');
-        document.getElementById('userAvatar').textContent = initials.toUpperCase() || 'П';
-        document.getElementById('userName').textContent = `${u.first_name || ''} ${u.last_name || ''}`.trim();
-        document.getElementById('userRole').textContent = u.user_type || 'Автор';
+    // Navigation & Loading
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadFragment(btn.dataset.file, btn.dataset.group);
+      });
+    });
+
+    async function loadFragment(file, group) {
+      if (!file) return;
+      
+      // Update accent color based on group (optional visual feedback)
+      if (group === 'group1') document.documentElement.style.setProperty('--accent-app', '#fe7f2d');
+      if (group === 'group2') document.documentElement.style.setProperty('--accent-app', '#2563eb');
+
+      pageContent.innerHTML = "<p class='helper'>Загрузка содержимого...</p>";
+      
+      try {
+        const res = await fetch(file);
+        if (!res.ok) throw new Error(`Файл ${file} не найден`);
+        
+        const htmlText = await res.text();
+        const parsed = new DOMParser().parseFromString(htmlText, "text/html");
+        
+        pageContent.innerHTML = "";
+        const fragment = document.createDocumentFragment();
+        Array.from(parsed.body.childNodes).forEach(node => fragment.appendChild(node));
+        pageContent.appendChild(fragment);
+
+        // Re-initialize scripts inside loaded content
+        const scripts = Array.from(pageContent.querySelectorAll("script"));
+        scripts.forEach((oldScript) => {
+          const newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach((attr) => newScript.setAttribute(attr.name, attr.value));
+          if (oldScript.src) newScript.src = oldScript.src;
+          else newScript.textContent = oldScript.textContent;
+          oldScript.replaceWith(newScript);
+        });
+        
+        statusText.textContent = `Загружен файл: ${file}`;
+        
+      } catch (err) {
+        console.error(err);
+        pageContent.innerHTML = `<div class='helper' style="color:red">Ошибка: ${err.message}</div><p>Убедитесь, что файл ${file} существует.</p>`;
       }
     }
 
-    // ==========================================
-    // NAVIGATION & SCRIPT LOADING FIX
-    // ==========================================
-    const navItems = document.querySelectorAll('.nav-item');
-    let currentPage = '';
-    const pageContainer = document.getElementById('pageContainer');
-    const pageContent = document.getElementById('pageContent');
-    const pageTitle = document.getElementById('pageTitle');
-
-    navItems.forEach(item => item.addEventListener('click', () => navigateToPage(item.dataset.page, item)));
-
-    async function navigateToPage(page, item) {
-      if (currentPage === page) return;
-      
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-      pageContainer.classList.remove('visible');
-      
-      setTimeout(async () => {
-        currentPage = page;
-        const pageNum = page.replace('modal', '');
-        pageTitle.textContent = `Страница ${pageNum}`;
-        
-        try {
-          const res = await fetch(`${page}.html`);
-          if (res.ok) {
-            const htmlText = await res.text();
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlText;
-            
-            const scripts = tempDiv.querySelectorAll('script');
-            scripts.forEach(script => script.remove());
-            
-            pageContent.innerHTML = tempDiv.innerHTML;
-            
-            scripts.forEach(oldScript => {
-              const newScript = document.createElement('script');
-              if(oldScript.src) newScript.src = oldScript.src;
-              else newScript.textContent = oldScript.textContent;
-              document.body.appendChild(newScript);
-              // newScript.remove(); // Можно раскомментировать, если скрипты конфликтуют
-            });
-            
-          } else {
-            pageContent.innerHTML = `<p>Ошибка загрузки</p>`;
-          }
-        } catch (err) {
-          console.error(err);
-          pageContent.innerHTML = `<p>Ошибка загрузки страницы</p>`;
-        }
-        
-        setTimeout(() => pageContainer.classList.add('visible'), 50);
-      }, 300);
-    }
-
-    // Init
+    // Event Listeners
     loginForm.addEventListener('submit', handleLogin);
     registerForm.addEventListener('submit', handleRegister);
-    document.getElementById('logoutBtn').addEventListener('click', hideApp);
+    
+    openAuthBtn.addEventListener('click', () => {
+      if (window.currentUser) {
+        hideApp();
+        window.currentUser = null;
+      } else {
+        // Если по какой-то причине нажали "Вход", будучи неавторизованным (не должно случиться в этом UI)
+        authOverlay.classList.add('visible');
+      }
+    });
   </script>
 </body>
 </html>
