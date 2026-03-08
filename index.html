@@ -558,6 +558,7 @@
       const phone = document.getElementById('regPhone').value.trim();
       const firstName = document.getElementById('regFirstName').value.trim();
       const lastName = document.getElementById('regLastName').value.trim();
+      const middleName = document.getElementById('regMiddleName').value.trim();
       const city = document.getElementById('regCity').value.trim();
       const login = document.getElementById('regLogin').value.trim();
       const password = document.getElementById('regPassword').value;
@@ -569,8 +570,16 @@
       registerBtn.disabled = true;
       try {
         const { error } = await window.supabaseClient.from('reviews_users').insert([{
-          phone, first_name: firstName, last_name: lastName, city,
-          login, password_hash: password, user_type: role, status: 'создана', created_at: new Date().toISOString()
+          phone, 
+          first_name: firstName, 
+          last_name: lastName, 
+          middle_name: middleName,
+          city,
+          login, 
+          password_hash: password, 
+          user_type: role, 
+          status: 'создана', 
+          created_at: new Date().toISOString()
         }]);
         if (error) throw error;
         registerBanner.classList.add('visible');
