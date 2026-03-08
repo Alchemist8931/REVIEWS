@@ -363,11 +363,12 @@
       if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
 
       innTimeout = setTimeout(async () => {
-        const { data } = await sb.from('reviews_counterparty').select('*').ilike('INN', `%${val}%`).limit(5);
+        // ИСПРАВЛЕНО: ilike('inn') вместо ilike('INN')
+        const { data } = await sb.from('reviews_counterparty').select('*').ilike('inn', `%${val}%`).limit(5);
         if (data && data.length > 0) {
           innDropdown.innerHTML = data.map(c => `
-            <div class="autocomplete-item" data-inn="${c.INN}" data-opf="${c.OPF}" data-name="${c.name_company}">
-              <strong>${c.INN}</strong> <small>${c.name_company || ''}</small>
+            <div class="autocomplete-item" data-inn="${c.inn}" data-opf="${c.opf}" data-name="${c.name_company}">
+              <strong>${c.inn}</strong> <small>${c.name_company || ''}</small>
             </div>
           `).join('');
           innDropdown.classList.add('visible');
@@ -491,12 +492,12 @@
 
         // 3. Создание Сделки
         const dealData = {
-          user_id: window.currentUser.id, // Из index.html
+          user_id: window.currentUser.id,
           contract_number: fields.contractNum.value.trim(),
           contract_date: fields.contractDate.value || null,
           sum_deal: parseFloat(fields.sum.value) || 0,
-          INN: inn,
-          OPF: fields.opf.value.trim(),
+          inn: inn,
+          opf: fields.opf.value.trim(),
           name_company: fields.company.value.trim(),
           client_id: client_id,
           last_name: lname,
