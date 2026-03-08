@@ -543,7 +543,7 @@
         return;
       }
 
-      container.innerHTML = data.map(deal => {
+            container.innerHTML = data.map(deal => {
         const date = new Date(deal.created_at).toLocaleString('ru-RU');
         const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
         return `
@@ -571,7 +571,7 @@
             </div>
             <div class="deal-footer">
               <span>Создано: ${date}</span>
-              <span>${deal.INN}</span>
+              <span>${deal.inn}</span>
             </div>
           </div>
         `;
