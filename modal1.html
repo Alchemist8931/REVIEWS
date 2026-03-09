@@ -1,10 +1,9 @@
-<!-- modal1.html -->
 <!DOCTYPE html>
 <div class="m1-root">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
   
   <style>
-    /* === PALETTE & ROOT === */
+    /* === ПАЛИТРА === */
     :root {
       --bg-primary: #f8f9fa;
       --bg-card: #ffffff;
@@ -26,37 +25,26 @@
       position: relative; background: var(--bg-card); font-family: 'SN Pro', sans-serif; overflow: hidden;
     }
 
-    /* === HEADER & MAIN TABS (Auth Style) === */
+    /* === ШАПКА И ТАБЫ === */
     .m1-header {
       display: flex; justify-content: space-between; align-items: center;
       height: 56px; min-height: 56px; border-bottom: 1px solid var(--border-color);
       padding: 0 20px; background: var(--bg-card); z-index: 10;
     }
     .m1-header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-primary); text-transform: uppercase; }
-    
-    /* Main Tab Switcher */
-    .tab-container { position: relative; display: flex; flex-direction: row; align-items: flex-start; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
-    .tab-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border: 0.5px solid rgba(0, 0, 0, 0.04); box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12); border-radius: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .tab-container .m1-tab-input { width: 50%; height: 36px; position: absolute; z-index: 99; outline: none; opacity: 0; cursor: pointer; }
-    .tab-container .m1-tab-label { width: 50%; height: 36px; position: relative; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
-    .tab-container .m1-tab-input:checked + .m1-tab-label { color: var(--text-primary); }
-    /* Move indicator for second tab */
+    .m1-tabs-container { position: relative; display: flex; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
+    .m1-tabs-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border-radius: 8px; box-shadow: 0px 3px 8px rgba(0,0,0,0.12); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .m1-tab-input { width: 50%; height: 36px; position: absolute; z-index: 99; opacity: 0; cursor: pointer; }
+    .m1-tab-label { width: 50%; height: 36px; position: relative; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
+    .m1-tab-input:checked + .m1-tab-label { color: var(--text-primary); }
     #m1-tab2:checked ~ .indicator { left: 50%; }
 
     .m1-page { display: none; flex-direction: column; flex: 1; height: calc(100% - 56px); position: relative; }
     .m1-page.active { display: flex; }
 
-    /* === COMMON LAYOUT PARTS === */
+    /* === ВЕРХНЯЯ ЧАСТЬ === */
     .m1-top-section { height: 100px; min-height: 100px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-card); }
-    .m1-bottom-section { flex: 1; position: relative; }
-    .modal9-scroll-wrapper { position: absolute; top: 0; left: 0; bottom: 0; width: calc(100% + 30px); overflow: visible; pointer-events: auto; z-index: 1; }
-    .modal9-window { height: 100%; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.6); padding: 20px; padding-right: 10px; }
-    .modal9-content { height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; padding-right: 20px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
-    .modal9-content::-webkit-scrollbar { width: 6px; }
-    .modal9-content::-webkit-scrollbar-track { background: transparent; }
-    .modal9-content::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
-
-    /* === BUTTONS === */
+    
     .m1-action-btn {
       padding: 12px 24px; background: var(--accent); color: white; border: none;
       border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
@@ -67,70 +55,39 @@
     .m1-action-btn .loader { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
     .m1-action-btn.loading .loader { display: block; }
     .m1-action-btn.loading .btn-text { display: none; }
-    
-    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 500; cursor: pointer; }
-    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-submit .loader { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
-    .btn-submit.loading .loader { display: block; }
-    .btn-submit.loading .btn-text { display: none; }
 
-    /* === SUBPAGE 1 (MANAGER) CARDS === */
-    .orders-list { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+    /* === НИЖНЯЯ ЧАСТЬ (СКРОЛЛ) === */
+    .m1-bottom-section { flex: 1; position: relative; }
+    .modal9-scroll-wrapper { position: absolute; top: 0; left: 0; bottom: 0; width: calc(100% + 30px); overflow: visible; pointer-events: auto; z-index: 1; }
+    .modal9-window { height: 100%; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.6); padding: 20px; padding-right: 10px; }
+    .modal9-content { height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; padding-right: 20px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+    .modal9-content::-webkit-scrollbar { width: 6px; }
+    .modal9-content::-webkit-scrollbar-track { background: transparent; }
+    .modal9-content::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
+
+    /* === КАРТОЧКИ СДЕЛОК === */
+    .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding-bottom: 20px; }
     
-    .order-card {
-      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
-      padding: 20px; width: 100%; box-sizing: border-box;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease;
+    .deal-card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;
     }
-    .order-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
+    .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
     
-    .card-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); gap: 16px; flex-wrap: wrap;
-    }
-    .client-info { display: flex; flex-direction: row; align-items: center; gap: 24px; flex: 1; }
-    .client-org { font-size: 16px; font-weight: 600; color: var(--text-primary); }
-    .client-org span { color: var(--text-muted); font-weight: 400; margin-right: 4px; }
-    .client-inn { font-size: 14px; color: var(--text-secondary); }
-    .client-inn span { color: var(--text-muted); margin-right: 4px; }
+    .deal-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+    .deal-id { font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--bg-primary); padding: 4px 8px; border-radius: 6px; }
+    .deal-sum { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .deal-sum small { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
     
-    .order-number-badge {
-      background: var(--bg-primary); padding: 6px 12px; border-radius: 8px;
-      font-size: 13px; font-weight: 600; color: var(--text-secondary); border: 1px solid var(--border-color); white-space: nowrap;
-    }
-
-    .card-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 14px; }
-    .row-label { color: var(--text-muted); flex-shrink: 0; min-width: 140px; }
-    .row-value { color: var(--text-primary); font-weight: 500; }
-
-    .platforms-container { margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; }
-    .platform-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
-    .platform-name { width: 120px; font-weight: 600; color: var(--text-primary); }
-    .platform-stats { display: flex; gap: 16px; color: var(--text-secondary); font-size: 13px; }
-    .stat-item { display: flex; align-items: center; gap: 4px; }
-    .stat-count { font-weight: 600; color: var(--text-primary); }
-
-    /* === SUBPAGE 2 (AUTHOR) STYLES === */
-    /* Inner Tab Switcher */
-    .view-header { display: flex; justify-content: flex-end; margin-bottom: 24px; }
-    .view-header .tab-container { transform: scale(0.9); } /* Slightly smaller for inner content */
+    .deal-body { display: flex; flex-direction: column; gap: 8px; }
+    .deal-row { display: flex; gap: 8px; align-items: baseline; }
+    .deal-label { font-size: 11px; color: var(--text-muted); min-width: 80px; }
+    .deal-value { font-size: 13px; color: var(--text-primary); font-weight: 500; }
     
-    .action-block { margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    
-    .action-btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; display: inline-flex; align-items: center; justify-content: center; min-width: 140px; height: 40px; }
-    .action-btn.primary { background: var(--accent); color: white; }
-    .action-btn.primary:hover { background: var(--accent-hover); }
-    .action-btn.secondary { background: var(--success); color: white; }
-    .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .deal-footer { margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--border-color); font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
 
-    .mini-dropzone { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-primary); border: 1px dashed var(--border-color); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text-secondary); flex-grow: 1; transition: all 0.3s ease; }
-    .mini-dropzone.visible { display: flex; }
-    .mini-dropzone.active { border-color: var(--accent); background: #f0f0f0; }
-    .mini-dropzone svg { width: 16px; height: 16px; flex-shrink: 0; }
-    .file-name { font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    /* === MODAL FORM STYLES === */
+    /* === МОДАЛЬНОЕ ОКНО === */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(248, 249, 250, 0.8); backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center; z-index: 2000;
@@ -149,10 +106,10 @@
     .form-title { font-size: 18px; font-weight: 700; }
     .form-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 24px; line-height: 1; }
     
-    .form-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+    .form-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 24px; }
     
     .form-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
-    .form-divider { border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+    .form-divider { border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
     
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     
@@ -160,24 +117,38 @@
     .input-field {
       width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color);
       border-radius: 10px; background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s, background 0.2s; font-family: 'SN Pro', sans-serif;
+      outline: none; transition: border-color 0.2s, background 0.2s;
     }
     .input-field:focus { border-color: var(--accent); background: var(--bg-card); }
     .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); pointer-events: none; transition: all 0.2s; background: transparent; padding: 0 4px; }
     .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { top: 0; font-size: 11px; color: var(--accent); background: var(--bg-card); font-weight: 500; }
-    /* Date fix */
-    input[type="date"] + .input-label, input[type="date"]:focus + .input-label { top: 0; font-size: 11px; color: var(--text-muted); background: var(--bg-card); transform: translateY(0); }
+    
+    .autocomplete-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card);
+      border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px;
+      overflow-y: auto; display: none;
+    }
+    .autocomplete-dropdown.visible { display: block; }
+    .autocomplete-item { padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--bg-primary); }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: var(--bg-primary); }
 
     .form-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
+    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 600; cursor: pointer; }
+    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-submit .loader { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+    .btn-submit.loading .loader { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
-  <!-- HEADER -->
+  <!-- ШАПКА -->
   <header class="m1-header">
     <div class="m1-header-title">Страница 1</div>
-    <!-- Main Tab Switcher -->
-    <div class="tab-container">
+    <div class="m1-tabs-container">
       <input type="radio" name="m1Tabs" id="m1-tab1" class="m1-tab-input" checked>
       <label for="m1-tab1" class="m1-tab-label">Подстраница 1</label>
       <input type="radio" name="m1Tabs" id="m1-tab2" class="m1-tab-input">
@@ -186,441 +157,397 @@
     </div>
   </header>
 
-  <!-- SUBPAGE 1 (MANAGER) -->
+  <!-- ПОДСТРАНИЦА 1 -->
   <div class="m1-page active" id="page1">
     <div class="m1-top-section">
-      <button class="m1-action-btn" id="openCreateTaskBtn">
+      <button class="m1-action-btn" id="openDealModalBtn">
         <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
-        Создать задание
+        Кнопка подстраницы 1
       </button>
     </div>
     <div class="m1-bottom-section">
       <div class="modal9-scroll-wrapper">
         <div class="modal9-window">
           <div class="modal9-content">
-            <div id="managerOrdersList" class="orders-list"></div>
+            <div class="deals-grid" id="dealsList"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SUBPAGE 2 (AUTHOR) -->
+  <!-- ПОДСТРАНИЦА 2 -->
   <div class="m1-page" id="page2">
     <div class="m1-top-section">
-       <!-- Author can have a button or title here, leaving empty or title based on context -->
-       <h3 style="font-size: 16px; font-weight: 600;">Доступные задания</h3>
+      <button class="m1-action-btn">Кнопка подстраницы 2</button>
     </div>
     <div class="m1-bottom-section">
       <div class="modal9-scroll-wrapper">
         <div class="modal9-window">
           <div class="modal9-content">
-            
-            <!-- Author Inner Tabs -->
-            <div class="view-header">
-              <div class="tab-container">
-                <input type="radio" name="authorTabs" id="authorTabNew" class="m1-tab-input tab--new" checked>
-                <label for="authorTabNew" class="m1-tab-label">Новые задания</label>
-                <input type="radio" name="authorTabs" id="authorTabMy" class="m1-tab-input tab--my">
-                <label for="authorTabMy" class="m1-tab-label">Мои задания</label>
-                <div class="indicator"></div>
-              </div>
-            </div>
-            
-            <div id="authorOrdersList" class="orders-list"></div>
-
+            <p style="color: var(--text-muted); padding: 20px;">Контент подстраницы 2...</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CREATE TASK MODAL -->
-  <div class="modal-overlay" id="createTaskModal">
-    <div class="modal-form-container" onclick="event.stopPropagation()">
+  <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ СДЕЛКИ -->
+  <div class="modal-overlay" id="dealModalOverlay">
+    <div class="modal-form-container">
       <div class="form-header">
-        <div class="form-title">Создание заданий</div>
-        <button class="form-close" onclick="closeTaskModal()">&times;</button>
+        <div class="form-title">Создание новой сделки</div>
+        <button class="form-close" id="closeDealModalBtn">&times;</button>
       </div>
-      <div class="form-body" id="taskFormBody">
-        <!-- Content injected by JS -->
+      <div class="form-body">
+        <div class="form-divider">
+          <div class="form-section-title">Данные контрагента</div>
+          <div class="form-grid">
+            <div class="input-group" style="position:relative;">
+              <input type="text" class="input-field" id="dealINN" placeholder=" " autocomplete="off">
+              <label class="input-label">ИНН</label>
+              <div class="autocomplete-dropdown" id="innDropdown"></div>
+            </div>
+            <div class="input-group">
+              <input type="text" class="input-field" id="dealOPF" placeholder=" ">
+              <label class="input-label">ОПФ (ИП, ООО...)</label>
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+              <input type="text" class="input-field" id="dealCompany" placeholder=" ">
+              <label class="input-label">Наименование организации</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-divider">
+          <div class="form-section-title">Данные клиента</div>
+          <div class="form-grid">
+            <div class="input-group" style="grid-column: span 2; position:relative;">
+              <input type="text" class="input-field" id="dealLastName" placeholder=" " autocomplete="off">
+              <label class="input-label">Фамилия</label>
+              <div class="autocomplete-dropdown" id="clientDropdown"></div>
+            </div>
+            <div class="input-group">
+              <input type="text" class="input-field" id="dealFirstName" placeholder=" ">
+              <label class="input-label">Имя</label>
+            </div>
+            <div class="input-group">
+              <input type="text" class="input-field" id="dealMiddleName" placeholder=" ">
+              <label class="input-label">Отчество</label>
+            </div>
+            <div class="input-group">
+              <input type="text" class="input-field" id="dealPhone" placeholder=" ">
+              <label class="input-label">Телефон</label>
+            </div>
+            <div class="input-group">
+              <input type="email" class="input-field" id="dealEmail" placeholder=" ">
+              <label class="input-label">Email</label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="form-section-title">Данные договора</div>
+          <div class="form-grid">
+            <div class="input-group">
+              <input type="text" class="input-field" id="dealContractNum" placeholder=" ">
+              <label class="input-label">Номер договора</label>
+            </div>
+            <div class="input-group">
+              <input type="date" class="input-field" id="dealContractDate" placeholder=" " style="padding-top: 16px;">
+              <label class="input-label" style="top: 0; background: var(--bg-card); padding: 0 4px; font-size: 11px; font-weight: 500;">Дата договора</label>
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+              <input type="number" class="input-field" id="dealSum" placeholder=" ">
+              <label class="input-label">Сумма договора</label>
+            </div>
+            <div class="input-group" style="grid-column: span 2;">
+              <textarea class="input-field" id="dealHelp" rows="2" placeholder=" " style="padding-top: 20px; min-height: auto;"></textarea>
+              <label class="input-label">Комментарий (Помощь)</label>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="form-footer" id="taskFormFooter">
-         <!-- Footer injected by JS -->
+      <div class="form-footer">
+        <button class="btn-cancel" id="cancelDealBtn">Отмена</button>
+        <button class="btn-submit" id="submitDealBtn">
+          <span class="btn-text">Создать сделку</span>
+          <div class="loader"></div>
+        </button>
       </div>
     </div>
   </div>
 
-<script>
-(function() {
-    // === FIX LAYOUT HEIGHT ===
+  <script>
+  (function() {
+    // === ВАЖНОЕ ИСПРАВЛЕНИЕ LAYOUT ===
+    // Заставляем родительский контейнер из index.html иметь высоту 100%
     const parentContainer = document.getElementById('pageContent');
-    if (parentContainer) { parentContainer.style.height = '100%'; parentContainer.style.overflow = 'hidden'; }
+    if (parentContainer) {
+        parentContainer.style.height = '100%';
+        parentContainer.style.overflow = 'hidden';
+    }
 
+    if (!window.supabaseClient) {
+        console.error('Supabase client not found!');
+        return;
+    }
     const sb = window.supabaseClient;
-    const user = window.currentUser;
 
-    // Elements
+    // Элементы
     const tab1 = document.getElementById('m1-tab1');
     const tab2 = document.getElementById('m1-tab2');
     const page1 = document.getElementById('page1');
     const page2 = document.getElementById('page2');
-    const managerList = document.getElementById('managerOrdersList');
-    const authorList = document.getElementById('authorOrdersList');
-    const createModal = document.getElementById('createTaskModal');
-    const openCreateBtn = document.getElementById('openCreateTaskBtn');
-    
-    // Author Tabs
-    const authorTabNew = document.getElementById('authorTabNew');
-    const authorTabMy = document.getElementById('authorTabMy');
-    let currentAuthorView = 'new';
+    const modalOverlay = document.getElementById('dealModalOverlay');
+    const openBtn = document.getElementById('openDealModalBtn');
+    const closeBtn = document.getElementById('closeDealModalBtn');
+    const cancelBtn = document.getElementById('cancelDealBtn');
+    const submitBtn = document.getElementById('submitDealBtn');
+    const container = document.getElementById('dealsList');
 
-    // Temp Data
-    let tempFiles = {};
-    let uploadedFiles = [];
-    let sources = [];
-    let sourceIdCounter = 0;
+    const fields = {
+      inn: document.getElementById('dealINN'),
+      opf: document.getElementById('dealOPF'),
+      company: document.getElementById('dealCompany'),
+      lname: document.getElementById('dealLastName'),
+      fname: document.getElementById('dealFirstName'),
+      mname: document.getElementById('dealMiddleName'),
+      phone: document.getElementById('dealPhone'),
+      email: document.getElementById('dealEmail'),
+      contractNum: document.getElementById('dealContractNum'),
+      contractDate: document.getElementById('dealContractDate'),
+      sum: document.getElementById('dealSum'),
+      help: document.getElementById('dealHelp')
+    };
 
-    // === TAB LOGIC ===
+    // Tabs
     tab1.addEventListener('change', () => { page1.classList.add('active'); page2.classList.remove('active'); });
-    tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); loadAuthorData(); }); // Load data when switching to author
-    
-    authorTabNew.addEventListener('change', () => { currentAuthorView = 'new'; loadAuthorData(); });
-    authorTabMy.addEventListener('change', () => { currentAuthorView = 'my'; loadAuthorData(); });
+    tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); });
 
-    // === CREATE TASK MODAL LOGIC ===
-    openCreateBtn.addEventListener('click', () => { createModal.classList.add('visible'); resetTaskForm(); renderTaskForm(); });
-    createModal.addEventListener('click', (e) => { if(e.target === createModal) createModal.classList.remove('visible'); });
-
-    function closeTaskModal() { createModal.classList.remove('visible'); }
-    
-    function resetTaskForm() {
-        uploadedFiles = [];
-        sources = [];
-        sourceIdCounter = 0;
-        sources.push({ id: ++sourceIdCounter, platform: '', count: 0, link: '' });
+    // Modal Toggle
+    function toggleModal(show) {
+      if (show) {
+        modalOverlay.classList.add('visible');
+        resetForm();
+      } else {
+        modalOverlay.classList.remove('visible');
+      }
     }
 
-    function renderTaskForm() {
-        const body = document.getElementById('taskFormBody');
-        const footer = document.getElementById('taskFormFooter');
+    openBtn.addEventListener('click', () => toggleModal(true));
+    closeBtn.addEventListener('click', () => toggleModal(false));
+    cancelBtn.addEventListener('click', () => toggleModal(false));
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) toggleModal(false); });
+
+    function resetForm() {
+      Object.values(fields).forEach(el => el.value = '');
+      submitBtn.classList.remove('loading');
+    }
+
+    // Autocomplete
+    let innTimeout;
+    const innDropdown = document.getElementById('innDropdown');
+
+    fields.inn.addEventListener('input', (e) => {
+      clearTimeout(innTimeout);
+      const val = e.target.value;
+      if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
+
+      innTimeout = setTimeout(async () => {
+        const { data } = await sb.from('reviews_counterparty').select('*').ilike('inn', `%${val}%`).limit(5);
+        if (data && data.length > 0) {
+          innDropdown.innerHTML = data.map(c => `
+            <div class="autocomplete-item" data-inn="${c.inn}" data-opf="${c.opf}" data-name="${c.name_company}">
+              <strong>${c.inn}</strong> <small style="margin-left:5px; color:#888;">${c.name_company || ''}</small>
+            </div>
+          `).join('');
+          innDropdown.classList.add('visible');
+        } else {
+          innDropdown.classList.remove('visible');
+        }
+      }, 300);
+    });
+
+    innDropdown.addEventListener('click', (e) => {
+      const item = e.target.closest('.autocomplete-item');
+      if (item) {
+        fields.inn.value = item.dataset.inn;
+        fields.opf.value = item.dataset.opf;
+        fields.company.value = item.dataset.name;
+        innDropdown.classList.remove('visible');
+      }
+    });
+
+    let clientTimeout;
+    const clientDropdown = document.getElementById('clientDropdown');
+
+    fields.lname.addEventListener('input', (e) => {
+      clearTimeout(clientTimeout);
+      const val = e.target.value;
+      if (val.length < 2) { clientDropdown.classList.remove('visible'); return; }
+
+      clientTimeout = setTimeout(async () => {
+        const { data } = await sb.from('reviews_human_contact').select('*').ilike('last_name', `%${val}%`).limit(5);
+        if (data && data.length > 0) {
+          clientDropdown.innerHTML = data.map(c => `
+            <div class="autocomplete-item" data-fname="${c.first_name}" data-lname="${c.last_name}" data-mname="${c.middle_name}" data-phone="${c.phone}" data-email="${c.email}">
+              ${c.last_name} ${c.first_name} ${c.middle_name} <small>${c.phone || ''}</small>
+            </div>
+          `).join('');
+          clientDropdown.classList.add('visible');
+        } else {
+          clientDropdown.classList.remove('visible');
+        }
+      }, 300);
+    });
+
+    clientDropdown.addEventListener('click', (e) => {
+      const item = e.target.closest('.autocomplete-item');
+      if (item) {
+        fields.lname.value = item.dataset.lname;
+        fields.fname.value = item.dataset.fname;
+        fields.mname.value = item.dataset.mname;
+        fields.phone.value = item.dataset.phone;
+        fields.email.value = item.dataset.email;
+        clientDropdown.classList.remove('visible');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#dealINN') && !e.target.closest('#innDropdown')) innDropdown.classList.remove('visible');
+      if (!e.target.closest('#dealLastName') && !e.target.closest('#clientDropdown')) clientDropdown.classList.remove('visible');
+    });
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      try {
+        // 1. Контакт
+        const lname = fields.lname.value.trim();
+        const fname = fields.fname.value.trim();
+        const mname = fields.mname.value.trim();
+        let client_id = null;
+
+        if (lname && fname) {
+          let { data: existingContact } = await sb.from('reviews_human_contact').select('id').eq('last_name', lname).eq('first_name', fname).eq('middle_name', mname).maybeSingle();
+          if (existingContact) {
+            client_id = existingContact.id;
+            await sb.from('reviews_human_contact').update({ phone: fields.phone.value.trim(), email: fields.email.value.trim() }).eq('id', client_id);
+          } else {
+            const { data: newContact, error: contactErr } = await sb.from('reviews_human_contact').insert([{ last_name: lname, first_name: fname, middle_name: mname, phone: fields.phone.value.trim(), email: fields.email.value.trim() }]).select('id').single();
+            if (contactErr) throw contactErr;
+            client_id = newContact.id;
+          }
+        }
+
+        // 2. Контрагент
+        const innVal = fields.inn.value.trim();
+        if (!innVal) throw new Error("ИНН обязателен");
+
+        let { data: existingComp } = await sb.from('reviews_counterparty').select('inn').eq('inn', innVal).maybeSingle();
         
-        const filesHtml = uploadedFiles.map((f, i) => `<div class="file-item"><span>${f.name}</span><span onclick="removeUploadFile(${i})" style="cursor:pointer;color:var(--error);margin-left:8px;">×</span></div>`).join('');
+        if (!existingComp) {
+            await sb.from('reviews_counterparty').insert([{
+                inn: innVal,
+                opf: fields.opf.value.trim(),
+                name_company: fields.company.value.trim()
+            }]);
+        }
 
-        const sourcesHtml = sources.map(s => `
-            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
-                <input type="text" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
-                <input type="number" placeholder="Кол-во" value="${s.count || ''}" onchange="updateSource(${s.id}, 'count', this.value)" style="width:60px; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
-                <input type="text" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
-                <button onclick="removeSource(${s.id})" style="background:none; border:none; color:var(--error); cursor:pointer; font-size:18px;">×</button>
-            </div>
-        `).join('');
+        // 3. Сделка
+        const dealData = {
+          user_id: window.currentUser.id,
+          contract_number: fields.contractNum.value.trim(),
+          contract_date: fields.contractDate.value || null,
+          sum_deal: parseFloat(fields.sum.value) || 0,
+          inn: innVal,
+          opf: fields.opf.value.trim(),
+          name_company: fields.company.value.trim(),
+          client_id: client_id,
+          last_name: lname,
+          first_name: fname,
+          middle_name: mname,
+          phone: fields.phone.value.trim(),
+          email: fields.email.value.trim(),
+          help_text: fields.help.value.trim()
+        };
 
-        body.innerHTML = `
-            <div style="display:flex; gap:16px; height:150px;">
-                <div style="flex:1; border:2px dashed var(--border-color); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;" onclick="document.getElementById('fileInputTask').click()">
-                    <span class="material-symbols-outlined" style="font-size:32px; color:var(--text-muted);">cloud_upload</span>
-                    <span style="font-size:12px; color:var(--text-muted); margin-top:8px;">Перетащите файлы</span>
-                    <input type="file" id="fileInputTask" multiple style="display:none" onchange="handleTaskFiles(this.files)">
+        const { error: dealErr } = await sb.from('reviews_list_deals').insert([dealData]);
+        if (dealErr) throw dealErr;
+
+        toggleModal(false);
+        await loadDeals();
+
+      } catch (err) {
+        alert("Ошибка создания: " + err.message);
+        console.error(err);
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+
+    // === Load Deals ===
+    async function loadDeals() {
+      if (!container) return;
+      container.innerHTML = '<div style="color:var(--text-muted); padding: 20px;">Загрузка сделок...</div>';
+
+      try {
+        const { data, error } = await sb.from('reviews_list_deals').select('*').order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = '<div style="color:var(--text-muted); padding: 20px; text-align:center;">Нет созданных сделек</div>';
+          return;
+        }
+
+        container.innerHTML = data.map(deal => {
+          const date = new Date(deal.created_at).toLocaleString('ru-RU');
+          const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
+          return `
+            <div class="deal-card">
+              <div class="deal-header">
+                <span class="deal-id">${deal.id}</span>
+                <div class="deal-sum">
+                  ${new Intl.NumberFormat('ru-RU').format(deal.sum_deal || 0)}
+                  <small>₽</small>
                 </div>
-                <div style="flex:1; border:1px solid var(--border-color); border-radius:10px; padding:10px; overflow-y:auto; background:white;">
-                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">Файлы</div>
-                    ${filesHtml}
+              </div>
+              <div class="deal-body">
+                <div class="deal-row">
+                  <span class="deal-label">Договор:</span>
+                  <span class="deal-value">№${deal.contract_number || '-' } от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}</span>
                 </div>
-            </div>
-            
-            <div class="form-grid">
-                <div class="input-group"><input type="text" id="taskClientName" placeholder=" "><label class="input-label">Наименование клиента</label></div>
-                <div class="input-group"><input type="text" id="taskClientInn" placeholder=" "><label class="input-label">ИНН клиента</label></div>
-            </div>
-            <div class="form-grid">
-                <div class="input-group"><input type="date" id="taskStartDate"><label class="input-label">Дата начала</label></div>
-                <div class="input-group"><input type="date" id="taskEndDate"><label class="input-label">Дата завершения</label></div>
-            </div>
-
-            <div style="background:var(--bg-primary); padding:12px; border-radius:8px;">
-                ${sourcesHtml}
-                <button onclick="addSource()" style="width:100%; margin-top:8px; padding:8px; border:1px dashed var(--border-color); border-radius:6px; cursor:pointer; color:var(--text-secondary); font-size:12px;">+ Добавить площадку</button>
-            </div>
-        `;
-
-        footer.innerHTML = `
-            <button class="btn-cancel" onclick="closeTaskModal()">Отмена</button>
-            <button class="btn-submit" id="submitTaskBtn" onclick="submitTask()">
-                <span class="btn-text">Создать</span>
-                <div class="loader"></div>
-            </button>
-        `;
-    }
-
-    // Global handlers for Task Form
-    window.handleTaskFiles = (files) => { Array.from(files).forEach(f => uploadedFiles.push(f)); renderTaskForm(); };
-    window.removeUploadFile = (idx) => { uploadedFiles.splice(idx, 1); renderTaskForm(); };
-    window.addSource = () => { sources.push({ id: ++sourceIdCounter, platform: '', count: 0, link: '' }); renderTaskForm(); };
-    window.removeSource = (id) => { sources = sources.filter(s => s.id !== id); renderTaskForm(); };
-    window.updateSource = (id, field, val) => { const s = sources.find(x => x.id === id); if(s) s[field] = val; renderTaskForm(); };
-
-    async function submitTask() {
-        const btn = document.getElementById('submitTaskBtn');
-        btn.classList.add('loading');
-
-        const clientName = document.getElementById('taskClientName').value;
-        const clientInn = document.getElementById('taskClientInn').value;
-        const startDate = document.getElementById('taskStartDate').value;
-        const endDate = document.getElementById('taskEndDate').value;
-
-        if(!clientName || !clientInn || !startDate || !endDate) { alert('Заполните поля'); btn.classList.remove('loading'); return; }
-        if(sources.length === 0 || sources.every(s => !s.count)) { alert('Добавьте площадки'); btn.classList.remove('loading'); return; }
-
-        try {
-            let lastNum = await getLastNum('order_number', 'reviews_order');
-            let lastGroup = await getLastNum('order_number_general', 'reviews_order');
-            
-            const docs = uploadedFiles.map(f => ({name: f.name, size: f.size}));
-            
-            for(const src of sources) {
-                const count = parseInt(src.count) || 0;
-                if(count === 0) continue;
-                
-                // Increment group number ONCE per group creation
-                lastGroup = incrementGroup(lastGroup);
-
-                const batch = [];
-                for(let i=0; i<count; i++) {
-                    lastNum = incrementOrder(lastNum);
-                    batch.push({
-                        manager_login: user.login,
-                        manager_name: `${user.first_name} ${user.last_name}`,
-                        manager_phone: user.phone,
-                        order_number: lastNum,
-                        order_number_general: lastGroup,
-                        client_name: clientName,
-                        client_inn: clientInn,
-                        start_date: startDate,
-                        end_date: endDate,
-                        platform: src.platform,
-                        link: src.link,
-                        documents: docs,
-                        status: 'создана'
-                    });
-                }
-                const {error} = await sb.from('reviews_order').insert(batch);
-                if(error) throw error;
-            }
-
-            alert('Задания созданы!');
-            closeTaskModal();
-            loadManagerData();
-        } catch(e) {
-            console.error(e);
-            alert('Ошибка: ' + e.message);
-        } finally {
-            btn.classList.remove('loading');
-        }
-    }
-
-    function incrementOrder(curr) {
-        let l = curr.substring(0,2);
-        let d = parseInt(curr.substring(3));
-        d++;
-        if(d>99999) { d=1; l = incL(l); }
-        return `${l}-${String(d).padStart(5,'0')}`;
-    }
-    function incL(str) { let a=str.split(''); let i=a.length-1; while(i>=0){ if(a[i]==='Z'){a[i]='A';i--;}else{a[i]=String.fromCharCode(a[i].charCodeAt(0)+1);return a.join('');} } return 'AA'; }
-    function incrementGroup(curr) {
-        if(!curr || !curr.startsWith('group-')) return 'group-A00001';
-        let c = curr.replace('group-','');
-        let l = c.substring(0,1);
-        let n = parseInt(c.substring(1));
-        n++;
-        if(n>99999) { n=1; l = String.fromCharCode(l.charCodeAt(0)+1); }
-        return `group-${l}${String(n).padStart(5,'0')}`;
-    }
-    async function getLastNum(col, table) {
-        const {data} = await sb.from(table).select(col).order(col, {ascending:false}).limit(1).maybeSingle();
-        return data ? data[col] : (col === 'order_number' ? 'AA-00000' : 'group-A00000');
-    }
-
-    // === SUBPAGE 1 (MANAGER) DATA LOADING ===
-    async function loadManagerData() {
-        managerList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Загрузка...</div>';
-        try {
-            // Fetch Client View
-            const { data: clients, error: e1 } = await sb.from('reviews_order_client').select('*');
-            if(e1) throw e1;
-
-            // Fetch Autor View
-            const { data: autors, error: e2 } = await sb.from('reviews_order_autor').select('*');
-            if(e2) throw e2;
-
-            const map = {};
-            autors.forEach(a => {
-                if(!map[a.order_number_general]) map[a.order_number_general] = [];
-                map[a.order_number_general].push(a);
-            });
-
-            if(!clients || clients.length === 0) {
-                managerList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Нет созданных заказов</div>';
-                return;
-            }
-
-            managerList.innerHTML = clients.map(c => {
-                const items = map[c.order_number_general] || [];
-                const aut = items[0] || {};
-                const plats = items.map(a => `
-                    <div class="platform-item">
-                        <div class="platform-name">${a.platform || '-'}</div>
-                        <div class="platform-stats">
-                            <div class="stat-item">Создана: <span class="stat-count">${a.count_created||0}</span></div>
-                            <div class="stat-item">В работе: <span class="stat-count">${a.count_in_progress||0}</span></div>
-                            <div class="stat-item">Проверка: <span class="stat-count">${a.count_review||0}</span></div>
-                            <div class="stat-item">Завершено: <span class="stat-count">${a.count_completed||0}</span></div>
-                        </div>
-                    </div>
-                `).join('');
-
-                return `
-                    <div class="order-card">
-                        <div class="card-header">
-                            <div class="client-info">
-                                <div class="client-org"><span>Организация:</span> ${c.client_name || '-'}</div>
-                                <div class="client-inn"><span>ИНН:</span> ${c.client_inn || '-'}</div>
-                            </div>
-                            <div class="order-number-badge">${c.order_number_general}</div>
-                        </div>
-                        <div class="card-row">
-                            <span class="row-label">данные менеджера сделки</span>
-                            <span class="row-value">${aut.manager_name || '-'} | ${aut.manager_phone || '-'}</span>
-                        </div>
-                        <div class="card-row">
-                            <span class="row-label">дата начала</span>
-                            <span class="row-value" style="margin-right:24px;">${formatDate(c.start_date)}</span>
-                            <span class="row-label">дата завершения</span>
-                            <span class="row-value">${formatDate(c.end_date)}</span>
-                        </div>
-                        <div class="platforms-container">
-                            ${plats}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-        } catch(e) {
-            console.error(e);
-            managerList.innerHTML = `<div style="color:var(--error); padding:20px;">Ошибка загрузки данных. Проверьте existence of views (reviews_order_client).<br><small>${e.message}</small></div>`;
-        }
-    }
-
-    // === SUBPAGE 2 (AUTHOR) DATA LOADING ===
-    async function loadAuthorData() {
-        authorList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Загрузка...</div>';
-        
-        try {
-            if(currentAuthorView === 'new') {
-                // New Tasks Logic
-                const { data: candidates } = await sb.from('reviews_order_autor_exercise').select('*').eq('status', 'создана');
-                const { data: busy } = await sb.from('reviews_order').select('order_number_general, platform').neq('status', 'создана');
-                const busyKeys = new Set(busy.map(r => `${r.order_number_general}::${r.platform}`));
-                const avail = candidates.filter(c => !busyKeys.has(`${c.order_number_general}::${c.platform}`));
-                renderAuthorCards(avail, 'new');
-            } else {
-                // My Tasks Logic
-                const { data } = await sb.from('reviews_order').select('*').eq('autor_phone', user.phone).in('status', ['в работе', 'на проверке']);
-                renderAuthorCards(data, 'my');
-            }
-        } catch(e) {
-            console.error(e);
-            authorList.innerHTML = `<div style="color:var(--error); padding:20px;">Ошибка: ${e.message}</div>`;
-        }
-    }
-
-    function renderAuthorCards(items, type) {
-        if(!items || items.length === 0) {
-            authorList.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:20px;">${type === 'new' ? 'Нет доступных заданий' : 'Нет ваших заданий'}</div>`;
-            return;
-        }
-
-        authorList.innerHTML = items.map(item => {
-            const key = `${item.order_number_general}-${(item.platform||'').replace(/[^a-zA-Z0-9]/g,'-')}`;
-            const statClass = item.status === 'в работе' ? 'status-progress' : (item.status === 'на проверке' ? 'status-review' : '');
-            
-            let action = '';
-            if(type === 'new') {
-                action = `<button class="action-btn primary" onclick="takeWork('${item.order_number_general}', '${item.platform}')">Взять в работу</button>`;
-            } else {
-                if(item.status === 'в работе') {
-                    const hasFile = tempFiles[key];
-                    const dz = hasFile ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${hasFile.name}</span>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><span>Фото</span>`;
-                    action = `
-                        <div class="mini-dropzone visible" onclick="document.getElementById('inp-${key}').click()" ondragover="event.preventDefault();this.classList.add('active')" ondragleave="this.classList.remove('active')" ondrop="dropAuthFile(event, '${key}')">${dz}<input type="file" accept="image/*" id="inp-${key}" style="display:none" onchange="authFile(event, '${key}')"></div>
-                        <button class="action-btn secondary" onclick="submitAuth('${key}')" ${hasFile ? '' : 'disabled'}>На проверку</button>
-                    `;
-                } else {
-                    action = `<div style="width:100%; text-align:center; color:var(--warning); font-weight:600;">Ожидает проверки</div>`;
-                }
-            }
-
-            return `
-                <div class="order-card" id="auth-card-${key}">
-                    <div class="card-header">
-                        <div class="client-info">
-                            <div style="font-size:12px; color:var(--text-muted);">Платформа: <b style="color:var(--text-primary);">${item.platform}</b></div>
-                            <div style="font-size:12px; color:var(--text-muted);">Группа: <b style="color:var(--text-primary);">${item.order_number_general}</b></div>
-                        </div>
-                        <div class="order-number-badge ${statClass}">${item.status || 'статус'}</div>
-                    </div>
-                    <div class="card-row">
-                        <span class="row-label">Менеджер:</span>
-                        <span class="row-value">${item.manager_name || '-'} (${item.manager_phone || '-'})</span>
-                    </div>
-                    <div class="card-row">
-                        <span class="row-label">Сроки:</span>
-                        <span class="row-value">${formatDate(item.start_date)} — ${formatDate(item.end_date)}</span>
-                    </div>
-                    <div class="card-row">
-                        <span class="row-label">Ссылка:</span>
-                        <span class="row-value"><a href="${item.link}" target="_blank">Перейти</a></span>
-                    </div>
-                    <div class="action-block">${action}</div>
+                <div class="deal-row">
+                  <span class="deal-label">Клиент:</span>
+                  <span class="deal-value">${fio || 'Не указан'}</span>
                 </div>
-            `;
+                <div class="deal-row">
+                  <span class="deal-label">Организация:</span>
+                  <span class="deal-value">${deal.name_company || '-'}</span>
+                </div>
+              </div>
+              <div class="deal-footer">
+                <span>Создано: ${date}</span>
+                <span>${deal.inn}</span>
+              </div>
+            </div>
+          `;
         }).join('');
+
+      } catch (err) {
+        console.error('Ошибка при загрузке сделок:', err);
+        container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных. Проверьте RLS политики в Supabase.</div>';
+      }
     }
 
-    // Author Actions
-    window.takeWork = async (grp, plat) => {
-        const {data: row} = await sb.from('reviews_order').select('id').eq('order_number_general', grp).eq('platform', plat).eq('status', 'создана').limit(1).maybeSingle();
-        if(!row) { alert('Задание недоступно'); loadAuthorData(); return; }
-        
-        const upd = { status: 'в работе', autor_name: `${user.first_name} ${user.last_name}`, autor_phone: user.phone, autor_task: new Date().toISOString() };
-        await sb.from('reviews_order').update(upd).eq('id', row.id);
-        loadAuthorData();
-    };
+    // Запуск при загрузке
+    loadDeals();
 
-    window.authFile = (e, key) => { if(e.target.files[0]) { tempFiles[key] = e.target.files[0]; loadAuthorData(); } };
-    window.dropAuthFile = (e, key) => { e.preventDefault(); e.currentTarget.classList.remove('active'); if(e.dataTransfer.files[0]) { tempFiles[key] = e.dataTransfer.files[0]; loadAuthorData(); } };
-    
-    window.submitAuth = async (key) => {
-        if(!tempFiles[key]) { alert('Загрузите фото'); return; }
-        const [grp, plat] = key.split('-'); // Reconstructing might be tricky, better pass args again or parse ID. Let's assume data-attrs needed but for simplicity re-fetch
-        
-        // We need group and platform to find the record. Let's parse the card ID: auth-card-group-A00001-Ozon-ru
-        const card = document.getElementById(`auth-card-${key}`);
-        const grpText = card.querySelector('.client-info div:nth-child(2) b').textContent; // group-A00001
-        const platText = card.querySelector('.client-info div:nth-child(1) b').textContent; // Ozon.ru
-        
-        const {data: row} = await sb.from('reviews_order').select('id').eq('order_number_general', grpText).eq('platform', platText).eq('status', 'в работе').maybeSingle();
-        if(!row) { alert('Ошибка'); return; }
-        await sb.from('reviews_order').update({status: 'на проверке'}).eq('id', row.id);
-        loadAuthorData();
-    };
-
-    // === HELPERS ===
-    function formatDate(d) { return d ? new Date(d).toLocaleDateString('ru-RU') : '-'; }
-
-    // === INIT ===
-    loadManagerData();
-
-})();
-</script>
+  })();
+  </script>
 </div>
