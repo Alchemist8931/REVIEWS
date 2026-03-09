@@ -1,561 +1,626 @@
 <!-- modal1.html -->
-<div id="taskAppContainer" class="task-app">
+<!DOCTYPE html>
+<div class="m1-root">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
   <style>
-    /* Scoped Styles */
-    .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
-    
-    /* --- Card List Styles --- */
-    .orders-list {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%; /* Full width */
+    /* === PALETTE & ROOT === */
+    :root {
+      --bg-primary: #f8f9fa;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border-color: #e5e7eb;
+      --accent: #000000;
+      --accent-hover: #333333;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --tab-bg: #e8e8e8;
+      --tab-active: #ffffff;
     }
+
+    .m1-root {
+      display: flex; flex-direction: column; height: 100%; width: 100%;
+      position: relative; background: var(--bg-card); font-family: 'SN Pro', sans-serif; overflow: hidden;
+    }
+
+    /* === HEADER & MAIN TABS (Auth Style) === */
+    .m1-header {
+      display: flex; justify-content: space-between; align-items: center;
+      height: 56px; min-height: 56px; border-bottom: 1px solid var(--border-color);
+      padding: 0 20px; background: var(--bg-card); z-index: 10;
+    }
+    .m1-header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-primary); text-transform: uppercase; }
+    
+    /* Main Tab Switcher */
+    .tab-container { position: relative; display: flex; flex-direction: row; align-items: flex-start; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
+    .tab-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border: 0.5px solid rgba(0, 0, 0, 0.04); box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12); border-radius: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .tab-container .m1-tab-input { width: 50%; height: 36px; position: absolute; z-index: 99; outline: none; opacity: 0; cursor: pointer; }
+    .tab-container .m1-tab-label { width: 50%; height: 36px; position: relative; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
+    .tab-container .m1-tab-input:checked + .m1-tab-label { color: var(--text-primary); }
+    /* Move indicator for second tab */
+    #m1-tab2:checked ~ .indicator { left: 50%; }
+
+    .m1-page { display: none; flex-direction: column; flex: 1; height: calc(100% - 56px); position: relative; }
+    .m1-page.active { display: flex; }
+
+    /* === COMMON LAYOUT PARTS === */
+    .m1-top-section { height: 100px; min-height: 100px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-card); }
+    .m1-bottom-section { flex: 1; position: relative; }
+    .modal9-scroll-wrapper { position: absolute; top: 0; left: 0; bottom: 0; width: calc(100% + 30px); overflow: visible; pointer-events: auto; z-index: 1; }
+    .modal9-window { height: 100%; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.6); padding: 20px; padding-right: 10px; }
+    .modal9-content { height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; padding-right: 20px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
+    .modal9-content::-webkit-scrollbar { width: 6px; }
+    .modal9-content::-webkit-scrollbar-track { background: transparent; }
+    .modal9-content::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
+
+    /* === BUTTONS === */
+    .m1-action-btn {
+      padding: 12px 24px; background: var(--accent); color: white; border: none;
+      border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; gap: 8px;
+    }
+    .m1-action-btn:hover { background: var(--accent-hover); }
+    .m1-action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .m1-action-btn .loader { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+    .m1-action-btn.loading .loader { display: block; }
+    .m1-action-btn.loading .btn-text { display: none; }
+    
+    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 500; cursor: pointer; }
+    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-submit .loader { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+    .btn-submit.loading .loader { display: block; }
+    .btn-submit.loading .btn-text { display: none; }
+
+    /* === SUBPAGE 1 (MANAGER) CARDS === */
+    .orders-list { display: flex; flex-direction: column; gap: 20px; width: 100%; }
     
     .order-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      transition: box-shadow 0.3s ease;
-      width: 100%; /* Full width */
-      box-sizing: border-box;
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 20px; width: 100%; box-sizing: border-box;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: box-shadow 0.3s ease;
     }
-    .order-card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-    }
+    .order-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
     
-    /* Row 1: Header */
     .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center; /* Centered vertically */
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border-color);
-      gap: 16px;
-      flex-wrap: wrap;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); gap: 16px; flex-wrap: wrap;
     }
-    .client-info {
-      display: flex;
-      flex-direction: row; /* Row layout */
-      align-items: center;
-      gap: 24px; /* Space between Org and INN */
-      flex: 1;
-    }
-    .client-org {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .client-org span {
-        color: var(--text-muted);
-        font-weight: 400;
-        margin-right: 4px;
-    }
-    .client-inn {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    .client-inn span {
-        color: var(--text-muted);
-        margin-right: 4px;
-    }
+    .client-info { display: flex; flex-direction: row; align-items: center; gap: 24px; flex: 1; }
+    .client-org { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .client-org span { color: var(--text-muted); font-weight: 400; margin-right: 4px; }
+    .client-inn { font-size: 14px; color: var(--text-secondary); }
+    .client-inn span { color: var(--text-muted); margin-right: 4px; }
     
     .order-number-badge {
-      background: var(--bg-primary);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      white-space: nowrap;
+      background: var(--bg-primary); padding: 6px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text-secondary); border: 1px solid var(--border-color); white-space: nowrap;
     }
 
-    /* Rows 2 & 3: Common Row Style */
-    .card-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    .row-label {
-      color: var(--text-muted);
-      flex-shrink: 0;
-      min-width: 140px;
-    }
-    .row-value {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
+    .card-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 14px; }
+    .row-label { color: var(--text-muted); flex-shrink: 0; min-width: 140px; }
+    .row-value { color: var(--text-primary); font-weight: 500; }
 
-    /* Row 4: Platforms */
-    .platforms-container {
-      margin-top: 16px;
-      border-top: 1px solid var(--border-color);
-      padding-top: 12px;
-    }
-    .platform-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    .platform-name {
-      width: 120px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .platform-stats {
-      display: flex;
-      gap: 16px;
-      color: var(--text-secondary);
-      font-size: 13px;
-    }
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .stat-count {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
+    .platforms-container { margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+    .platform-item { display: flex; align-items: center; margin-bottom: 8px; font-size: 14px; }
+    .platform-name { width: 120px; font-weight: 600; color: var(--text-primary); }
+    .platform-stats { display: flex; gap: 16px; color: var(--text-secondary); font-size: 13px; }
+    .stat-item { display: flex; align-items: center; gap: 4px; }
+    .stat-count { font-weight: 600; color: var(--text-primary); }
 
-    /* Existing Modal Styles (Create Task) */
-    .create-task-btn {
-      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
-      background: var(--accent); color: white; border-radius: 12px; font-weight: 600;
-      cursor: pointer; transition: all 0.3s ease; border: none; font-size: 15px;
-    }
-    .create-task-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    /* === SUBPAGE 2 (AUTHOR) STYLES === */
+    /* Inner Tab Switcher */
+    .view-header { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+    .view-header .tab-container { transform: scale(0.9); } /* Slightly smaller for inner content */
     
-    .task-modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center; z-index: 1000; 
-      opacity: 0; visibility: hidden; transition: all 0.3s ease;
-    }
-    .task-modal-overlay.visible { opacity: 1; visibility: visible; }
+    .action-block { margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     
-    .task-modal {
-      background: var(--bg-card); border-radius: 20px;
-      width: 800px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-      transform: scale(0.9); transition: transform 0.3s ease;
-    }
-    .task-modal-overlay.visible .task-modal { transform: scale(1); }
-    
-    .task-modal-header {
-      padding: 24px; border-bottom: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; background: var(--bg-card); z-index: 10;
-    }
-    .task-modal-title { font-size: 20px; font-weight: 700; }
-    .close-modal-btn {
-      width: 36px; height: 36px; border-radius: 50%; border: none;
-      background: var(--bg-primary); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s; color: var(--text-primary);
-    }
-    .close-modal-btn:hover { background: #e0e0e0; }
-    
-    .task-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-    
-    .upload-section { display: flex; gap: 16px; height: 200px; }
-    .dropzone {
-      flex: 1; border: 2px dashed var(--border-color); border-radius: 12px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.3s ease; background: var(--bg-primary);
-    }
-    .dropzone.dragover { border-color: var(--accent); background: #f0f0f0; }
-    .dropzone-icon { width: 40px; height: 40px; margin-bottom: 12px; color: var(--text-muted); }
-    
-    .file-list-container {
-      flex: 1; border: 1.5px solid var(--border-color); border-radius: 12px;
-      padding: 12px; overflow-y: auto; background: white;
-    }
-    .file-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
-    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
-    .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
-    
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
-    .input-group { position: relative; }
-    .input-group input {
-      width: 100%; padding: 14px 16px; font-size: 15px; font-family: 'SN Pro', sans-serif; 
-      border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-card); 
-      color: var(--text-primary); outline: none; transition: all 0.3s ease; box-sizing: border-box;
-    }
-    .input-group input::placeholder { color: transparent; }
-    .input-group input:focus { border-color: var(--accent); background: var(--bg-card); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
-    .input-group label {
-      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-      font-size: 15px; font-family: 'SN Pro', sans-serif; color: var(--text-muted);
-      pointer-events: none; transition: all 0.2s ease; background: transparent; padding: 0 4px;
-    }
-    .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label {
-      top: 0; left: 12px; font-size: 12px; font-weight: 500;
-      background-color: var(--bg-card); color: var(--accent);
-    }
-    .input-group input[type="date"] + label, .input-group input[type="date"]:focus + label { top: 0; left: 12px; font-size: 12px; font-weight: 500; background-color: var(--bg-card); color: var(--text-muted); }
-    .input-group input[type="date"]:focus + label { color: var(--accent); }
+    .action-btn { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; display: inline-flex; align-items: center; justify-content: center; min-width: 140px; height: 40px; }
+    .action-btn.primary { background: var(--accent); color: white; }
+    .action-btn.primary:hover { background: var(--accent-hover); }
+    .action-btn.secondary { background: var(--success); color: white; }
+    .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .sources-section { display: flex; gap: 20px; background: var(--bg-primary); border-radius: 12px; padding: 16px; }
-    .sources-list { flex: 2; display: flex; flex-direction: column; gap: 12px; }
-    
-    .source-item {
-      display: flex; gap: 8px; align-items: center;
-      background: white; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color);
-    }
-    .source-item input { 
-      border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; 
-      font-size: 13px; outline: none; background: var(--bg-card); 
-      box-sizing: border-box; height: 36px;
-    }
-    .source-item input:focus { border-color: var(--accent); }
-    .source-item .input-platform { flex: 1; min-width: 80px; }
-    .source-item .input-count { width: 65px; text-align: center; }
-    .source-item .input-link { flex: 1; min-width: 80px; }
-    .source-item input[type="number"]::-webkit-outer-spin-button, .source-item input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .source-item input[type="number"] { -moz-appearance: textfield; }
-    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin-left: 4px; flex-shrink: 0; height: 36px; }
-    
-    .total-counter {
-      flex: 1; background: white; border-radius: 10px; padding: 16px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border: 1px solid var(--border-color);
-    }
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
-    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
+    .mini-dropzone { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-primary); border: 1px dashed var(--border-color); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text-secondary); flex-grow: 1; transition: all 0.3s ease; }
+    .mini-dropzone.visible { display: flex; }
+    .mini-dropzone.active { border-color: var(--accent); background: #f0f0f0; }
+    .mini-dropzone svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .file-name { font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .add-source-btn {
-      margin-top: 4px; padding: 10px; background: transparent;
-      border: 1px dashed var(--border-color); border-radius: 8px;
-      cursor: pointer; color: var(--text-secondary); font-size: 13px; text-align: center;
+    /* === MODAL FORM STYLES === */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(248, 249, 250, 0.8); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; z-index: 2000;
+      opacity: 0; visibility: hidden; transition: opacity 0.3s;
     }
-    .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-overlay.visible { opacity: 1; visibility: visible; }
     
-    .task-modal-footer {
-      padding: 16px 24px; border-top: 1px solid var(--border-color);
-      display: flex; justify-content: flex-end; gap: 12px;
-      position: sticky; bottom: 0; background: var(--bg-card);
+    .modal-form-container {
+      background: var(--bg-card); border-radius: 16px; width: 600px; max-height: 90vh;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column;
+      transform: scale(0.95); transition: transform 0.3s;
     }
-    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; font-weight: 500; }
-    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; }
-    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+    .modal-overlay.visible .modal-form-container { transform: scale(1); }
+    
+    .form-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .form-title { font-size: 18px; font-weight: 700; }
+    .form-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 24px; line-height: 1; }
+    
+    .form-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+    
+    .form-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+    .form-divider { border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    
+    .input-group { position: relative; width: 100%; }
+    .input-field {
+      width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color);
+      border-radius: 10px; background: var(--bg-primary); color: var(--text-primary);
+      outline: none; transition: border-color 0.2s, background 0.2s; font-family: 'SN Pro', sans-serif;
+    }
+    .input-field:focus { border-color: var(--accent); background: var(--bg-card); }
+    .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); pointer-events: none; transition: all 0.2s; background: transparent; padding: 0 4px; }
+    .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { top: 0; font-size: 11px; color: var(--accent); background: var(--bg-card); font-weight: 500; }
+    /* Date fix */
+    input[type="date"] + .input-label, input[type="date"]:focus + .input-label { top: 0; font-size: 11px; color: var(--text-muted); background: var(--bg-card); transform: translateY(0); }
 
-    .creation-progress { display: none; flex-direction: column; align-items: center; padding: 40px; }
-    .progress-bar-container { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin: 20px 0; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.2s ease; }
-    .progress-details { width: 100%; margin-top: 16px; max-height: 150px; overflow-y: auto; font-size: 13px; color: var(--text-secondary); }
-    .progress-item { margin-bottom: 4px; }
-    .progress-item.done { color: var(--success); font-weight: 500; }
+    .form-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
-  <!-- Container for rendered cards -->
-  <div id="ordersList" class="orders-list">
-    <!-- Cards will be injected here -->
-  </div>
+  <!-- HEADER -->
+  <header class="m1-header">
+    <div class="m1-header-title">Страница 1</div>
+    <!-- Main Tab Switcher -->
+    <div class="tab-container">
+      <input type="radio" name="m1Tabs" id="m1-tab1" class="m1-tab-input" checked>
+      <label for="m1-tab1" class="m1-tab-label">Подстраница 1</label>
+      <input type="radio" name="m1Tabs" id="m1-tab2" class="m1-tab-input">
+      <label for="m1-tab2" class="m1-tab-label">Подстраница 2</label>
+      <div class="indicator"></div>
+    </div>
+  </header>
 
-  <div style="margin-bottom: 24px;">
-    <button id="openModalBtn" class="create-task-btn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-      Создать задание
-    </button>
-  </div>
-
-  <div id="taskModalOverlay" class="task-modal-overlay">
-    <div class="task-modal" onclick="event.stopPropagation()">
-      <div class="task-modal-header">
-        <h3 class="task-modal-title">Форма создания заданий на условиях договора</h3>
-        <button class="close-modal-btn" onclick="closeTaskModal()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <div id="formContainer" class="task-modal-body">
-        <div class="upload-section">
-          <div class="dropzone" id="dropzone">
-            <div class="dropzone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
-            <p>Перетащите файлы сюда<br><span style="font-size:12px; color: var(--text-muted);">или нажмите для выбора</span></p>
-            <input type="file" id="fileInput" multiple style="display:none">
-          </div>
-          <div class="file-list-container">
-            <div class="file-list-title">Загруженные файлы</div>
-            <div id="fileList"></div>
+  <!-- SUBPAGE 1 (MANAGER) -->
+  <div class="m1-page active" id="page1">
+    <div class="m1-top-section">
+      <button class="m1-action-btn" id="openCreateTaskBtn">
+        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+        Создать задание
+      </button>
+    </div>
+    <div class="m1-bottom-section">
+      <div class="modal9-scroll-wrapper">
+        <div class="modal9-window">
+          <div class="modal9-content">
+            <div id="managerOrdersList" class="orders-list"></div>
           </div>
         </div>
-
-        <div class="form-grid">
-          <div class="input-group"><input type="text" id="clientName" required placeholder=" "><label for="clientName">Наименование клиента</label></div>
-          <div class="input-group"><input type="text" id="clientInn" required placeholder=" "><label for="clientInn">ИНН клиента</label></div>
-        </div>
-
-        <div class="form-grid">
-          <div class="input-group"><input type="date" id="startDate" required><label for="startDate">Дата начала</label></div>
-          <div class="input-group"><input type="date" id="endDate" required><label for="endDate">Дата завершения</label></div>
-        </div>
-
-        <div class="sources-section">
-          <div class="sources-list" id="sourcesList"></div>
-          <div class="total-counter"><span class="total-label">Всего заданий</span><span class="total-value" id="totalTasks">0</span></div>
-        </div>
-        <button class="add-source-btn" onclick="addSourceRow()">+ Добавить площадку</button>
-      </div>
-
-      <div id="progressContainer" class="creation-progress">
-        <h4>Создание заданий...</h4>
-        <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill"></div></div>
-        <div id="progressPercent" style="font-weight:600; margin-bottom:10px;">0%</div>
-        <div class="progress-details" id="progressDetails"></div>
-      </div>
-
-      <div class="task-modal-footer" id="modalFooter">
-        <button class="btn-cancel" onclick="closeTaskModal()">Отмена</button>
-        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Создать задание</button>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- SUBPAGE 2 (AUTHOR) -->
+  <div class="m1-page" id="page2">
+    <div class="m1-top-section">
+       <!-- Author can have a button or title here, leaving empty or title based on context -->
+       <h3 style="font-size: 16px; font-weight: 600;">Доступные задания</h3>
+    </div>
+    <div class="m1-bottom-section">
+      <div class="modal9-scroll-wrapper">
+        <div class="modal9-window">
+          <div class="modal9-content">
+            
+            <!-- Author Inner Tabs -->
+            <div class="view-header">
+              <div class="tab-container">
+                <input type="radio" name="authorTabs" id="authorTabNew" class="m1-tab-input tab--new" checked>
+                <label for="authorTabNew" class="m1-tab-label">Новые задания</label>
+                <input type="radio" name="authorTabs" id="authorTabMy" class="m1-tab-input tab--my">
+                <label for="authorTabMy" class="m1-tab-label">Мои задания</label>
+                <div class="indicator"></div>
+              </div>
+            </div>
+            
+            <div id="authorOrdersList" class="orders-list"></div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE TASK MODAL -->
+  <div class="modal-overlay" id="createTaskModal">
+    <div class="modal-form-container" onclick="event.stopPropagation()">
+      <div class="form-header">
+        <div class="form-title">Создание заданий</div>
+        <button class="form-close" onclick="closeTaskModal()">&times;</button>
+      </div>
+      <div class="form-body" id="taskFormBody">
+        <!-- Content injected by JS -->
+      </div>
+      <div class="form-footer" id="taskFormFooter">
+         <!-- Footer injected by JS -->
+      </div>
+    </div>
+  </div>
 
 <script>
 (function() {
-  
-  const sbClient = window.supabaseClient;
-  const user = window.currentUser;
+    // === FIX LAYOUT HEIGHT ===
+    const parentContainer = document.getElementById('pageContent');
+    if (parentContainer) { parentContainer.style.height = '100%'; parentContainer.style.overflow = 'hidden'; }
 
-  let uploadedFiles = [];
-  let sources = [];
-  let sourceIdCounter = 0;
+    const sb = window.supabaseClient;
+    const user = window.currentUser;
 
-  const overlay = document.getElementById('taskModalOverlay');
-  const openBtn = document.getElementById('openModalBtn');
-  const formContainer = document.getElementById('formContainer');
-  const progressContainer = document.getElementById('progressContainer');
-  const modalFooter = document.getElementById('modalFooter');
-  const fileInput = document.getElementById('fileInput');
-  const dropzone = document.getElementById('dropzone');
-  const sourcesList = document.getElementById('sourcesList');
-  const ordersListContainer = document.getElementById('ordersList');
+    // Elements
+    const tab1 = document.getElementById('m1-tab1');
+    const tab2 = document.getElementById('m1-tab2');
+    const page1 = document.getElementById('page1');
+    const page2 = document.getElementById('page2');
+    const managerList = document.getElementById('managerOrdersList');
+    const authorList = document.getElementById('authorOrdersList');
+    const createModal = document.getElementById('createTaskModal');
+    const openCreateBtn = document.getElementById('openCreateTaskBtn');
+    
+    // Author Tabs
+    const authorTabNew = document.getElementById('authorTabNew');
+    const authorTabMy = document.getElementById('authorTabMy');
+    let currentAuthorView = 'new';
 
-  async function initPage() {
-      addSourceRow();
-      bindEvents();
-      await loadAndRenderOrders();
-  }
+    // Temp Data
+    let tempFiles = {};
+    let uploadedFiles = [];
+    let sources = [];
+    let sourceIdCounter = 0;
 
-  // --- RENDERING CARDS ---
+    // === TAB LOGIC ===
+    tab1.addEventListener('change', () => { page1.classList.add('active'); page2.classList.remove('active'); });
+    tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); loadAuthorData(); }); // Load data when switching to author
+    
+    authorTabNew.addEventListener('change', () => { currentAuthorView = 'new'; loadAuthorData(); });
+    authorTabMy.addEventListener('change', () => { currentAuthorView = 'my'; loadAuthorData(); });
 
-  async function loadAndRenderOrders() {
-    try {
-      const { data: clients, error: errClients } = await sbClient.from('reviews_order_client').select('*').order('start_date', { ascending: false });
-      if (errClients) throw errClients;
+    // === CREATE TASK MODAL LOGIC ===
+    openCreateBtn.addEventListener('click', () => { createModal.classList.add('visible'); resetTaskForm(); renderTaskForm(); });
+    createModal.addEventListener('click', (e) => { if(e.target === createModal) createModal.classList.remove('visible'); });
 
-      const { data: autors, error: errAutors } = await sbClient.from('reviews_order_autor').select('*');
-      if (errAutors) throw errAutors;
+    function closeTaskModal() { createModal.classList.remove('visible'); }
+    
+    function resetTaskForm() {
+        uploadedFiles = [];
+        sources = [];
+        sourceIdCounter = 0;
+        sources.push({ id: ++sourceIdCounter, platform: '', count: 0, link: '' });
+    }
 
-      const autorsMap = {};
-      if (autors) autors.forEach(a => {
-        if (!autorsMap[a.order_number_general]) autorsMap[a.order_number_general] = [];
-        autorsMap[a.order_number_general].push(a);
-      });
+    function renderTaskForm() {
+        const body = document.getElementById('taskFormBody');
+        const footer = document.getElementById('taskFormFooter');
+        
+        const filesHtml = uploadedFiles.map((f, i) => `<div class="file-item"><span>${f.name}</span><span onclick="removeUploadFile(${i})" style="cursor:pointer;color:var(--error);margin-left:8px;">×</span></div>`).join('');
 
-      ordersListContainer.innerHTML = clients.map(client => {
-        const relatedAutors = autorsMap[client.order_number_general] || [];
-        const firstAutor = relatedAutors[0] || {};
-
-        return `
-          <div class="order-card">
-            <!-- Row 1: Header (Updated) -->
-            <div class="card-header">
-              <div class="client-info">
-                <div class="client-org"><span>Организация:</span> ${client.client_name || 'Не указана'}</div>
-                <div class="client-inn"><span>ИНН:</span> ${client.client_inn || '-'}</div>
-              </div>
-              <div class="order-number-badge">${client.order_number_general || '-'}</div>
+        const sourcesHtml = sources.map(s => `
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                <input type="text" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="number" placeholder="Кол-во" value="${s.count || ''}" onchange="updateSource(${s.id}, 'count', this.value)" style="width:60px; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="text" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <button onclick="removeSource(${s.id})" style="background:none; border:none; color:var(--error); cursor:pointer; font-size:18px;">×</button>
             </div>
+        `).join('');
 
-            <!-- Row 2 -->
-            <div class="card-row">
-              <span class="row-label">данные менеджера сделки</span>
-              <span class="row-value">${firstAutor.manager_name || '-'} | ${firstAutor.manager_phone || '-'}</span>
-            </div>
-
-            <!-- Row 3 -->
-            <div class="card-row">
-              <span class="row-label">дата начала</span>
-              <span class="row-value" style="margin-right: 24px;">${formatDate(client.start_date)}</span>
-              <span class="row-label">дата завершения</span>
-              <span class="row-value">${formatDate(client.end_date)}</span>
-            </div>
-
-            <!-- Row 4: Platforms Block -->
-            <div class="platforms-container">
-              ${relatedAutors.map(aut => `
-                <div class="platform-item">
-                  <div class="platform-name">${aut.platform || '-'}</div>
-                  <div class="platform-stats">
-                    <div class="stat-item">Создана: <span class="stat-count">${aut.count_created || 0}</span></div>
-                    <div class="stat-item">В работе: <span class="stat-count">${aut.count_in_progress || 0}</span></div>
-                    <div class="stat-item">Проверка: <span class="stat-count">${aut.count_review || 0}</span></div>
-                    <div class="stat-item">Завершено: <span class="stat-count">${aut.count_completed || 0}</span></div>
-                  </div>
+        body.innerHTML = `
+            <div style="display:flex; gap:16px; height:150px;">
+                <div style="flex:1; border:2px dashed var(--border-color); border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;" onclick="document.getElementById('fileInputTask').click()">
+                    <span class="material-symbols-outlined" style="font-size:32px; color:var(--text-muted);">cloud_upload</span>
+                    <span style="font-size:12px; color:var(--text-muted); margin-top:8px;">Перетащите файлы</span>
+                    <input type="file" id="fileInputTask" multiple style="display:none" onchange="handleTaskFiles(this.files)">
                 </div>
-              `).join('')}
-              ${relatedAutors.length === 0 ? '<div style="color: var(--text-muted); font-size: 13px;">Нет данных по площадкам</div>' : ''}
+                <div style="flex:1; border:1px solid var(--border-color); border-radius:10px; padding:10px; overflow-y:auto; background:white;">
+                    <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">Файлы</div>
+                    ${filesHtml}
+                </div>
             </div>
-          </div>
+            
+            <div class="form-grid">
+                <div class="input-group"><input type="text" id="taskClientName" placeholder=" "><label class="input-label">Наименование клиента</label></div>
+                <div class="input-group"><input type="text" id="taskClientInn" placeholder=" "><label class="input-label">ИНН клиента</label></div>
+            </div>
+            <div class="form-grid">
+                <div class="input-group"><input type="date" id="taskStartDate"><label class="input-label">Дата начала</label></div>
+                <div class="input-group"><input type="date" id="taskEndDate"><label class="input-label">Дата завершения</label></div>
+            </div>
+
+            <div style="background:var(--bg-primary); padding:12px; border-radius:8px;">
+                ${sourcesHtml}
+                <button onclick="addSource()" style="width:100%; margin-top:8px; padding:8px; border:1px dashed var(--border-color); border-radius:6px; cursor:pointer; color:var(--text-secondary); font-size:12px;">+ Добавить площадку</button>
+            </div>
         `;
-      }).join('');
 
-    } catch (e) {
-      console.error("Error loading orders:", e);
-      ordersListContainer.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заказов.</p>';
+        footer.innerHTML = `
+            <button class="btn-cancel" onclick="closeTaskModal()">Отмена</button>
+            <button class="btn-submit" id="submitTaskBtn" onclick="submitTask()">
+                <span class="btn-text">Создать</span>
+                <div class="loader"></div>
+            </button>
+        `;
     }
-  }
 
-  function formatDate(dateStr) {
-    if (!dateStr) return '-';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('ru-RU');
-  }
+    // Global handlers for Task Form
+    window.handleTaskFiles = (files) => { Array.from(files).forEach(f => uploadedFiles.push(f)); renderTaskForm(); };
+    window.removeUploadFile = (idx) => { uploadedFiles.splice(idx, 1); renderTaskForm(); };
+    window.addSource = () => { sources.push({ id: ++sourceIdCounter, platform: '', count: 0, link: '' }); renderTaskForm(); };
+    window.removeSource = (id) => { sources = sources.filter(s => s.id !== id); renderTaskForm(); };
+    window.updateSource = (id, field, val) => { const s = sources.find(x => x.id === id); if(s) s[field] = val; renderTaskForm(); };
 
-  // --- EXISTING LOGIC ---
+    async function submitTask() {
+        const btn = document.getElementById('submitTaskBtn');
+        btn.classList.add('loading');
 
-  function bindEvents() {
-      openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
-      overlay.onclick = (e) => { if (e.target === overlay) closeTaskModal(); };
-      dropzone.onclick = () => fileInput.click();
-      dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
-      dropzone.ondragleave = () => dropzone.classList.remove('dragover');
-      dropzone.ondrop = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
-      fileInput.onchange = (e) => handleFiles(e.target.files);
-  }
+        const clientName = document.getElementById('taskClientName').value;
+        const clientInn = document.getElementById('taskClientInn').value;
+        const startDate = document.getElementById('taskStartDate').value;
+        const endDate = document.getElementById('taskEndDate').value;
 
-  function closeTaskModal() { overlay.classList.remove('visible'); }
-  function handleFiles(files) { Array.from(files).forEach(file => uploadedFiles.push(file)); renderFileList(); }
-  function renderFileList() { const list = document.getElementById('fileList'); list.innerHTML = uploadedFiles.map((file, idx) => `<div class="file-item"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span><span class="file-item-remove" onclick="removeFile(${idx})">✕</span></div>`).join(''); }
-  
-  window.removeFile = function(idx) { uploadedFiles.splice(idx, 1); renderFileList(); };
-  window.addSourceRow = function() { const id = ++sourceIdCounter; sources.push({ id, platform: '', count: 0, link: '' }); renderSources(); };
-  window.removeSourceRow = function(id) { sources = sources.filter(s => s.id !== id); renderSources(); updateTotal(); };
-  window.updateSource = function(id, field, value) { const src = sources.find(s => s.id === id); if (src) src[field] = value; if (field === 'count') updateTotal(); };
-  window.closeTaskModal = closeTaskModal;
-  window.handleSubmit = handleSubmit;
+        if(!clientName || !clientInn || !startDate || !endDate) { alert('Заполните поля'); btn.classList.remove('loading'); return; }
+        if(sources.length === 0 || sources.every(s => !s.count)) { alert('Добавьте площадки'); btn.classList.remove('loading'); return; }
 
-  function renderSources() {
-      sourcesList.innerHTML = sources.map(s => `
-        <div class="source-item">
-          <input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
-          <input type="number" class="input-count" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
-          <input type="text" class="input-link" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
-          <button type="button" onclick="removeSourceRow(${s.id})">✕</button>
-        </div>
-      `).join('');
-  }
-  
-  function updateTotal() { const total = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0); document.getElementById('totalTasks').textContent = total; }
+        try {
+            let lastNum = await getLastNum('order_number', 'reviews_order');
+            let lastGroup = await getLastNum('order_number_general', 'reviews_order');
+            
+            const docs = uploadedFiles.map(f => ({name: f.name, size: f.size}));
+            
+            for(const src of sources) {
+                const count = parseInt(src.count) || 0;
+                if(count === 0) continue;
+                
+                // Increment group number ONCE per group creation
+                lastGroup = incrementGroup(lastGroup);
 
-  function resetForm() {
-    formContainer.style.display = 'flex'; progressContainer.style.display = 'none'; modalFooter.style.display = 'flex';
-    uploadedFiles = []; renderFileList(); sources = []; sourceIdCounter = 0; addSourceRow();
-    document.getElementById('clientName').value = ''; document.getElementById('clientInn').value = '';
-    document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; updateTotal();
-  }
+                const batch = [];
+                for(let i=0; i<count; i++) {
+                    lastNum = incrementOrder(lastNum);
+                    batch.push({
+                        manager_login: user.login,
+                        manager_name: `${user.first_name} ${user.last_name}`,
+                        manager_phone: user.phone,
+                        order_number: lastNum,
+                        order_number_general: lastGroup,
+                        client_name: clientName,
+                        client_inn: clientInn,
+                        start_date: startDate,
+                        end_date: endDate,
+                        platform: src.platform,
+                        link: src.link,
+                        documents: docs,
+                        status: 'создана'
+                    });
+                }
+                const {error} = await sb.from('reviews_order').insert(batch);
+                if(error) throw error;
+            }
 
-  async function handleSubmit() {
-    if (!user) return alert('Пользователь не определен');
-    const clientName = document.getElementById('clientName').value;
-    const clientInn = document.getElementById('clientInn').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    if (!clientName || !clientInn || !startDate || !endDate) return alert('Заполните все поля клиента и даты');
-    if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте площадки');
-
-    formContainer.style.display = 'none'; modalFooter.style.display = 'none'; progressContainer.style.display = 'flex';
-    const totalTasks = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
-    let processedTasks = 0;
-    const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
-    
-    let lastOrderNumber = await getLastOrderNumber();
-    let groupNumber = await getLastGroupNumber();
-    
-    const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
-
-    try {
-      for (const src of sources) {
-        const count = parseInt(src.count) || 0; if (count === 0) continue;
-        const itemDiv = document.createElement('div'); itemDiv.className = 'progress-item';
-        itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: 0 из ${count}`; progressDetails.appendChild(itemDiv);
-        let insertedCount = 0; const batchSize = 10; const batches = Math.ceil(count / batchSize);
-
-        for (let b = 0; b < batches; b++) {
-          const currentBatchSize = Math.min(batchSize, count - insertedCount);
-          const insertData = [];
-          for (let i = 0; i < currentBatchSize; i++) {
-            lastOrderNumber = incrementOrderNumber(lastOrderNumber);
-            insertData.push({
-              manager_login: user.login, manager_name: `${user.first_name} ${user.last_name}`, manager_phone: user.phone,
-              order_number: lastOrderNumber, 
-              order_number_general: groupNumber, 
-              client_name: clientName, client_inn: clientInn,
-              start_date: startDate, end_date: endDate, platform: src.platform, link: src.link,
-              documents: docs, status: 'создана'
-            });
-          }
-          const { error } = await sbClient.from('reviews_order').insert(insertData);
-          if (error) throw error;
-          insertedCount += currentBatchSize; processedTasks += currentBatchSize;
-          itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: ${insertedCount} из ${count}`;
-          if (insertedCount === count) itemDiv.classList.add('done');
-          const percent = Math.round((processedTasks / totalTasks) * 100);
-          document.getElementById('progressFill').style.width = percent + '%';
-          document.getElementById('progressPercent').textContent = percent + '%';
-          await new Promise(r => setTimeout(r, 50));
+            alert('Задания созданы!');
+            closeTaskModal();
+            loadManagerData();
+        } catch(e) {
+            console.error(e);
+            alert('Ошибка: ' + e.message);
+        } finally {
+            btn.classList.remove('loading');
         }
-      }
-      document.getElementById('progressPercent').textContent = 'Готово!';
-      setTimeout(() => { alert('Задания созданы!'); closeTaskModal(); loadAndRenderOrders(); }, 500);
-    } catch (err) { console.error(err); alert('Ошибка: ' + err.message); resetForm(); }
-  }
-
-  async function getLastOrderNumber() {
-    const { data, error } = await sbClient.from('reviews_order').select('order_number').order('order_number', { ascending: false }).limit(1).maybeSingle();
-    if (error) { console.error("Error:", error); return 'AA-00000'; }
-    if (!data || !data.order_number) return 'AA-00000';
-    return data.order_number;
-  }
-
-  async function getLastGroupNumber() {
-    const { data, error } = await sbClient.from('reviews_order').select('order_number_general').order('order_number_general', { ascending: false }).limit(1).maybeSingle();
-    if (error || !data || !data.order_number_general) return 'group-A00001';
-    const clean = data.order_number_general.replace('group-', '');
-    const letter = clean.substring(0, 1);
-    let num = parseInt(clean.substring(1), 10);
-    num++;
-    if (num > 99999) { const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1); return `group-${nextLetter}00001`; }
-    return `group-${letter}${String(num).padStart(5, '0')}`;
-  }
-
-  function incrementOrderNumber(current) {
-    let letters = current.substring(0, 2);
-    let digits = parseInt(current.substring(3));
-    digits++;
-    if (digits > 99999) { digits = 1; letters = incrementLetters(letters); }
-    return `${letters}-${String(digits).padStart(5, '0')}`;
-  }
-
-  function incrementLetters(str) {
-    let arr = str.split(''); let i = arr.length - 1;
-    while (i >= 0) {
-      if (arr[i] === 'Z') { arr[i] = 'A'; i--; } else { arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1); return arr.join(''); }
     }
-    return 'AA';
-  }
 
-  initPage();
+    function incrementOrder(curr) {
+        let l = curr.substring(0,2);
+        let d = parseInt(curr.substring(3));
+        d++;
+        if(d>99999) { d=1; l = incL(l); }
+        return `${l}-${String(d).padStart(5,'0')}`;
+    }
+    function incL(str) { let a=str.split(''); let i=a.length-1; while(i>=0){ if(a[i]==='Z'){a[i]='A';i--;}else{a[i]=String.fromCharCode(a[i].charCodeAt(0)+1);return a.join('');} } return 'AA'; }
+    function incrementGroup(curr) {
+        if(!curr || !curr.startsWith('group-')) return 'group-A00001';
+        let c = curr.replace('group-','');
+        let l = c.substring(0,1);
+        let n = parseInt(c.substring(1));
+        n++;
+        if(n>99999) { n=1; l = String.fromCharCode(l.charCodeAt(0)+1); }
+        return `group-${l}${String(n).padStart(5,'0')}`;
+    }
+    async function getLastNum(col, table) {
+        const {data} = await sb.from(table).select(col).order(col, {ascending:false}).limit(1).maybeSingle();
+        return data ? data[col] : (col === 'order_number' ? 'AA-00000' : 'group-A00000');
+    }
+
+    // === SUBPAGE 1 (MANAGER) DATA LOADING ===
+    async function loadManagerData() {
+        managerList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Загрузка...</div>';
+        try {
+            // Fetch Client View
+            const { data: clients, error: e1 } = await sb.from('reviews_order_client').select('*');
+            if(e1) throw e1;
+
+            // Fetch Autor View
+            const { data: autors, error: e2 } = await sb.from('reviews_order_autor').select('*');
+            if(e2) throw e2;
+
+            const map = {};
+            autors.forEach(a => {
+                if(!map[a.order_number_general]) map[a.order_number_general] = [];
+                map[a.order_number_general].push(a);
+            });
+
+            if(!clients || clients.length === 0) {
+                managerList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Нет созданных заказов</div>';
+                return;
+            }
+
+            managerList.innerHTML = clients.map(c => {
+                const items = map[c.order_number_general] || [];
+                const aut = items[0] || {};
+                const plats = items.map(a => `
+                    <div class="platform-item">
+                        <div class="platform-name">${a.platform || '-'}</div>
+                        <div class="platform-stats">
+                            <div class="stat-item">Создана: <span class="stat-count">${a.count_created||0}</span></div>
+                            <div class="stat-item">В работе: <span class="stat-count">${a.count_in_progress||0}</span></div>
+                            <div class="stat-item">Проверка: <span class="stat-count">${a.count_review||0}</span></div>
+                            <div class="stat-item">Завершено: <span class="stat-count">${a.count_completed||0}</span></div>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="order-card">
+                        <div class="card-header">
+                            <div class="client-info">
+                                <div class="client-org"><span>Организация:</span> ${c.client_name || '-'}</div>
+                                <div class="client-inn"><span>ИНН:</span> ${c.client_inn || '-'}</div>
+                            </div>
+                            <div class="order-number-badge">${c.order_number_general}</div>
+                        </div>
+                        <div class="card-row">
+                            <span class="row-label">данные менеджера сделки</span>
+                            <span class="row-value">${aut.manager_name || '-'} | ${aut.manager_phone || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="row-label">дата начала</span>
+                            <span class="row-value" style="margin-right:24px;">${formatDate(c.start_date)}</span>
+                            <span class="row-label">дата завершения</span>
+                            <span class="row-value">${formatDate(c.end_date)}</span>
+                        </div>
+                        <div class="platforms-container">
+                            ${plats}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+        } catch(e) {
+            console.error(e);
+            managerList.innerHTML = `<div style="color:var(--error); padding:20px;">Ошибка загрузки данных. Проверьте existence of views (reviews_order_client).<br><small>${e.message}</small></div>`;
+        }
+    }
+
+    // === SUBPAGE 2 (AUTHOR) DATA LOADING ===
+    async function loadAuthorData() {
+        authorList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Загрузка...</div>';
+        
+        try {
+            if(currentAuthorView === 'new') {
+                // New Tasks Logic
+                const { data: candidates } = await sb.from('reviews_order_autor_exercise').select('*').eq('status', 'создана');
+                const { data: busy } = await sb.from('reviews_order').select('order_number_general, platform').neq('status', 'создана');
+                const busyKeys = new Set(busy.map(r => `${r.order_number_general}::${r.platform}`));
+                const avail = candidates.filter(c => !busyKeys.has(`${c.order_number_general}::${c.platform}`));
+                renderAuthorCards(avail, 'new');
+            } else {
+                // My Tasks Logic
+                const { data } = await sb.from('reviews_order').select('*').eq('autor_phone', user.phone).in('status', ['в работе', 'на проверке']);
+                renderAuthorCards(data, 'my');
+            }
+        } catch(e) {
+            console.error(e);
+            authorList.innerHTML = `<div style="color:var(--error); padding:20px;">Ошибка: ${e.message}</div>`;
+        }
+    }
+
+    function renderAuthorCards(items, type) {
+        if(!items || items.length === 0) {
+            authorList.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding:20px;">${type === 'new' ? 'Нет доступных заданий' : 'Нет ваших заданий'}</div>`;
+            return;
+        }
+
+        authorList.innerHTML = items.map(item => {
+            const key = `${item.order_number_general}-${(item.platform||'').replace(/[^a-zA-Z0-9]/g,'-')}`;
+            const statClass = item.status === 'в работе' ? 'status-progress' : (item.status === 'на проверке' ? 'status-review' : '');
+            
+            let action = '';
+            if(type === 'new') {
+                action = `<button class="action-btn primary" onclick="takeWork('${item.order_number_general}', '${item.platform}')">Взять в работу</button>`;
+            } else {
+                if(item.status === 'в работе') {
+                    const hasFile = tempFiles[key];
+                    const dz = hasFile ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span class="file-name">${hasFile.name}</span>` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg><span>Фото</span>`;
+                    action = `
+                        <div class="mini-dropzone visible" onclick="document.getElementById('inp-${key}').click()" ondragover="event.preventDefault();this.classList.add('active')" ondragleave="this.classList.remove('active')" ondrop="dropAuthFile(event, '${key}')">${dz}<input type="file" accept="image/*" id="inp-${key}" style="display:none" onchange="authFile(event, '${key}')"></div>
+                        <button class="action-btn secondary" onclick="submitAuth('${key}')" ${hasFile ? '' : 'disabled'}>На проверку</button>
+                    `;
+                } else {
+                    action = `<div style="width:100%; text-align:center; color:var(--warning); font-weight:600;">Ожидает проверки</div>`;
+                }
+            }
+
+            return `
+                <div class="order-card" id="auth-card-${key}">
+                    <div class="card-header">
+                        <div class="client-info">
+                            <div style="font-size:12px; color:var(--text-muted);">Платформа: <b style="color:var(--text-primary);">${item.platform}</b></div>
+                            <div style="font-size:12px; color:var(--text-muted);">Группа: <b style="color:var(--text-primary);">${item.order_number_general}</b></div>
+                        </div>
+                        <div class="order-number-badge ${statClass}">${item.status || 'статус'}</div>
+                    </div>
+                    <div class="card-row">
+                        <span class="row-label">Менеджер:</span>
+                        <span class="row-value">${item.manager_name || '-'} (${item.manager_phone || '-'})</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="row-label">Сроки:</span>
+                        <span class="row-value">${formatDate(item.start_date)} — ${formatDate(item.end_date)}</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="row-label">Ссылка:</span>
+                        <span class="row-value"><a href="${item.link}" target="_blank">Перейти</a></span>
+                    </div>
+                    <div class="action-block">${action}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Author Actions
+    window.takeWork = async (grp, plat) => {
+        const {data: row} = await sb.from('reviews_order').select('id').eq('order_number_general', grp).eq('platform', plat).eq('status', 'создана').limit(1).maybeSingle();
+        if(!row) { alert('Задание недоступно'); loadAuthorData(); return; }
+        
+        const upd = { status: 'в работе', autor_name: `${user.first_name} ${user.last_name}`, autor_phone: user.phone, autor_task: new Date().toISOString() };
+        await sb.from('reviews_order').update(upd).eq('id', row.id);
+        loadAuthorData();
+    };
+
+    window.authFile = (e, key) => { if(e.target.files[0]) { tempFiles[key] = e.target.files[0]; loadAuthorData(); } };
+    window.dropAuthFile = (e, key) => { e.preventDefault(); e.currentTarget.classList.remove('active'); if(e.dataTransfer.files[0]) { tempFiles[key] = e.dataTransfer.files[0]; loadAuthorData(); } };
+    
+    window.submitAuth = async (key) => {
+        if(!tempFiles[key]) { alert('Загрузите фото'); return; }
+        const [grp, plat] = key.split('-'); // Reconstructing might be tricky, better pass args again or parse ID. Let's assume data-attrs needed but for simplicity re-fetch
+        
+        // We need group and platform to find the record. Let's parse the card ID: auth-card-group-A00001-Ozon-ru
+        const card = document.getElementById(`auth-card-${key}`);
+        const grpText = card.querySelector('.client-info div:nth-child(2) b').textContent; // group-A00001
+        const platText = card.querySelector('.client-info div:nth-child(1) b').textContent; // Ozon.ru
+        
+        const {data: row} = await sb.from('reviews_order').select('id').eq('order_number_general', grpText).eq('platform', platText).eq('status', 'в работе').maybeSingle();
+        if(!row) { alert('Ошибка'); return; }
+        await sb.from('reviews_order').update({status: 'на проверке'}).eq('id', row.id);
+        loadAuthorData();
+    };
+
+    // === HELPERS ===
+    function formatDate(d) { return d ? new Date(d).toLocaleDateString('ru-RU') : '-'; }
+
+    // === INIT ===
+    loadManagerData();
 
 })();
 </script>
+</div>
