@@ -1,553 +1,561 @@
-<!DOCTYPE html>
-<div class="m1-root">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-  
+<!-- modal1.html -->
+<div id="taskAppContainer" class="task-app">
   <style>
-    /* === ПАЛИТРА === */
-    :root {
-      --bg-primary: #f8f9fa;
-      --bg-card: #ffffff;
-      --text-primary: #1a1a1a;
-      --text-secondary: #6b7280;
-      --text-muted: #9ca3af;
-      --border-color: #e5e7eb;
-      --accent: #000000;
-      --accent-hover: #333333;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --error: #ef4444;
-      --tab-bg: #e8e8e8;
-      --tab-active: #ffffff;
+    /* Scoped Styles */
+    .task-app { font-family: 'SN Pro', sans-serif; color: var(--text-primary); }
+    
+    /* --- Card List Styles --- */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%; /* Full width */
+    }
+    
+    .order-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.3s ease;
+      width: 100%; /* Full width */
+      box-sizing: border-box;
+    }
+    .order-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Row 1: Header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; /* Centered vertically */
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .client-info {
+      display: flex;
+      flex-direction: row; /* Row layout */
+      align-items: center;
+      gap: 24px; /* Space between Org and INN */
+      flex: 1;
+    }
+    .client-org {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .client-org span {
+        color: var(--text-muted);
+        font-weight: 400;
+        margin-right: 4px;
+    }
+    .client-inn {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .client-inn span {
+        color: var(--text-muted);
+        margin-right: 4px;
+    }
+    
+    .order-number-badge {
+      background: var(--bg-primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      white-space: nowrap;
     }
 
-    .m1-root {
-      display: flex; flex-direction: column; height: 100%; width: 100%;
-      position: relative; background: var(--bg-card); font-family: 'SN Pro', sans-serif; overflow: hidden;
+    /* Rows 2 & 3: Common Row Style */
+    .card-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .row-label {
+      color: var(--text-muted);
+      flex-shrink: 0;
+      min-width: 140px;
+    }
+    .row-value {
+      color: var(--text-primary);
+      font-weight: 500;
     }
 
-    /* === ШАПКА И ТАБЫ === */
-    .m1-header {
+    /* Row 4: Platforms */
+    .platforms-container {
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+    }
+    .platform-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .platform-name {
+      width: 120px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .platform-stats {
+      display: flex;
+      gap: 16px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-count {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Existing Modal Styles (Create Task) */
+    .create-task-btn {
+      display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
+      background: var(--accent); color: white; border-radius: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease; border: none; font-size: 15px;
+    }
+    .create-task-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    
+    .task-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; 
+      opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .task-modal-overlay.visible { opacity: 1; visibility: visible; }
+    
+    .task-modal {
+      background: var(--bg-card); border-radius: 20px;
+      width: 800px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      transform: scale(0.9); transition: transform 0.3s ease;
+    }
+    .task-modal-overlay.visible .task-modal { transform: scale(1); }
+    
+    .task-modal-header {
+      padding: 24px; border-bottom: 1px solid var(--border-color);
       display: flex; justify-content: space-between; align-items: center;
-      height: 56px; min-height: 56px; border-bottom: 1px solid var(--border-color);
-      padding: 0 20px; background: var(--bg-card); z-index: 10;
+      position: sticky; top: 0; background: var(--bg-card); z-index: 10;
     }
-    .m1-header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-primary); text-transform: uppercase; }
-    .m1-tabs-container { position: relative; display: flex; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
-    .m1-tabs-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border-radius: 8px; box-shadow: 0px 3px 8px rgba(0,0,0,0.12); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .m1-tab-input { width: 50%; height: 36px; position: absolute; z-index: 99; opacity: 0; cursor: pointer; }
-    .m1-tab-label { width: 50%; height: 36px; position: relative; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
-    .m1-tab-input:checked + .m1-tab-label { color: var(--text-primary); }
-    #m1-tab2:checked ~ .indicator { left: 50%; }
-
-    .m1-page { display: none; flex-direction: column; flex: 1; height: calc(100% - 56px); position: relative; }
-    .m1-page.active { display: flex; }
-
-    /* === ВЕРХНЯЯ ЧАСТЬ === */
-    .m1-top-section { height: 100px; min-height: 100px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-card); }
-    
-    .m1-action-btn {
-      padding: 12px 24px; background: var(--accent); color: white; border: none;
-      border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; gap: 8px;
+    .task-modal-title { font-size: 20px; font-weight: 700; }
+    .close-modal-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: var(--bg-primary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; color: var(--text-primary);
     }
-    .m1-action-btn:hover { background: var(--accent-hover); }
-    .m1-action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .m1-action-btn .loader { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
-    .m1-action-btn.loading .loader { display: block; }
-    .m1-action-btn.loading .btn-text { display: none; }
-
-    /* === НИЖНЯЯ ЧАСТЬ (СКРОЛЛ) === */
-    .m1-bottom-section { flex: 1; position: relative; }
-    .modal9-scroll-wrapper { position: absolute; top: 0; left: 0; bottom: 0; width: calc(100% + 30px); overflow: visible; pointer-events: auto; z-index: 1; }
-    .modal9-window { height: 100%; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.6); padding: 20px; padding-right: 10px; }
-    .modal9-content { height: 100%; width: 100%; overflow-y: scroll; overflow-x: hidden; padding-right: 20px; scrollbar-width: thin; scrollbar-color: var(--accent) transparent; }
-    .modal9-content::-webkit-scrollbar { width: 6px; }
-    .modal9-content::-webkit-scrollbar-track { background: transparent; }
-    .modal9-content::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
-
-    /* === КАРТОЧКИ СДЕЛОК === */
-    .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding-bottom: 20px; }
+    .close-modal-btn:hover { background: #e0e0e0; }
     
-    .deal-card {
-      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px;
-      padding: 16px; display: flex; flex-direction: column; gap: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;
+    .task-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    
+    .upload-section { display: flex; gap: 16px; height: 200px; }
+    .dropzone {
+      flex: 1; border: 2px dashed var(--border-color); border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s ease; background: var(--bg-primary);
     }
-    .deal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+    .dropzone.dragover { border-color: var(--accent); background: #f0f0f0; }
+    .dropzone-icon { width: 40px; height: 40px; margin-bottom: 12px; color: var(--text-muted); }
     
-    .deal-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-    .deal-id { font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--bg-primary); padding: 4px 8px; border-radius: 6px; }
-    .deal-sum { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-    .deal-sum small { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 4px; }
+    .file-list-container {
+      flex: 1; border: 1.5px solid var(--border-color); border-radius: 12px;
+      padding: 12px; overflow-y: auto; background: white;
+    }
+    .file-list-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: var(--bg-primary); border-radius: 6px; margin-bottom: 4px; font-size: 13px; }
+    .file-item-remove { color: var(--error); cursor: pointer; margin-left: 8px; font-weight: bold; }
     
-    .deal-body { display: flex; flex-direction: column; gap: 8px; }
-    .deal-row { display: flex; gap: 8px; align-items: baseline; }
-    .deal-label { font-size: 11px; color: var(--text-muted); min-width: 80px; }
-    .deal-value { font-size: 13px; color: var(--text-primary); font-weight: 500; }
-    
-    .deal-footer { margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--border-color); font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1; background: var(--bg-card); }
+    .input-group { position: relative; }
+    .input-group input {
+      width: 100%; padding: 14px 16px; font-size: 15px; font-family: 'SN Pro', sans-serif; 
+      border: 1.5px solid var(--border-color); border-radius: 10px; background: var(--bg-card); 
+      color: var(--text-primary); outline: none; transition: all 0.3s ease; box-sizing: border-box;
+    }
+    .input-group input::placeholder { color: transparent; }
+    .input-group input:focus { border-color: var(--accent); background: var(--bg-card); box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); }
+    .input-group label {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      font-size: 15px; font-family: 'SN Pro', sans-serif; color: var(--text-muted);
+      pointer-events: none; transition: all 0.2s ease; background: transparent; padding: 0 4px;
+    }
+    .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label {
+      top: 0; left: 12px; font-size: 12px; font-weight: 500;
+      background-color: var(--bg-card); color: var(--accent);
+    }
+    .input-group input[type="date"] + label, .input-group input[type="date"]:focus + label { top: 0; left: 12px; font-size: 12px; font-weight: 500; background-color: var(--bg-card); color: var(--text-muted); }
+    .input-group input[type="date"]:focus + label { color: var(--accent); }
 
-    /* === МОДАЛЬНОЕ ОКНО === */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(248, 249, 250, 0.8); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center; z-index: 2000;
-      opacity: 0; visibility: hidden; transition: opacity 0.3s;
+    .sources-section { display: flex; gap: 20px; background: var(--bg-primary); border-radius: 12px; padding: 16px; }
+    .sources-list { flex: 2; display: flex; flex-direction: column; gap: 12px; }
+    
+    .source-item {
+      display: flex; gap: 8px; align-items: center;
+      background: white; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color);
     }
-    .modal-overlay.visible { opacity: 1; visibility: visible; }
-    
-    .modal-form-container {
-      background: var(--bg-card); border-radius: 16px; width: 600px; max-height: 90vh;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column;
-      transform: scale(0.95); transition: transform 0.3s;
+    .source-item input { 
+      border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; 
+      font-size: 13px; outline: none; background: var(--bg-card); 
+      box-sizing: border-box; height: 36px;
     }
-    .modal-overlay.visible .modal-form-container { transform: scale(1); }
+    .source-item input:focus { border-color: var(--accent); }
+    .source-item .input-platform { flex: 1; min-width: 80px; }
+    .source-item .input-count { width: 65px; text-align: center; }
+    .source-item .input-link { flex: 1; min-width: 80px; }
+    .source-item input[type="number"]::-webkit-outer-spin-button, .source-item input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .source-item input[type="number"] { -moz-appearance: textfield; }
+    .source-item button { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; margin-left: 4px; flex-shrink: 0; height: 36px; }
     
-    .form-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-    .form-title { font-size: 18px; font-weight: 700; }
-    .form-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 24px; line-height: 1; }
-    
-    .form-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 24px; }
-    
-    .form-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
-    .form-divider { border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-    
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    
-    .input-group { position: relative; width: 100%; }
-    .input-field {
-      width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color);
-      border-radius: 10px; background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s, background 0.2s;
+    .total-counter {
+      flex: 1; background: white; border-radius: 10px; padding: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1px solid var(--border-color);
     }
-    .input-field:focus { border-color: var(--accent); background: var(--bg-card); }
-    .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); pointer-events: none; transition: all 0.2s; background: transparent; padding: 0 4px; }
-    .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { top: 0; font-size: 11px; color: var(--accent); background: var(--bg-card); font-weight: 500; }
-    
-    .autocomplete-dropdown {
-      position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card);
-      border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px;
-      overflow-y: auto; display: none;
-    }
-    .autocomplete-dropdown.visible { display: block; }
-    .autocomplete-item { padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--bg-primary); }
-    .autocomplete-item:last-child { border-bottom: none; }
-    .autocomplete-item:hover { background: var(--bg-primary); }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-align: center; }
+    .total-value { font-size: 36px; font-weight: 700; color: var(--accent); }
 
-    .form-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
-    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 600; cursor: pointer; }
-    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-submit .loader { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
-    .btn-submit.loading .loader { display: block; }
-    .btn-submit.loading .btn-text { display: none; }
+    .add-source-btn {
+      margin-top: 4px; padding: 10px; background: transparent;
+      border: 1px dashed var(--border-color); border-radius: 8px;
+      cursor: pointer; color: var(--text-secondary); font-size: 13px; text-align: center;
+    }
+    .add-source-btn:hover { border-color: var(--accent); color: var(--accent); }
+    
+    .task-modal-footer {
+      padding: 16px 24px; border-top: 1px solid var(--border-color);
+      display: flex; justify-content: flex-end; gap: 12px;
+      position: sticky; bottom: 0; background: var(--bg-card);
+    }
+    .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; font-weight: 500; }
+    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; min-width: 120px; }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .creation-progress { display: none; flex-direction: column; align-items: center; padding: 40px; }
+    .progress-bar-container { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin: 20px 0; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.2s ease; }
+    .progress-details { width: 100%; margin-top: 16px; max-height: 150px; overflow-y: auto; font-size: 13px; color: var(--text-secondary); }
+    .progress-item { margin-bottom: 4px; }
+    .progress-item.done { color: var(--success); font-weight: 500; }
   </style>
 
-  <!-- ШАПКА -->
-  <header class="m1-header">
-    <div class="m1-header-title">Страница 1</div>
-    <div class="m1-tabs-container">
-      <input type="radio" name="m1Tabs" id="m1-tab1" class="m1-tab-input" checked>
-      <label for="m1-tab1" class="m1-tab-label">Подстраница 1</label>
-      <input type="radio" name="m1Tabs" id="m1-tab2" class="m1-tab-input">
-      <label for="m1-tab2" class="m1-tab-label">Подстраница 2</label>
-      <div class="indicator"></div>
-    </div>
-  </header>
-
-  <!-- ПОДСТРАНИЦА 1 -->
-  <div class="m1-page active" id="page1">
-    <div class="m1-top-section">
-      <button class="m1-action-btn" id="openDealModalBtn">
-        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
-        Кнопка подстраницы 1
-      </button>
-    </div>
-    <div class="m1-bottom-section">
-      <div class="modal9-scroll-wrapper">
-        <div class="modal9-window">
-          <div class="modal9-content">
-            <div class="deals-grid" id="dealsList"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Container for rendered cards -->
+  <div id="ordersList" class="orders-list">
+    <!-- Cards will be injected here -->
   </div>
 
-  <!-- ПОДСТРАНИЦА 2 -->
-  <div class="m1-page" id="page2">
-    <div class="m1-top-section">
-      <button class="m1-action-btn">Кнопка подстраницы 2</button>
-    </div>
-    <div class="m1-bottom-section">
-      <div class="modal9-scroll-wrapper">
-        <div class="modal9-window">
-          <div class="modal9-content">
-            <p style="color: var(--text-muted); padding: 20px;">Контент подстраницы 2...</p>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div style="margin-bottom: 24px;">
+    <button id="openModalBtn" class="create-task-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Создать задание
+    </button>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО СОЗДАНИЯ СДЕЛКИ -->
-  <div class="modal-overlay" id="dealModalOverlay">
-    <div class="modal-form-container">
-      <div class="form-header">
-        <div class="form-title">Создание новой сделки</div>
-        <button class="form-close" id="closeDealModalBtn">&times;</button>
-      </div>
-      <div class="form-body">
-        <div class="form-divider">
-          <div class="form-section-title">Данные контрагента</div>
-          <div class="form-grid">
-            <div class="input-group" style="position:relative;">
-              <input type="text" class="input-field" id="dealINN" placeholder=" " autocomplete="off">
-              <label class="input-label">ИНН</label>
-              <div class="autocomplete-dropdown" id="innDropdown"></div>
-            </div>
-            <div class="input-group">
-              <input type="text" class="input-field" id="dealOPF" placeholder=" ">
-              <label class="input-label">ОПФ (ИП, ООО...)</label>
-            </div>
-            <div class="input-group" style="grid-column: span 2;">
-              <input type="text" class="input-field" id="dealCompany" placeholder=" ">
-              <label class="input-label">Наименование организации</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-divider">
-          <div class="form-section-title">Данные клиента</div>
-          <div class="form-grid">
-            <div class="input-group" style="grid-column: span 2; position:relative;">
-              <input type="text" class="input-field" id="dealLastName" placeholder=" " autocomplete="off">
-              <label class="input-label">Фамилия</label>
-              <div class="autocomplete-dropdown" id="clientDropdown"></div>
-            </div>
-            <div class="input-group">
-              <input type="text" class="input-field" id="dealFirstName" placeholder=" ">
-              <label class="input-label">Имя</label>
-            </div>
-            <div class="input-group">
-              <input type="text" class="input-field" id="dealMiddleName" placeholder=" ">
-              <label class="input-label">Отчество</label>
-            </div>
-            <div class="input-group">
-              <input type="text" class="input-field" id="dealPhone" placeholder=" ">
-              <label class="input-label">Телефон</label>
-            </div>
-            <div class="input-group">
-              <input type="email" class="input-field" id="dealEmail" placeholder=" ">
-              <label class="input-label">Email</label>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="form-section-title">Данные договора</div>
-          <div class="form-grid">
-            <div class="input-group">
-              <input type="text" class="input-field" id="dealContractNum" placeholder=" ">
-              <label class="input-label">Номер договора</label>
-            </div>
-            <div class="input-group">
-              <input type="date" class="input-field" id="dealContractDate" placeholder=" " style="padding-top: 16px;">
-              <label class="input-label" style="top: 0; background: var(--bg-card); padding: 0 4px; font-size: 11px; font-weight: 500;">Дата договора</label>
-            </div>
-            <div class="input-group" style="grid-column: span 2;">
-              <input type="number" class="input-field" id="dealSum" placeholder=" ">
-              <label class="input-label">Сумма договора</label>
-            </div>
-            <div class="input-group" style="grid-column: span 2;">
-              <textarea class="input-field" id="dealHelp" rows="2" placeholder=" " style="padding-top: 20px; min-height: auto;"></textarea>
-              <label class="input-label">Комментарий (Помощь)</label>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-footer">
-        <button class="btn-cancel" id="cancelDealBtn">Отмена</button>
-        <button class="btn-submit" id="submitDealBtn">
-          <span class="btn-text">Создать сделку</span>
-          <div class="loader"></div>
+  <div id="taskModalOverlay" class="task-modal-overlay">
+    <div class="task-modal" onclick="event.stopPropagation()">
+      <div class="task-modal-header">
+        <h3 class="task-modal-title">Форма создания заданий на условиях договора</h3>
+        <button class="close-modal-btn" onclick="closeTaskModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
+
+      <div id="formContainer" class="task-modal-body">
+        <div class="upload-section">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
+            <p>Перетащите файлы сюда<br><span style="font-size:12px; color: var(--text-muted);">или нажмите для выбора</span></p>
+            <input type="file" id="fileInput" multiple style="display:none">
+          </div>
+          <div class="file-list-container">
+            <div class="file-list-title">Загруженные файлы</div>
+            <div id="fileList"></div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group"><input type="text" id="clientName" required placeholder=" "><label for="clientName">Наименование клиента</label></div>
+          <div class="input-group"><input type="text" id="clientInn" required placeholder=" "><label for="clientInn">ИНН клиента</label></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="input-group"><input type="date" id="startDate" required><label for="startDate">Дата начала</label></div>
+          <div class="input-group"><input type="date" id="endDate" required><label for="endDate">Дата завершения</label></div>
+        </div>
+
+        <div class="sources-section">
+          <div class="sources-list" id="sourcesList"></div>
+          <div class="total-counter"><span class="total-label">Всего заданий</span><span class="total-value" id="totalTasks">0</span></div>
+        </div>
+        <button class="add-source-btn" onclick="addSourceRow()">+ Добавить площадку</button>
+      </div>
+
+      <div id="progressContainer" class="creation-progress">
+        <h4>Создание заданий...</h4>
+        <div class="progress-bar-container"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <div id="progressPercent" style="font-weight:600; margin-bottom:10px;">0%</div>
+        <div class="progress-details" id="progressDetails"></div>
+      </div>
+
+      <div class="task-modal-footer" id="modalFooter">
+        <button class="btn-cancel" onclick="closeTaskModal()">Отмена</button>
+        <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">Создать задание</button>
+      </div>
     </div>
   </div>
-
-  <script>
-  (function() {
-    // === ВАЖНОЕ ИСПРАВЛЕНИЕ LAYOUT ===
-    // Заставляем родительский контейнер из index.html иметь высоту 100%
-    const parentContainer = document.getElementById('pageContent');
-    if (parentContainer) {
-        parentContainer.style.height = '100%';
-        parentContainer.style.overflow = 'hidden';
-    }
-
-    if (!window.supabaseClient) {
-        console.error('Supabase client not found!');
-        return;
-    }
-    const sb = window.supabaseClient;
-
-    // Элементы
-    const tab1 = document.getElementById('m1-tab1');
-    const tab2 = document.getElementById('m1-tab2');
-    const page1 = document.getElementById('page1');
-    const page2 = document.getElementById('page2');
-    const modalOverlay = document.getElementById('dealModalOverlay');
-    const openBtn = document.getElementById('openDealModalBtn');
-    const closeBtn = document.getElementById('closeDealModalBtn');
-    const cancelBtn = document.getElementById('cancelDealBtn');
-    const submitBtn = document.getElementById('submitDealBtn');
-    const container = document.getElementById('dealsList');
-
-    const fields = {
-      inn: document.getElementById('dealINN'),
-      opf: document.getElementById('dealOPF'),
-      company: document.getElementById('dealCompany'),
-      lname: document.getElementById('dealLastName'),
-      fname: document.getElementById('dealFirstName'),
-      mname: document.getElementById('dealMiddleName'),
-      phone: document.getElementById('dealPhone'),
-      email: document.getElementById('dealEmail'),
-      contractNum: document.getElementById('dealContractNum'),
-      contractDate: document.getElementById('dealContractDate'),
-      sum: document.getElementById('dealSum'),
-      help: document.getElementById('dealHelp')
-    };
-
-    // Tabs
-    tab1.addEventListener('change', () => { page1.classList.add('active'); page2.classList.remove('active'); });
-    tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); });
-
-    // Modal Toggle
-    function toggleModal(show) {
-      if (show) {
-        modalOverlay.classList.add('visible');
-        resetForm();
-      } else {
-        modalOverlay.classList.remove('visible');
-      }
-    }
-
-    openBtn.addEventListener('click', () => toggleModal(true));
-    closeBtn.addEventListener('click', () => toggleModal(false));
-    cancelBtn.addEventListener('click', () => toggleModal(false));
-    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) toggleModal(false); });
-
-    function resetForm() {
-      Object.values(fields).forEach(el => el.value = '');
-      submitBtn.classList.remove('loading');
-    }
-
-    // Autocomplete
-    let innTimeout;
-    const innDropdown = document.getElementById('innDropdown');
-
-    fields.inn.addEventListener('input', (e) => {
-      clearTimeout(innTimeout);
-      const val = e.target.value;
-      if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
-
-      innTimeout = setTimeout(async () => {
-        const { data } = await sb.from('reviews_counterparty').select('*').ilike('inn', `%${val}%`).limit(5);
-        if (data && data.length > 0) {
-          innDropdown.innerHTML = data.map(c => `
-            <div class="autocomplete-item" data-inn="${c.inn}" data-opf="${c.opf}" data-name="${c.name_company}">
-              <strong>${c.inn}</strong> <small style="margin-left:5px; color:#888;">${c.name_company || ''}</small>
-            </div>
-          `).join('');
-          innDropdown.classList.add('visible');
-        } else {
-          innDropdown.classList.remove('visible');
-        }
-      }, 300);
-    });
-
-    innDropdown.addEventListener('click', (e) => {
-      const item = e.target.closest('.autocomplete-item');
-      if (item) {
-        fields.inn.value = item.dataset.inn;
-        fields.opf.value = item.dataset.opf;
-        fields.company.value = item.dataset.name;
-        innDropdown.classList.remove('visible');
-      }
-    });
-
-    let clientTimeout;
-    const clientDropdown = document.getElementById('clientDropdown');
-
-    fields.lname.addEventListener('input', (e) => {
-      clearTimeout(clientTimeout);
-      const val = e.target.value;
-      if (val.length < 2) { clientDropdown.classList.remove('visible'); return; }
-
-      clientTimeout = setTimeout(async () => {
-        const { data } = await sb.from('reviews_human_contact').select('*').ilike('last_name', `%${val}%`).limit(5);
-        if (data && data.length > 0) {
-          clientDropdown.innerHTML = data.map(c => `
-            <div class="autocomplete-item" data-fname="${c.first_name}" data-lname="${c.last_name}" data-mname="${c.middle_name}" data-phone="${c.phone}" data-email="${c.email}">
-              ${c.last_name} ${c.first_name} ${c.middle_name} <small>${c.phone || ''}</small>
-            </div>
-          `).join('');
-          clientDropdown.classList.add('visible');
-        } else {
-          clientDropdown.classList.remove('visible');
-        }
-      }, 300);
-    });
-
-    clientDropdown.addEventListener('click', (e) => {
-      const item = e.target.closest('.autocomplete-item');
-      if (item) {
-        fields.lname.value = item.dataset.lname;
-        fields.fname.value = item.dataset.fname;
-        fields.mname.value = item.dataset.mname;
-        fields.phone.value = item.dataset.phone;
-        fields.email.value = item.dataset.email;
-        clientDropdown.classList.remove('visible');
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#dealINN') && !e.target.closest('#innDropdown')) innDropdown.classList.remove('visible');
-      if (!e.target.closest('#dealLastName') && !e.target.closest('#clientDropdown')) clientDropdown.classList.remove('visible');
-    });
-
-    // Submit
-    submitBtn.addEventListener('click', async () => {
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
-
-      try {
-        // 1. Контакт
-        const lname = fields.lname.value.trim();
-        const fname = fields.fname.value.trim();
-        const mname = fields.mname.value.trim();
-        let client_id = null;
-
-        if (lname && fname) {
-          let { data: existingContact } = await sb.from('reviews_human_contact').select('id').eq('last_name', lname).eq('first_name', fname).eq('middle_name', mname).maybeSingle();
-          if (existingContact) {
-            client_id = existingContact.id;
-            await sb.from('reviews_human_contact').update({ phone: fields.phone.value.trim(), email: fields.email.value.trim() }).eq('id', client_id);
-          } else {
-            const { data: newContact, error: contactErr } = await sb.from('reviews_human_contact').insert([{ last_name: lname, first_name: fname, middle_name: mname, phone: fields.phone.value.trim(), email: fields.email.value.trim() }]).select('id').single();
-            if (contactErr) throw contactErr;
-            client_id = newContact.id;
-          }
-        }
-
-        // 2. Контрагент
-        const innVal = fields.inn.value.trim();
-        if (!innVal) throw new Error("ИНН обязателен");
-
-        let { data: existingComp } = await sb.from('reviews_counterparty').select('inn').eq('inn', innVal).maybeSingle();
-        
-        if (!existingComp) {
-            await sb.from('reviews_counterparty').insert([{
-                inn: innVal,
-                opf: fields.opf.value.trim(),
-                name_company: fields.company.value.trim()
-            }]);
-        }
-
-        // 3. Сделка
-        const dealData = {
-          user_id: window.currentUser.id,
-          contract_number: fields.contractNum.value.trim(),
-          contract_date: fields.contractDate.value || null,
-          sum_deal: parseFloat(fields.sum.value) || 0,
-          inn: innVal,
-          opf: fields.opf.value.trim(),
-          name_company: fields.company.value.trim(),
-          client_id: client_id,
-          last_name: lname,
-          first_name: fname,
-          middle_name: mname,
-          phone: fields.phone.value.trim(),
-          email: fields.email.value.trim(),
-          help_text: fields.help.value.trim()
-        };
-
-        const { error: dealErr } = await sb.from('reviews_list_deals').insert([dealData]);
-        if (dealErr) throw dealErr;
-
-        toggleModal(false);
-        await loadDeals();
-
-      } catch (err) {
-        alert("Ошибка создания: " + err.message);
-        console.error(err);
-      } finally {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-      }
-    });
-
-    // === Load Deals ===
-    async function loadDeals() {
-      if (!container) return;
-      container.innerHTML = '<div style="color:var(--text-muted); padding: 20px;">Загрузка сделок...</div>';
-
-      try {
-        const { data, error } = await sb.from('reviews_list_deals').select('*').order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div style="color:var(--text-muted); padding: 20px; text-align:center;">Нет созданных сделек</div>';
-          return;
-        }
-
-        container.innerHTML = data.map(deal => {
-          const date = new Date(deal.created_at).toLocaleString('ru-RU');
-          const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
-          return `
-            <div class="deal-card">
-              <div class="deal-header">
-                <span class="deal-id">${deal.id}</span>
-                <div class="deal-sum">
-                  ${new Intl.NumberFormat('ru-RU').format(deal.sum_deal || 0)}
-                  <small>₽</small>
-                </div>
-              </div>
-              <div class="deal-body">
-                <div class="deal-row">
-                  <span class="deal-label">Договор:</span>
-                  <span class="deal-value">№${deal.contract_number || '-' } от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}</span>
-                </div>
-                <div class="deal-row">
-                  <span class="deal-label">Клиент:</span>
-                  <span class="deal-value">${fio || 'Не указан'}</span>
-                </div>
-                <div class="deal-row">
-                  <span class="deal-label">Организация:</span>
-                  <span class="deal-value">${deal.name_company || '-'}</span>
-                </div>
-              </div>
-              <div class="deal-footer">
-                <span>Создано: ${date}</span>
-                <span>${deal.inn}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-      } catch (err) {
-        console.error('Ошибка при загрузке сделок:', err);
-        container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных. Проверьте RLS политики в Supabase.</div>';
-      }
-    }
-
-    // Запуск при загрузке
-    loadDeals();
-
-  })();
-  </script>
 </div>
+
+<script>
+(function() {
+  
+  const sbClient = window.supabaseClient;
+  const user = window.currentUser;
+
+  let uploadedFiles = [];
+  let sources = [];
+  let sourceIdCounter = 0;
+
+  const overlay = document.getElementById('taskModalOverlay');
+  const openBtn = document.getElementById('openModalBtn');
+  const formContainer = document.getElementById('formContainer');
+  const progressContainer = document.getElementById('progressContainer');
+  const modalFooter = document.getElementById('modalFooter');
+  const fileInput = document.getElementById('fileInput');
+  const dropzone = document.getElementById('dropzone');
+  const sourcesList = document.getElementById('sourcesList');
+  const ordersListContainer = document.getElementById('ordersList');
+
+  async function initPage() {
+      addSourceRow();
+      bindEvents();
+      await loadAndRenderOrders();
+  }
+
+  // --- RENDERING CARDS ---
+
+  async function loadAndRenderOrders() {
+    try {
+      const { data: clients, error: errClients } = await sbClient.from('reviews_order_client').select('*').order('start_date', { ascending: false });
+      if (errClients) throw errClients;
+
+      const { data: autors, error: errAutors } = await sbClient.from('reviews_order_autor').select('*');
+      if (errAutors) throw errAutors;
+
+      const autorsMap = {};
+      if (autors) autors.forEach(a => {
+        if (!autorsMap[a.order_number_general]) autorsMap[a.order_number_general] = [];
+        autorsMap[a.order_number_general].push(a);
+      });
+
+      ordersListContainer.innerHTML = clients.map(client => {
+        const relatedAutors = autorsMap[client.order_number_general] || [];
+        const firstAutor = relatedAutors[0] || {};
+
+        return `
+          <div class="order-card">
+            <!-- Row 1: Header (Updated) -->
+            <div class="card-header">
+              <div class="client-info">
+                <div class="client-org"><span>Организация:</span> ${client.client_name || 'Не указана'}</div>
+                <div class="client-inn"><span>ИНН:</span> ${client.client_inn || '-'}</div>
+              </div>
+              <div class="order-number-badge">${client.order_number_general || '-'}</div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="card-row">
+              <span class="row-label">данные менеджера сделки</span>
+              <span class="row-value">${firstAutor.manager_name || '-'} | ${firstAutor.manager_phone || '-'}</span>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="card-row">
+              <span class="row-label">дата начала</span>
+              <span class="row-value" style="margin-right: 24px;">${formatDate(client.start_date)}</span>
+              <span class="row-label">дата завершения</span>
+              <span class="row-value">${formatDate(client.end_date)}</span>
+            </div>
+
+            <!-- Row 4: Platforms Block -->
+            <div class="platforms-container">
+              ${relatedAutors.map(aut => `
+                <div class="platform-item">
+                  <div class="platform-name">${aut.platform || '-'}</div>
+                  <div class="platform-stats">
+                    <div class="stat-item">Создана: <span class="stat-count">${aut.count_created || 0}</span></div>
+                    <div class="stat-item">В работе: <span class="stat-count">${aut.count_in_progress || 0}</span></div>
+                    <div class="stat-item">Проверка: <span class="stat-count">${aut.count_review || 0}</span></div>
+                    <div class="stat-item">Завершено: <span class="stat-count">${aut.count_completed || 0}</span></div>
+                  </div>
+                </div>
+              `).join('')}
+              ${relatedAutors.length === 0 ? '<div style="color: var(--text-muted); font-size: 13px;">Нет данных по площадкам</div>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (e) {
+      console.error("Error loading orders:", e);
+      ordersListContainer.innerHTML = '<p style="color: var(--error);">Ошибка загрузки заказов.</p>';
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('ru-RU');
+  }
+
+  // --- EXISTING LOGIC ---
+
+  function bindEvents() {
+      openBtn.onclick = () => { overlay.classList.add('visible'); resetForm(); };
+      overlay.onclick = (e) => { if (e.target === overlay) closeTaskModal(); };
+      dropzone.onclick = () => fileInput.click();
+      dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover'); };
+      dropzone.ondragleave = () => dropzone.classList.remove('dragover');
+      dropzone.ondrop = (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); };
+      fileInput.onchange = (e) => handleFiles(e.target.files);
+  }
+
+  function closeTaskModal() { overlay.classList.remove('visible'); }
+  function handleFiles(files) { Array.from(files).forEach(file => uploadedFiles.push(file)); renderFileList(); }
+  function renderFileList() { const list = document.getElementById('fileList'); list.innerHTML = uploadedFiles.map((file, idx) => `<div class="file-item"><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</span><span class="file-item-remove" onclick="removeFile(${idx})">✕</span></div>`).join(''); }
+  
+  window.removeFile = function(idx) { uploadedFiles.splice(idx, 1); renderFileList(); };
+  window.addSourceRow = function() { const id = ++sourceIdCounter; sources.push({ id, platform: '', count: 0, link: '' }); renderSources(); };
+  window.removeSourceRow = function(id) { sources = sources.filter(s => s.id !== id); renderSources(); updateTotal(); };
+  window.updateSource = function(id, field, value) { const src = sources.find(s => s.id === id); if (src) src[field] = value; if (field === 'count') updateTotal(); };
+  window.closeTaskModal = closeTaskModal;
+  window.handleSubmit = handleSubmit;
+
+  function renderSources() {
+      sourcesList.innerHTML = sources.map(s => `
+        <div class="source-item">
+          <input type="text" class="input-platform" placeholder="Площадка" value="${s.platform}" onchange="updateSource(${s.id}, 'platform', this.value)">
+          <input type="number" class="input-count" placeholder="Кол-во" value="${s.count || ''}" min="0" onchange="updateSource(${s.id}, 'count', parseInt(this.value) || 0)">
+          <input type="text" class="input-link" placeholder="Ссылка" value="${s.link}" onchange="updateSource(${s.id}, 'link', this.value)">
+          <button type="button" onclick="removeSourceRow(${s.id})">✕</button>
+        </div>
+      `).join('');
+  }
+  
+  function updateTotal() { const total = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0); document.getElementById('totalTasks').textContent = total; }
+
+  function resetForm() {
+    formContainer.style.display = 'flex'; progressContainer.style.display = 'none'; modalFooter.style.display = 'flex';
+    uploadedFiles = []; renderFileList(); sources = []; sourceIdCounter = 0; addSourceRow();
+    document.getElementById('clientName').value = ''; document.getElementById('clientInn').value = '';
+    document.getElementById('startDate').value = ''; document.getElementById('endDate').value = ''; updateTotal();
+  }
+
+  async function handleSubmit() {
+    if (!user) return alert('Пользователь не определен');
+    const clientName = document.getElementById('clientName').value;
+    const clientInn = document.getElementById('clientInn').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    if (!clientName || !clientInn || !startDate || !endDate) return alert('Заполните все поля клиента и даты');
+    if (sources.length === 0 || sources.every(s => !s.count)) return alert('Добавьте площадки');
+
+    formContainer.style.display = 'none'; modalFooter.style.display = 'none'; progressContainer.style.display = 'flex';
+    const totalTasks = sources.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0);
+    let processedTasks = 0;
+    const docs = uploadedFiles.map(f => ({ name: f.name, size: f.size }));
+    
+    let lastOrderNumber = await getLastOrderNumber();
+    let groupNumber = await getLastGroupNumber();
+    
+    const progressDetails = document.getElementById('progressDetails'); progressDetails.innerHTML = '';
+
+    try {
+      for (const src of sources) {
+        const count = parseInt(src.count) || 0; if (count === 0) continue;
+        const itemDiv = document.createElement('div'); itemDiv.className = 'progress-item';
+        itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: 0 из ${count}`; progressDetails.appendChild(itemDiv);
+        let insertedCount = 0; const batchSize = 10; const batches = Math.ceil(count / batchSize);
+
+        for (let b = 0; b < batches; b++) {
+          const currentBatchSize = Math.min(batchSize, count - insertedCount);
+          const insertData = [];
+          for (let i = 0; i < currentBatchSize; i++) {
+            lastOrderNumber = incrementOrderNumber(lastOrderNumber);
+            insertData.push({
+              manager_login: user.login, manager_name: `${user.first_name} ${user.last_name}`, manager_phone: user.phone,
+              order_number: lastOrderNumber, 
+              order_number_general: groupNumber, 
+              client_name: clientName, client_inn: clientInn,
+              start_date: startDate, end_date: endDate, platform: src.platform, link: src.link,
+              documents: docs, status: 'создана'
+            });
+          }
+          const { error } = await sbClient.from('reviews_order').insert(insertData);
+          if (error) throw error;
+          insertedCount += currentBatchSize; processedTasks += currentBatchSize;
+          itemDiv.innerHTML = `<b>${src.platform || 'Площадка'}</b>: ${insertedCount} из ${count}`;
+          if (insertedCount === count) itemDiv.classList.add('done');
+          const percent = Math.round((processedTasks / totalTasks) * 100);
+          document.getElementById('progressFill').style.width = percent + '%';
+          document.getElementById('progressPercent').textContent = percent + '%';
+          await new Promise(r => setTimeout(r, 50));
+        }
+      }
+      document.getElementById('progressPercent').textContent = 'Готово!';
+      setTimeout(() => { alert('Задания созданы!'); closeTaskModal(); loadAndRenderOrders(); }, 500);
+    } catch (err) { console.error(err); alert('Ошибка: ' + err.message); resetForm(); }
+  }
+
+  async function getLastOrderNumber() {
+    const { data, error } = await sbClient.from('reviews_order').select('order_number').order('order_number', { ascending: false }).limit(1).maybeSingle();
+    if (error) { console.error("Error:", error); return 'AA-00000'; }
+    if (!data || !data.order_number) return 'AA-00000';
+    return data.order_number;
+  }
+
+  async function getLastGroupNumber() {
+    const { data, error } = await sbClient.from('reviews_order').select('order_number_general').order('order_number_general', { ascending: false }).limit(1).maybeSingle();
+    if (error || !data || !data.order_number_general) return 'group-A00001';
+    const clean = data.order_number_general.replace('group-', '');
+    const letter = clean.substring(0, 1);
+    let num = parseInt(clean.substring(1), 10);
+    num++;
+    if (num > 99999) { const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1); return `group-${nextLetter}00001`; }
+    return `group-${letter}${String(num).padStart(5, '0')}`;
+  }
+
+  function incrementOrderNumber(current) {
+    let letters = current.substring(0, 2);
+    let digits = parseInt(current.substring(3));
+    digits++;
+    if (digits > 99999) { digits = 1; letters = incrementLetters(letters); }
+    return `${letters}-${String(digits).padStart(5, '0')}`;
+  }
+
+  function incrementLetters(str) {
+    let arr = str.split(''); let i = arr.length - 1;
+    while (i >= 0) {
+      if (arr[i] === 'Z') { arr[i] = 'A'; i--; } else { arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1); return arr.join(''); }
+    }
+    return 'AA';
+  }
+
+  initPage();
+
+})();
+</script>
