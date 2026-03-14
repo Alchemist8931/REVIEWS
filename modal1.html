@@ -24,36 +24,18 @@
       position: relative; background: var(--bg-card); font-family: 'SN Pro', sans-serif; overflow: hidden;
     }
 
-    /* === ШАПКА И ТАБЫ === */
-    .m1-header {
-      display: flex; justify-content: space-between; align-items: center;
-      height: 56px; min-height: 56px; border-bottom: 1px solid var(--border-color);
-      padding: 0 20px; background: var(--bg-card); z-index: 10;
-    }
+    /* === ШАПКА СТРАНИЦЫ (ТАБЫ) === */
+    .m1-header { display: flex; justify-content: space-between; align-items: center; height: 56px; min-height: 56px; border-bottom: 1px solid var(--border-color); padding: 0 20px; background: var(--bg-card); z-index: 10; }
     .m1-header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-primary); text-transform: uppercase; }
     
-    .radio-inputs {
-      position: relative; display: flex; flex-wrap: wrap; border-radius: 10px;
-      background-color: var(--bg-primary); box-sizing: border-box;
-      box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06); padding: 4px; font-size: 14px;
-    }
+    .radio-inputs { position: relative; display: flex; flex-wrap: wrap; border-radius: 10px; background-color: var(--bg-primary); box-sizing: border-box; box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06); padding: 4px; font-size: 14px; }
     .radio-inputs .radio { flex: 1 1 auto; text-align: center; }
     .radio-inputs .radio input { display: none; }
-    .radio-inputs .radio .name {
-      display: flex; cursor: pointer; align-items: center; justify-content: center;
-      border-radius: 8px; border: none; padding: 8px 16px; color: var(--text-secondary);
-      transition: all 0.15s ease-in-out; font-weight: 500;
-    }
-    .radio-inputs .radio input:checked + .name {
-      background-color: var(--bg-card); font-weight: 600; color: var(--text-primary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: select 0.3s ease;
-    }
+    .radio-inputs .radio .name { display: flex; cursor: pointer; align-items: center; justify-content: center; border-radius: 8px; border: none; padding: 8px 16px; color: var(--text-secondary); transition: all 0.15s ease-in-out; font-weight: 500; }
+    .radio-inputs .radio input:checked + .name { background-color: var(--bg-card); font-weight: 600; color: var(--text-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: select 0.3s ease; }
     .radio-inputs .radio:hover .name { background-color: rgba(255, 255, 255, 0.5); }
     @keyframes select { 0% { transform: scale(0.95); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-    .radio-inputs .radio input:checked + .name::before, .radio-inputs .radio input:checked + .name::after {
-      content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%;
-      background: var(--accent); opacity: 0; animation: particles 0.5s ease forwards;
-    }
+    .radio-inputs .radio input:checked + .name::before, .radio-inputs .radio input:checked + .name::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); opacity: 0; animation: particles 0.5s ease forwards; }
     .radio-inputs .radio input:checked + .name::before { top: -6px; left: 50%; transform: translateX(-50%); }
     .radio-inputs .radio input:checked + .name::after { bottom: -6px; left: 50%; transform: translateX(-50%); }
     @keyframes particles { 0% { opacity: 0; transform: translateX(-50%) translateY(0); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(var(--direction)); } }
@@ -66,13 +48,7 @@
     /* === ВЕРХНЯЯ ЧАСТЬ === */
     .m1-top-section { height: 100px; min-height: 100px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-card); }
     
-    .glass-btn {
-      padding: 12px 24px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white;
-      font-size: 14px; font-weight: 600; font-family: 'SN Pro', sans-serif; cursor: pointer;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;
-      display: flex; align-items: center; gap: 8px; position: relative; overflow: hidden;
-    }
+    .glass-btn { padding: 12px 24px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: white; font-size: 14px; font-weight: 600; font-family: 'SN Pro', sans-serif; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; position: relative; overflow: hidden; }
     .glass-btn:hover { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15); background: rgba(0, 0, 0, 0.9); }
     .glass-btn:active { transform: scale(0.98); }
     .glass-btn .icon { width: 20px; height: 20px; transition: transform 0.3s ease; }
@@ -101,42 +77,56 @@
     }
     .deal-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
     
-    /* Header: Horizontal flex with fixed width chunks */
+    /* Header New Layout */
     .deal-header {
-      display: flex; align-items: center; gap: 20px;
+      display: flex; align-items: flex-start; justify-content: flex-start; gap: 20px;
       padding-bottom: 12px; border-bottom: 1px solid var(--border-color);
-      overflow-x: auto; /* Allow scroll if fixed widths exceed container */
+      position: relative; /* For absolute positioning of sum */
     }
 
-    .header-block {
-      display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; /* Fixed width blocks */
+    .h-block {
+      display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
     }
-    
-    /* Fixed Widths for Header Elements */
-    .block-id { width: 120px; }
-    .block-sum { width: 120px; }
-    .block-org { width: 250px; }
-    .block-inn { width: 140px; }
-    .block-client { width: 200px; }
-    .block-contract { width: 220px; }
 
-    .header-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
-    .header-value { font-size: 14px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .header-value.muted { font-weight: 400; color: var(--text-secondary); }
-    .header-value.money { color: var(--success); }
+    .h-row {
+      display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+    }
+
+    .h-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; white-space: nowrap; text-align: right; }
+    .h-value { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
     
+    /* Fixed Widths */
+    .block-1 { width: 220px; }
+    .block-2 { width: 260px; }
+    .block-3 { width: 200px; }
+    
+    /* Block 1 Specifics */
+    .deal-id-badge {
+      display: inline-block; padding: 2px 8px; background: var(--bg-primary); border-radius: 4px;
+      font-size: 12px; font-weight: 700; color: var(--text-primary);
+      border: 1px solid var(--border-color); text-align: left; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Block 4 (Sum) - Absolute positioning top right */
+    .block-sum {
+      position: absolute; top: 0; right: 0;
+      text-align: right; width: auto;
+    }
+    .sum-value {
+      font-size: 22.4px; /* 14px * 1.6 */
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
     /* Body: 3 Columns */
-    .deal-body-row {
-      display: flex; gap: 16px; height: 100px; /* Fixed height */
-    }
+    .deal-body-row { display: flex; gap: 16px; height: 100px; }
 
     .doc-block {
-      flex: 1; /* 1/4 width */
-      border: 1px solid var(--border-color); border-radius: 8px;
-      display: flex; flex-direction: column; position: relative; overflow: hidden;
-      background: var(--bg-primary);
+      flex: 1; border: 1px solid var(--border-color); border-radius: 8px;
+      display: flex; flex-direction: column; position: relative; overflow: hidden; background: var(--bg-primary);
     }
-    .doc-block.double { flex: 2; } /* 2/4 width */
+    .doc-block.double { flex: 2; }
 
     .doc-header {
       padding: 8px 12px; font-size: 11px; font-weight: 600;
@@ -144,17 +134,19 @@
       text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
     }
 
-    .doc-content {
-      flex: 1; overflow-y: auto; padding: 8px;
-      display: flex; flex-direction: column; gap: 4px;
-    }
+    .doc-content { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
 
     .file-item {
-      font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;
-      background: white; padding: 4px 6px; border-radius: 4px; cursor: pointer;
+      font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between;
+      background: white; padding: 4px 6px; border-radius: 4px; gap: 6px;
     }
-    .file-item:hover { color: var(--accent); }
-    .file-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .file-item-left { display: flex; align-items: center; gap: 6px; overflow: hidden; cursor: pointer; flex: 1; }
+    .file-item-left:hover { color: var(--accent); }
+    .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .file-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 2px; line-height: 1; }
+    .file-btn:hover { color: var(--accent); }
+    .file-btn.delete:hover { color: var(--error); }
 
     .upload-btn-abs {
       position: absolute; bottom: 8px; right: 8px;
@@ -162,82 +154,42 @@
       background: var(--accent); color: white; border-radius: 6px; border: none; cursor: pointer;
       z-index: 2; transition: opacity 0.2s;
     }
-    .doc-block:hover .upload-btn-abs { opacity: 1; }
     .upload-btn-abs:hover { background: var(--accent-hover); }
 
-    /* History Block Specifics */
-    .history-header-row {
-      display: grid; grid-template-columns: 1fr 0.8fr 0.8fr 1.2fr;
-      padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted);
-      background: white; border-bottom: 1px solid var(--border-color); flex-shrink: 0;
-    }
+    /* History Block */
+    .history-header-row { display: grid; grid-template-columns: 1fr 0.8fr 0.8fr 1.2fr; padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); background: white; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
     .history-body { flex: 1; overflow-y: auto; padding: 4px; font-size: 12px; }
     .history-row { display: grid; grid-template-columns: 1fr 0.8fr 0.8fr 1.2fr; padding: 4px 6px; border-bottom: 1px solid #f0f0f0; }
     .history-row:last-child { border-bottom: none; }
 
     /* Footer */
-    .deal-footer {
-      margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color);
-      font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;
-    }
+    .deal-footer { margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color); font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
 
     /* === МОДАЛЬНОЕ ОКНО === */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(248, 249, 250, 0.8); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center; z-index: 2000;
-      opacity: 0; visibility: hidden; transition: opacity 0.3s;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(248, 249, 250, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
     .modal-overlay.visible { opacity: 1; visibility: visible; }
-    
-    .modal-form-container {
-      background: var(--bg-card); border-radius: 16px; width: 600px; max-height: 90vh;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column;
-      transform: scale(0.95); transition: transform 0.3s;
-    }
+    .modal-form-container { background: var(--bg-card); border-radius: 16px; width: 600px; max-height: 90vh; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s; }
     .modal-overlay.visible .modal-form-container { transform: scale(1); }
-    
     .form-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
     .form-title { font-size: 18px; font-weight: 700; }
     .form-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 24px; line-height: 1; }
-    
     .form-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 24px; }
-    
     .form-section-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
     .form-divider { border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-    
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    
     .input-group { position: relative; width: 100%; }
-    .input-field {
-      width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color);
-      border-radius: 10px; background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s, background 0.2s; font-family: 'SN Pro', sans-serif;
-    }
+    .input-field { width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); outline: none; transition: border-color 0.2s, background 0.2s; font-family: 'SN Pro', sans-serif; }
     .input-field:focus { border-color: var(--accent); background: var(--bg-card); }
     .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); pointer-events: none; transition: all 0.2s; background: transparent; padding: 0 4px; }
     .input-field:focus + .input-label, .input-field:not(:placeholder-shown) + .input-label { top: 0; font-size: 11px; color: var(--accent); background: var(--bg-card); font-weight: 500; }
-    
-    .autocomplete-dropdown {
-      position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card);
-      border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none;
-    }
+    .autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none; }
     .autocomplete-dropdown.visible { display: block; }
     .autocomplete-item { padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--bg-primary); }
     .autocomplete-item:last-child { border-bottom: none; }
     .autocomplete-item:hover { background: var(--bg-primary); }
-
     .form-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
     .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 600; cursor: pointer; }
-    
-    .btn-submit {
-      padding: 10px 20px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
-      color: white; font-weight: 600; cursor: pointer;
-      display: flex; align-items: center; gap: 8px;
-      transition: all 0.3s ease; min-width: 140px; justify-content: center;
-      font-family: 'SN Pro', sans-serif; font-size: 14px;
-    }
+    .btn-submit { padding: 10px 20px; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; min-width: 140px; justify-content: center; font-family: 'SN Pro', sans-serif; font-size: 14px; }
     .btn-submit:hover { transform: scale(1.02); background: rgba(0, 0, 0, 0.9); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
     .btn-submit .loader { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -467,62 +419,116 @@
       } catch (err) { alert("Ошибка создания: " + err.message); console.error(err); } finally { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
     });
 
-    // Helper: Format Date "02 марта 2026 г. ( 16:59 )"
+    // Helper: Format Date
     function formatCustomDate(isoString) {
         if (!isoString) return '-';
         const date = new Date(isoString);
         const months = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-        const d = date.getDate().toString().padStart(2, '0');
-        const m = months[date.getMonth()];
-        const y = date.getFullYear();
+        const d = date.getDate().toString().padStart(2, '0'); const m = months[date.getMonth()]; const y = date.getFullYear();
         const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         return `${d} ${m} ${y} г. ( ${time} )`;
     }
 
-    // Helper: File Upload
+    // Helper: File Upload (Multiple)
     window.handleDealFileUpload = async function(dealId, type, inputElement) {
-        const file = inputElement.files[0];
-        if (!file) return;
+        const files = inputElement.files;
+        if (!files || files.length === 0) return;
 
-        // Show loading state? 
-        // For simplicity, just upload.
-        
-        const filePath = `${dealId}/${type}/${Date.now()}_${file.name}`;
+        const column = type === 'agreement' ? 'documents_agreement' : 'documents_closing';
         
         try {
-            // 1. Upload to Storage
-            const { data: uploadData, error: uploadError } = await sb.storage
-                .from('deals-documents')
-                .upload(filePath, file);
-            
-            if (uploadError) throw uploadError;
+            // 1. Fetch current list
+            const { data: currentDeal } = await sb.from('reviews_list_deals').select(column).eq('id', dealId).single();
+            let docs = currentDeal[column] || [];
+            let newDocs = [];
 
-            // 2. Get Public URL
-            const { data: urlData } = sb.storage.from('deals-documents').getPublicUrl(filePath);
-            const fileUrl = urlData.publicUrl;
+            // 2. Upload each file
+            for (const file of files) {
+                const filePath = `${dealId}/${type}/${Date.now()}_${file.name}`;
+                const { error: uploadError } = await sb.storage.from('deals-documents').upload(filePath, file);
+                if (uploadError) throw new Error(`Ошибка загрузки ${file.name}: ${uploadError.message}`);
 
-            // 3. Update DB (Append to JSONB array)
-            // We need to fetch current, append, and update. Or use a Postgres function. 
-            // Let's do simple fetch -> update in JS.
-            const column = type === 'agreement' ? 'documents_agreement' : 'documents_closing';
-            
+                const { data: urlData } = sb.storage.from('deals-documents').getPublicUrl(filePath);
+                newDocs.push({ name: file.name, url: urlData.publicUrl, path: filePath });
+            }
+
+            // 3. Update DB
+            docs = [...docs, ...newDocs];
+            const { error: updateError } = await sb.from('reviews_list_deals').update({ [column]: docs }).eq('id', dealId);
+            if (updateError) throw updateError;
+
+            await loadDeals(); // Refresh
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка загрузки: ' + err.message);
+        }
+    };
+
+    // Helper: File Delete
+    window.deleteFile = async function(dealId, type, path, event) {
+        event.stopPropagation(); // Prevent opening file
+        if(!confirm('Удалить файл?')) return;
+
+        const column = type === 'agreement' ? 'documents_agreement' : 'documents_closing';
+        try {
+            // 1. Delete from Storage
+            const { error: storageError } = await sb.storage.from('deals-documents').remove([path]);
+            if (storageError) throw storageError;
+
+            // 2. Update DB
+            const { data: currentDeal } = await sb.from('reviews_list_deals').select(column).eq('id', dealId).single();
+            let docs = currentDeal[column] || [];
+            docs = docs.filter(d => d.path !== path);
+
+            const { error: updateError } = await sb.from('reviews_list_deals').update({ [column]: docs }).eq('id', dealId);
+            if (updateError) throw updateError;
+
+            await loadDeals();
+        } catch (err) {
+            console.error(err);
+            alert('Ошибка удаления: ' + err.message);
+        }
+    };
+
+    // Helper: File Rename
+    window.renameFile = async function(dealId, type, oldPath, event) {
+        event.stopPropagation();
+        const newName = prompt('Введите новое имя файла:', oldPath.split('/').pop());
+        if (!newName) return;
+
+        const column = type === 'agreement' ? 'documents_agreement' : 'documents_closing';
+
+        try {
+            // 1. Update DB Name (Simpler approach)
             const { data: currentDeal } = await sb.from('reviews_list_deals').select(column).eq('id', dealId).single();
             let docs = currentDeal[column] || [];
             
-            docs.push({ name: file.name, url: fileUrl, path: filePath });
-
-            const { error: updateError } = await sb.from('reviews_list_deals')
-                .update({ [column]: docs })
-                .eq('id', dealId);
+            const docIndex = docs.findIndex(d => d.path === oldPath);
+            if (docIndex === -1) throw new Error("File not found in DB");
             
+            // Construct new path
+            const pathParts = oldPath.split('/');
+            pathParts[pathParts.length-1] = newName;
+            const newPath = pathParts.join('/');
+
+            // 2. Move file in Storage
+            const { data, error: moveError } = await sb.storage.from('deals-documents').move(oldPath, newPath);
+            if (moveError) throw moveError;
+
+            // 3. Update metadata in DB
+            docs[docIndex].name = newName;
+            docs[docIndex].path = newPath;
+            // Update URL if public URL changes (usually it does based on path)
+            const { data: urlData } = sb.storage.from('deals-documents').getPublicUrl(newPath);
+            docs[docIndex].url = urlData.publicUrl;
+
+            const { error: updateError } = await sb.from('reviews_list_deals').update({ [column]: docs }).eq('id', dealId);
             if (updateError) throw updateError;
 
-            // 4. Re-render this specific card part or just refresh list
-            await loadDeals(); // Lazy refresh
-
+            await loadDeals();
         } catch (err) {
             console.error(err);
-            alert('Ошибка загрузки файла: ' + err.message);
+            alert('Ошибка переименования: ' + err.message);
         }
     };
 
@@ -537,76 +543,90 @@
         container.innerHTML = data.map(deal => {
           const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
           const sumFormatted = new Intl.NumberFormat('ru-RU').format(deal.sum_deal || 0);
+          const contractStr = `№ ${deal.contract_number || '-'} от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}`;
           
-          // Render file lists
-          const renderFiles = (docs) => (docs && docs.length > 0) 
-            ? docs.map(d => `<div class="file-item" onclick="window.open('${d.url}', '_blank')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><span>${d.name}</span></div>`).join('')
+          // Render file lists with Rename/Delete buttons
+          const renderFiles = (docs, type) => (docs && docs.length > 0) 
+            ? docs.map(d => `
+                <div class="file-item">
+                    <div class="file-item-left" onclick="window.open('${d.url}', '_blank')">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        <span class="file-name">${d.name}</span>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-btn rename" onclick="renameFile('${deal.id}', '${type}', '${d.path}', event)" title="Переименовать">✎</button>
+                        <button class="file-btn delete" onclick="deleteFile('${deal.id}', '${type}', '${d.path}', event)" title="Удалить">✕</button>
+                    </div>
+                </div>
+            `).join('')
             : '<div style="font-size:11px; color:var(--text-muted); padding:4px;">Нет файлов</div>';
 
           return `
             <div class="deal-card" id="deal-${deal.id}">
               <div class="deal-header">
-                <!-- Block 1: ID & Sum -->
-                <div class="header-block block-id">
-                    <span class="header-label">ID Сделки</span>
-                    <span class="header-value">${deal.id}</span>
-                </div>
-                <div class="header-block block-sum">
-                    <span class="header-label">Сумма</span>
-                    <span class="header-value money">${sumFormatted} ₽</span>
+                <!-- Block 1: ID & Contract -->
+                <div class="h-block block-1">
+                    <div class="h-row">
+                        <span class="h-value"><span class="deal-id-badge">${deal.id}</span></span>
+                        <span class="h-label"></span>
+                    </div>
+                    <div class="h-row">
+                        <span class="h-value muted" style="font-size: 13px;">${contractStr}</span>
+                        <span class="h-label">Договор</span>
+                    </div>
                 </div>
                 
                 <!-- Block 2: Org & INN -->
-                <div class="header-block block-org">
-                    <span class="header-label">Организация</span>
-                    <span class="header-value">${deal.opf || ''} ${deal.name_company || '-'}</span>
-                </div>
-                <div class="header-block block-inn">
-                    <span class="header-label">ИНН</span>
-                    <span class="header-value muted">${deal.inn || '-'}</span>
+                <div class="h-block block-2">
+                    <div class="h-row">
+                        <span class="h-value">${deal.opf || ''} ${deal.name_company || '-'}</span>
+                        <span class="h-label">Организация</span>
+                    </div>
+                    <div class="h-row">
+                        <span class="h-value muted">${deal.inn || '-'}</span>
+                        <span class="h-label">ИНН</span>
+                    </div>
                 </div>
                 
-                <!-- Block 3: Client & Contract -->
-                <div class="header-block block-client">
-                    <span class="header-label">Клиент</span>
-                    <span class="header-value">${fio || '-'}</span>
+                <!-- Block 3: Client & Phone -->
+                <div class="h-block block-3">
+                    <div class="h-row">
+                        <span class="h-value">${fio || '-'}</span>
+                        <span class="h-label">Клиент</span>
+                    </div>
+                    <div class="h-row">
+                        <span class="h-value muted">${deal.phone || '-'}</span>
+                        <span class="h-label">Телефон</span>
+                    </div>
                 </div>
-                <div class="header-block block-contract">
-                    <span class="header-label">Договор</span>
-                    <span class="header-value muted">№ ${deal.contract_number || '-'} от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}</span>
+
+                <!-- Block 4: Sum (Absolute Right) -->
+                <div class="block-sum">
+                    <div class="sum-value">${sumFormatted} ₽</div>
                 </div>
               </div>
 
               <div class="deal-body-row">
-                 <!-- Block 1: Agreement Docs (1/4) -->
+                 <!-- Docs 1 -->
                  <div class="doc-block">
                     <div class="doc-header">Документы соглашения сделки</div>
-                    <div class="doc-content">
-                       ${renderFiles(deal.documents_agreement)}
-                    </div>
+                    <div class="doc-content">${renderFiles(deal.documents_agreement, 'agreement')}</div>
                     <button class="upload-btn-abs" onclick="document.getElementById('file-agr-${deal.id}').click()">Загрузить</button>
-                    <input type="file" id="file-agr-${deal.id}" style="display:none" onchange="handleDealFileUpload('${deal.id}', 'agreement', this)">
+                    <input type="file" multiple id="file-agr-${deal.id}" style="display:none" onchange="handleDealFileUpload('${deal.id}', 'agreement', this)">
                  </div>
                  
-                 <!-- Block 2: Closing Docs (1/4) -->
+                 <!-- Docs 2 -->
                  <div class="doc-block">
                     <div class="doc-header">Документы закрытия сделки</div>
-                    <div class="doc-content">
-                       ${renderFiles(deal.documents_closing)}
-                    </div>
+                    <div class="doc-content">${renderFiles(deal.documents_closing, 'closing')}</div>
                     <button class="upload-btn-abs" onclick="document.getElementById('file-close-${deal.id}').click()">Загрузить</button>
-                    <input type="file" id="file-close-${deal.id}" style="display:none" onchange="handleDealFileUpload('${deal.id}', 'closing', this)">
+                    <input type="file" multiple id="file-close-${deal.id}" style="display:none" onchange="handleDealFileUpload('${deal.id}', 'closing', this)">
                  </div>
                  
-                 <!-- Block 3: History (2/4) -->
+                 <!-- History -->
                  <div class="doc-block double">
-                    <div class="history-header-row">
-                        <span>ФИО</span><span>Роль</span><span>Дата</span><span>Описание действия</span>
-                    </div>
-                    <div class="history-body">
-                        <!-- History items will go here later -->
-                        <div style="color:var(--text-muted); font-size:11px; padding:10px;">История пуста</div>
-                    </div>
+                    <div class="history-header-row"><span>ФИО</span><span>Роль</span><span>Дата</span><span>Описание действия</span></div>
+                    <div class="history-body"><div style="color:var(--text-muted); font-size:11px; padding:10px;">История пуста</div></div>
                  </div>
               </div>
 
