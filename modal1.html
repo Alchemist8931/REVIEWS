@@ -17,8 +17,6 @@
       --success: #10b981;
       --warning: #f59e0b;
       --error: #ef4444;
-      --tab-bg: #e8e8e8;
-      --tab-active: #ffffff;
     }
 
     .m1-root {
@@ -33,12 +31,82 @@
       padding: 0 20px; background: var(--bg-card); z-index: 10;
     }
     .m1-header-title { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-primary); text-transform: uppercase; }
-    .m1-tabs-container { position: relative; display: flex; padding: 2px; background-color: var(--tab-bg); border-radius: 10px; }
-    .m1-tabs-container .indicator { width: 50%; height: 36px; background: var(--tab-active); position: absolute; top: 2px; left: 2px; z-index: 9; border-radius: 8px; box-shadow: 0px 3px 8px rgba(0,0,0,0.12); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .m1-tab-input { width: 50%; height: 36px; position: absolute; z-index: 99; opacity: 0; cursor: pointer; }
-    .m1-tab-label { width: 50%; height: 36px; position: relative; z-index: 999; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: color 0.3s ease; }
-    .m1-tab-input:checked + .m1-tab-label { color: var(--text-primary); }
-    #m1-tab2:checked ~ .indicator { left: 50%; }
+    
+    /* === NEW RADIO INPUTS STYLE (Code Example 2 Adapted) === */
+    .radio-inputs {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      border-radius: 10px;
+      background-color: var(--bg-primary);
+      box-sizing: border-box;
+      box-shadow: 0 0 0px 1px rgba(0, 0, 0, 0.06);
+      padding: 4px;
+      font-size: 14px;
+    }
+
+    .radio-inputs .radio {
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    .radio-inputs .radio input {
+      display: none;
+    }
+
+    .radio-inputs .radio .name {
+      display: flex;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: none;
+      padding: 8px 16px;
+      color: var(--text-secondary);
+      transition: all 0.15s ease-in-out;
+      font-weight: 500;
+    }
+
+    .radio-inputs .radio input:checked + .name {
+      background-color: var(--bg-card);
+      font-weight: 600;
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      animation: select 0.3s ease;
+    }
+    
+    .radio-inputs .radio:hover .name {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+    
+    @keyframes select {
+      0% { transform: scale(0.95); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    .radio-inputs .radio input:checked + .name::before,
+    .radio-inputs .radio input:checked + .name::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      animation: particles 0.5s ease forwards;
+    }
+
+    .radio-inputs .radio input:checked + .name::before { top: -6px; left: 50%; transform: translateX(-50%); }
+    .radio-inputs .radio input:checked + .name::after { bottom: -6px; left: 50%; transform: translateX(-50%); }
+
+    @keyframes particles {
+      0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) translateY(var(--direction)); }
+    }
+    .radio-inputs .radio input:checked + .name::before { --direction: -10px; }
+    .radio-inputs .radio input:checked + .name::after { --direction: 10px; }
 
     .m1-page { display: none; flex-direction: column; flex: 1; height: calc(100% - 56px); position: relative; }
     .m1-page.active { display: flex; }
@@ -46,16 +114,49 @@
     /* === ВЕРХНЯЯ ЧАСТЬ === */
     .m1-top-section { height: 100px; min-height: 100px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-card); }
     
-    .m1-action-btn {
-      padding: 12px 24px; background: var(--accent); color: white; border: none;
-      border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: background 0.2s, opacity 0.2s; display: flex; align-items: center; gap: 8px;
+    /* === GLASS BUTTON STYLE (Code Example 1 Adapted) === */
+    .glass-btn {
+      padding: 12px 24px;
+      background: rgba(0, 0, 0, 0.85); /* Dark Glass for light theme */
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'SN Pro', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      display: flex; align-items: center; gap: 8px;
+      position: relative;
+      overflow: hidden;
     }
-    .m1-action-btn:hover { background: var(--accent-hover); }
-    .m1-action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .m1-action-btn .loader { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
-    .m1-action-btn.loading .loader { display: block; }
-    .m1-action-btn.loading .btn-text { display: none; }
+
+    .glass-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .glass-btn:active {
+      transform: scale(0.98);
+    }
+
+    .glass-btn .icon {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s ease;
+    }
+    
+    .glass-btn:hover .icon {
+      transform: rotate(12deg);
+    }
+    
+    .glass-btn .loader { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .glass-btn.loading .btn-text { visibility: hidden; }
+    .glass-btn.loading .loader { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
     /* === НИЖНЯЯ ЧАСТЬ (СКРОЛЛ) === */
     .m1-bottom-section { flex: 1; position: relative; }
@@ -66,8 +167,7 @@
     .modal9-content::-webkit-scrollbar-track { background: transparent; }
     .modal9-content::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
 
-    /* === КАРТОЧКИ СДЕЛОК (FULL WIDTH) === */
-    /* Заменили grid на column layout */
+    /* === КАРТОЧКИ СДЕЛОК === */
     .deals-list { display: flex; flex-direction: column; gap: 20px; width: 100%; padding-bottom: 20px; }
     
     .deal-card {
@@ -77,11 +177,9 @@
     }
     .deal-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08); }
     
-    /* Header: Full width, Org info left, ID/Sum right */
     .deal-header {
       display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);
-      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); gap: 16px; flex-wrap: wrap;
     }
     .deal-org-info { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
     .deal-org-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
@@ -94,7 +192,6 @@
     .deal-sum { font-size: 18px; font-weight: 700; color: var(--text-primary); }
     .deal-sum small { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 2px; }
 
-    /* Body Rows */
     .deal-body { display: flex; flex-direction: column; gap: 8px; }
     .deal-row { display: flex; gap: 8px; align-items: baseline; }
     .deal-label { font-size: 12px; color: var(--text-muted); min-width: 120px; flex-shrink: 0; }
@@ -139,7 +236,7 @@
     .input-field {
       width: 100%; padding: 14px 16px; font-size: 14px; border: 1px solid var(--border-color);
       border-radius: 10px; background: var(--bg-primary); color: var(--text-primary);
-      outline: none; transition: border-color 0.2s, background 0.2s;
+      outline: none; transition: border-color 0.2s, background 0.2s; font-family: 'SN Pro', sans-serif;
     }
     .input-field:focus { border-color: var(--accent); background: var(--bg-card); }
     .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-muted); pointer-events: none; transition: all 0.2s; background: transparent; padding: 0 4px; }
@@ -148,8 +245,7 @@
     .autocomplete-dropdown {
       position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card);
       border: 1px solid var(--border-color); border-radius: 8px; margin-top: 4px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px;
-      overflow-y: auto; display: none;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1); z-index: 100; max-height: 200px; overflow-y: auto; display: none;
     }
     .autocomplete-dropdown.visible { display: block; }
     .autocomplete-item { padding: 10px 14px; cursor: pointer; font-size: 13px; border-bottom: 1px solid var(--bg-primary); }
@@ -158,40 +254,54 @@
 
     .form-footer { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
     .btn-cancel { padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); border-radius: 10px; font-weight: 600; cursor: pointer; }
-    .btn-submit { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-submit .loader { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
-    .btn-submit.loading .loader { display: block; }
-    .btn-submit.loading .btn-text { display: none; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Modal Submit uses Glass Button styles too */
+    .btn-submit {
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+      color: white; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: all 0.3s ease; min-width: 140px; justify-content: center;
+      font-family: 'SN Pro', sans-serif; font-size: 14px;
+    }
+    .btn-submit:hover { transform: scale(1.02); background: rgba(0, 0, 0, 0.9); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-submit .loader { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .btn-submit.loading .btn-text { visibility: hidden; }
+    .btn-submit.loading .loader { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   </style>
 
   <!-- ШАПКА -->
   <header class="m1-header">
     <div class="m1-header-title">Страница 1</div>
-    <div class="m1-tabs-container">
-      <input type="radio" name="m1Tabs" id="m1-tab1" class="m1-tab-input" checked>
-      <label for="m1-tab1" class="m1-tab-label">Подстраница 1</label>
-      <input type="radio" name="m1Tabs" id="m1-tab2" class="m1-tab-input">
-      <label for="m1-tab2" class="m1-tab-label">Подстраница 2</label>
-      <div class="indicator"></div>
+    
+    <!-- NEW RADIO INPUTS STRUCTURE -->
+    <div class="radio-inputs">
+      <label class="radio">
+        <input type="radio" name="m1Tabs" id="m1-tab1" checked />
+        <span class="name">Подстраница 1</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="m1Tabs" id="m1-tab2" />
+        <span class="name">Подстраница 2</span>
+      </label>
     </div>
   </header>
 
   <!-- ПОДСТРАНИЦА 1 -->
   <div class="m1-page active" id="page1">
     <div class="m1-top-section">
-      <button class="m1-action-btn" id="openDealModalBtn">
-        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
-        Кнопка подстраницы 1
+      <!-- GLASS BUTTON -->
+      <button class="glass-btn" id="openDealModalBtn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="btn-text">Кнопка подстраницы 1</span>
       </button>
     </div>
     <div class="m1-bottom-section">
       <div class="modal9-scroll-wrapper">
         <div class="modal9-window">
           <div class="modal9-content">
-            <!-- Changed class to deals-list -->
             <div class="deals-list" id="dealsList"></div>
           </div>
         </div>
@@ -202,7 +312,11 @@
   <!-- ПОДСТРАНИЦА 2 -->
   <div class="m1-page" id="page2">
     <div class="m1-top-section">
-      <button class="m1-action-btn">Кнопка подстраницы 2</button>
+      <!-- GLASS BUTTON -->
+      <button class="glass-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span class="btn-text">Кнопка подстраницы 2</span>
+      </button>
     </div>
     <div class="m1-bottom-section">
       <div class="modal9-scroll-wrapper">
@@ -293,6 +407,7 @@
       </div>
       <div class="form-footer">
         <button class="btn-cancel" id="cancelDealBtn">Отмена</button>
+        <!-- GLASS BUTTON -->
         <button class="btn-submit" id="submitDealBtn">
           <span class="btn-text">Создать сделку</span>
           <div class="loader"></div>
@@ -303,20 +418,12 @@
 
   <script>
   (function() {
-    // === ВАЖНОЕ ИСПРАВЛЕНИЕ LAYOUT ===
     const parentContainer = document.getElementById('pageContent');
-    if (parentContainer) {
-        parentContainer.style.height = '100%';
-        parentContainer.style.overflow = 'hidden';
-    }
+    if (parentContainer) { parentContainer.style.height = '100%'; parentContainer.style.overflow = 'hidden'; }
 
-    if (!window.supabaseClient) {
-        console.error('Supabase client not found!');
-        return;
-    }
+    if (!window.supabaseClient) { console.error('Supabase client not found!'); return; }
     const sb = window.supabaseClient;
 
-    // Elements
     const tab1 = document.getElementById('m1-tab1');
     const tab2 = document.getElementById('m1-tab2');
     const page1 = document.getElementById('page1');
@@ -329,209 +436,80 @@
     const container = document.getElementById('dealsList');
 
     const fields = {
-      inn: document.getElementById('dealINN'),
-      opf: document.getElementById('dealOPF'),
-      company: document.getElementById('dealCompany'),
-      lname: document.getElementById('dealLastName'),
-      fname: document.getElementById('dealFirstName'),
-      mname: document.getElementById('dealMiddleName'),
-      phone: document.getElementById('dealPhone'),
-      email: document.getElementById('dealEmail'),
-      contractNum: document.getElementById('dealContractNum'),
-      contractDate: document.getElementById('dealContractDate'),
-      sum: document.getElementById('dealSum'),
-      help: document.getElementById('dealHelp')
+      inn: document.getElementById('dealINN'), opf: document.getElementById('dealOPF'), company: document.getElementById('dealCompany'),
+      lname: document.getElementById('dealLastName'), fname: document.getElementById('dealFirstName'), mname: document.getElementById('dealMiddleName'),
+      phone: document.getElementById('dealPhone'), email: document.getElementById('dealEmail'),
+      contractNum: document.getElementById('dealContractNum'), contractDate: document.getElementById('dealContractDate'),
+      sum: document.getElementById('dealSum'), help: document.getElementById('dealHelp')
     };
 
-    // Tabs
+    // Tabs Logic (Works with new input structure)
     tab1.addEventListener('change', () => { page1.classList.add('active'); page2.classList.remove('active'); });
     tab2.addEventListener('change', () => { page1.classList.remove('active'); page2.classList.add('active'); });
 
-    // Modal Toggle
-    function toggleModal(show) {
-      if (show) {
-        modalOverlay.classList.add('visible');
-        resetForm();
-      } else {
-        modalOverlay.classList.remove('visible');
-      }
-    }
-
+    function toggleModal(show) { if (show) { modalOverlay.classList.add('visible'); resetForm(); } else { modalOverlay.classList.remove('visible'); } }
     openBtn.addEventListener('click', () => toggleModal(true));
     closeBtn.addEventListener('click', () => toggleModal(false));
     cancelBtn.addEventListener('click', () => toggleModal(false));
     modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) toggleModal(false); });
+    function resetForm() { Object.values(fields).forEach(el => el.value = ''); submitBtn.classList.remove('loading'); }
 
-    function resetForm() {
-      Object.values(fields).forEach(el => el.value = '');
-      submitBtn.classList.remove('loading');
-    }
-
-    // Autocomplete
-    let innTimeout;
-    const innDropdown = document.getElementById('innDropdown');
-
+    // Autocomplete Logic (Unchanged logic, just working with IDs)
+    let innTimeout; const innDropdown = document.getElementById('innDropdown');
     fields.inn.addEventListener('input', (e) => {
-      clearTimeout(innTimeout);
-      const val = e.target.value;
-      if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
-
+      clearTimeout(innTimeout); const val = e.target.value; if (val.length < 2) { innDropdown.classList.remove('visible'); return; }
       innTimeout = setTimeout(async () => {
         const { data } = await sb.from('reviews_counterparty').select('*').ilike('inn', `%${val}%`).limit(5);
-        if (data && data.length > 0) {
-          innDropdown.innerHTML = data.map(c => `
-            <div class="autocomplete-item" data-inn="${c.inn}" data-opf="${c.opf}" data-name="${c.name_company}">
-              <strong>${c.inn}</strong> <small style="margin-left:5px; color:#888;">${c.name_company || ''}</small>
-            </div>
-          `).join('');
-          innDropdown.classList.add('visible');
-        } else {
-          innDropdown.classList.remove('visible');
-        }
+        if (data && data.length > 0) { innDropdown.innerHTML = data.map(c => `<div class="autocomplete-item" data-inn="${c.inn}" data-opf="${c.opf}" data-name="${c.name_company}"><strong>${c.inn}</strong> <small style="margin-left:5px; color:#888;">${c.name_company || ''}</small></div>`).join(''); innDropdown.classList.add('visible'); } else { innDropdown.classList.remove('visible'); }
       }, 300);
     });
+    innDropdown.addEventListener('click', (e) => { const item = e.target.closest('.autocomplete-item'); if (item) { fields.inn.value = item.dataset.inn; fields.opf.value = item.dataset.opf; fields.company.value = item.dataset.name; innDropdown.classList.remove('visible'); } });
 
-    innDropdown.addEventListener('click', (e) => {
-      const item = e.target.closest('.autocomplete-item');
-      if (item) {
-        fields.inn.value = item.dataset.inn;
-        fields.opf.value = item.dataset.opf;
-        fields.company.value = item.dataset.name;
-        innDropdown.classList.remove('visible');
-      }
-    });
-
-    let clientTimeout;
-    const clientDropdown = document.getElementById('clientDropdown');
-
+    let clientTimeout; const clientDropdown = document.getElementById('clientDropdown');
     fields.lname.addEventListener('input', (e) => {
-      clearTimeout(clientTimeout);
-      const val = e.target.value;
-      if (val.length < 2) { clientDropdown.classList.remove('visible'); return; }
-
+      clearTimeout(clientTimeout); const val = e.target.value; if (val.length < 2) { clientDropdown.classList.remove('visible'); return; }
       clientTimeout = setTimeout(async () => {
         const { data } = await sb.from('reviews_human_contact').select('*').ilike('last_name', `%${val}%`).limit(5);
-        if (data && data.length > 0) {
-          clientDropdown.innerHTML = data.map(c => `
-            <div class="autocomplete-item" data-fname="${c.first_name}" data-lname="${c.last_name}" data-mname="${c.middle_name}" data-phone="${c.phone}" data-email="${c.email}">
-              ${c.last_name} ${c.first_name} ${c.middle_name} <small>${c.phone || ''}</small>
-            </div>
-          `).join('');
-          clientDropdown.classList.add('visible');
-        } else {
-          clientDropdown.classList.remove('visible');
-        }
+        if (data && data.length > 0) { clientDropdown.innerHTML = data.map(c => `<div class="autocomplete-item" data-fname="${c.first_name}" data-lname="${c.last_name}" data-mname="${c.middle_name}" data-phone="${c.phone}" data-email="${c.email}">${c.last_name} ${c.first_name} ${c.middle_name} <small>${c.phone || ''}</small></div>`).join(''); clientDropdown.classList.add('visible'); } else { clientDropdown.classList.remove('visible'); }
       }, 300);
     });
+    clientDropdown.addEventListener('click', (e) => { const item = e.target.closest('.autocomplete-item'); if (item) { fields.lname.value = item.dataset.lname; fields.fname.value = item.dataset.fname; fields.mname.value = item.dataset.mname; fields.phone.value = item.dataset.phone; fields.email.value = item.dataset.email; clientDropdown.classList.remove('visible'); } });
 
-    clientDropdown.addEventListener('click', (e) => {
-      const item = e.target.closest('.autocomplete-item');
-      if (item) {
-        fields.lname.value = item.dataset.lname;
-        fields.fname.value = item.dataset.fname;
-        fields.mname.value = item.dataset.mname;
-        fields.phone.value = item.dataset.phone;
-        fields.email.value = item.dataset.email;
-        clientDropdown.classList.remove('visible');
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('#dealINN') && !e.target.closest('#innDropdown')) innDropdown.classList.remove('visible');
-      if (!e.target.closest('#dealLastName') && !e.target.closest('#clientDropdown')) clientDropdown.classList.remove('visible');
-    });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#dealINN') && !e.target.closest('#innDropdown')) innDropdown.classList.remove('visible'); if (!e.target.closest('#dealLastName') && !e.target.closest('#clientDropdown')) clientDropdown.classList.remove('visible'); });
 
     // Submit
     submitBtn.addEventListener('click', async () => {
-      submitBtn.classList.add('loading');
-      submitBtn.disabled = true;
-
+      submitBtn.classList.add('loading'); submitBtn.disabled = true;
       try {
-        // 1. Контакт
-        const lname = fields.lname.value.trim();
-        const fname = fields.fname.value.trim();
-        const mname = fields.mname.value.trim();
-        let client_id = null;
-
+        const lname = fields.lname.value.trim(); const fname = fields.fname.value.trim(); const mname = fields.mname.value.trim(); let client_id = null;
         if (lname && fname) {
           let { data: existingContact } = await sb.from('reviews_human_contact').select('id').eq('last_name', lname).eq('first_name', fname).eq('middle_name', mname).maybeSingle();
-          if (existingContact) {
-            client_id = existingContact.id;
-            await sb.from('reviews_human_contact').update({ phone: fields.phone.value.trim(), email: fields.email.value.trim() }).eq('id', client_id);
-          } else {
-            const { data: newContact, error: contactErr } = await sb.from('reviews_human_contact').insert([{ last_name: lname, first_name: fname, middle_name: mname, phone: fields.phone.value.trim(), email: fields.email.value.trim() }]).select('id').single();
-            if (contactErr) throw contactErr;
-            client_id = newContact.id;
-          }
+          if (existingContact) { client_id = existingContact.id; await sb.from('reviews_human_contact').update({ phone: fields.phone.value.trim(), email: fields.email.value.trim() }).eq('id', client_id); }
+          else { const { data: newContact, error: contactErr } = await sb.from('reviews_human_contact').insert([{ last_name: lname, first_name: fname, middle_name: mname, phone: fields.phone.value.trim(), email: fields.email.value.trim() }]).select('id').single(); if (contactErr) throw contactErr; client_id = newContact.id; }
         }
-
-        // 2. Контрагент
-        const innVal = fields.inn.value.trim();
-        if (!innVal) throw new Error("ИНН обязателен");
-
+        const innVal = fields.inn.value.trim(); if (!innVal) throw new Error("ИНН обязателен");
         let { data: existingComp } = await sb.from('reviews_counterparty').select('inn').eq('inn', innVal).maybeSingle();
-        
-        if (!existingComp) {
-            await sb.from('reviews_counterparty').insert([{
-                inn: innVal,
-                opf: fields.opf.value.trim(),
-                name_company: fields.company.value.trim()
-            }]);
-        }
-
-        // 3. Сделка
+        if (!existingComp) { await sb.from('reviews_counterparty').insert([{ inn: innVal, opf: fields.opf.value.trim(), name_company: fields.company.value.trim() }]); }
         const dealData = {
-          user_id: window.currentUser.id,
-          contract_number: fields.contractNum.value.trim(),
-          contract_date: fields.contractDate.value || null,
-          sum_deal: parseFloat(fields.sum.value) || 0,
-          inn: innVal,
-          opf: fields.opf.value.trim(),
-          name_company: fields.company.value.trim(),
-          client_id: client_id,
-          last_name: lname,
-          first_name: fname,
-          middle_name: mname,
-          phone: fields.phone.value.trim(),
-          email: fields.email.value.trim(),
-          help_text: fields.help.value.trim()
+          user_id: window.currentUser.id, contract_number: fields.contractNum.value.trim(), contract_date: fields.contractDate.value || null, sum_deal: parseFloat(fields.sum.value) || 0,
+          inn: innVal, opf: fields.opf.value.trim(), name_company: fields.company.value.trim(), client_id: client_id,
+          last_name: lname, first_name: fname, middle_name: mname, phone: fields.phone.value.trim(), email: fields.email.value.trim(), help_text: fields.help.value.trim()
         };
-
-        const { error: dealErr } = await sb.from('reviews_list_deals').insert([dealData]);
-        if (dealErr) throw dealErr;
-
-        toggleModal(false);
-        await loadDeals();
-
-      } catch (err) {
-        alert("Ошибка создания: " + err.message);
-        console.error(err);
-      } finally {
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-      }
+        const { error: dealErr } = await sb.from('reviews_list_deals').insert([dealData]); if (dealErr) throw dealErr;
+        toggleModal(false); await loadDeals();
+      } catch (err) { alert("Ошибка создания: " + err.message); console.error(err); } finally { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
     });
 
-    // === Load Deals ===
+    // Load Deals
     async function loadDeals() {
-      if (!container) return;
-      container.innerHTML = '<div style="color:var(--text-muted); padding: 20px;">Загрузка сделок...</div>';
-
+      if (!container) return; container.innerHTML = '<div style="color:var(--text-muted); padding: 20px;">Загрузка сделок...</div>';
       try {
         const { data, error } = await sb.from('reviews_list_deals').select('*').order('created_at', { ascending: false });
-
         if (error) throw error;
-
-        if (!data || data.length === 0) {
-          container.innerHTML = '<div style="color:var(--text-muted); padding: 20px; text-align:center;">Нет созданных сделок</div>';
-          return;
-        }
-
+        if (!data || data.length === 0) { container.innerHTML = '<div style="color:var(--text-muted); padding: 20px; text-align:center;">Нет созданных сделок</div>'; return; }
         container.innerHTML = data.map(deal => {
-          const date = new Date(deal.created_at).toLocaleString('ru-RU');
-          const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
+          const date = new Date(deal.created_at).toLocaleString('ru-RU'); const fio = `${deal.last_name || ''} ${deal.first_name || ''} ${deal.middle_name || ''}`.trim();
           const sumFormatted = new Intl.NumberFormat('ru-RU').format(deal.sum_deal || 0);
-          
           return `
             <div class="deal-card">
               <div class="deal-header">
@@ -544,51 +522,21 @@
                   <div class="deal-sum">${sumFormatted}<small>₽</small></div>
                 </div>
               </div>
-              
               <div class="deal-body">
-                <div class="deal-row">
-                  <span class="deal-label">Клиент:</span>
-                  <span class="deal-value">${fio || 'Не указан'}</span>
-                </div>
-                
-                <div class="deal-row">
-                  <span class="deal-label">Договор:</span>
-                  <span class="deal-value">№ ${deal.contract_number || '-'} от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}</span>
-                </div>
-
+                <div class="deal-row"><span class="deal-label">Клиент:</span><span class="deal-value">${fio || 'Не указан'}</span></div>
+                <div class="deal-row"><span class="deal-label">Договор:</span><span class="deal-value">№ ${deal.contract_number || '-'} от ${deal.contract_date ? new Date(deal.contract_date).toLocaleDateString('ru-RU') : '-'}</span></div>
                 <div class="deal-subrow">
-                   <div class="deal-subitem">
-                     <span class="deal-subitem-label">Телефон</span>
-                     <span class="deal-subitem-val">${deal.phone || '-'}</span>
-                   </div>
-                   <div class="deal-subitem">
-                     <span class="deal-subitem-label">Email</span>
-                     <span class="deal-subitem-val">${deal.email || '-'}</span>
-                   </div>
+                   <div class="deal-subitem"><span class="deal-subitem-label">Телефон</span><span class="deal-subitem-val">${deal.phone || '-'}</span></div>
+                   <div class="deal-subitem"><span class="deal-subitem-label">Email</span><span class="deal-subitem-val">${deal.email || '-'}</span></div>
                 </div>
-                
-                ${deal.help_text ? `<div class="deal-row" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-color);">
-                  <span class="deal-label">Комментарий:</span>
-                  <span class="deal-value" style="font-weight:400; color:var(--text-secondary);">${deal.help_text}</span>
-                </div>` : ''}
+                ${deal.help_text ? `<div class="deal-row" style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--border-color);"><span class="deal-label">Комментарий:</span><span class="deal-value" style="font-weight:400; color:var(--text-secondary);">${deal.help_text}</span></div>` : ''}
               </div>
-              
-              <div class="deal-footer">
-                <span>Создано: ${date}</span>
-              </div>
-            </div>
-          `;
+              <div class="deal-footer"><span>Создано: ${date}</span></div>
+            </div>`;
         }).join('');
-
-      } catch (err) {
-        console.error('Ошибка при загрузке сделок:', err);
-        container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных. Проверьте RLS политики в Supabase.</div>';
-      }
+      } catch (err) { console.error(err); container.innerHTML = '<div style="color:red; padding: 20px;">Ошибка загрузки данных.</div>'; }
     }
-
-    // Запуск при загрузке
     loadDeals();
-
   })();
   </script>
 </div>
