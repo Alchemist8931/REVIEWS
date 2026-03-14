@@ -532,7 +532,7 @@
         }
     };
 
-    // Load Deals
+        // Load Deals
     async function loadDeals() {
       if (!container) return; container.innerHTML = '<div style="color:var(--text-muted); padding: 20px;">Загрузка сделок...</div>';
       try {
@@ -588,8 +588,8 @@
                     </div>
                 </div>
                 
-                <!-- Block 3: Client & Phone -->
-                <div class="h-block block-3 style="margin-top: 10px;"">
+                <!-- Block 3: Client & Phone (ИСПРАВЛЕНО) -->
+                <div class="h-block block-3" style="margin-top: 10px;">
                     <div class="h-row">
                         <span class="h-label">Клиент</span>
                         <span class="h-value">${fio || '-'}</span>
