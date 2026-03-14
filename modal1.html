@@ -113,7 +113,7 @@
       text-align: right; width: auto;
     }
     .sum-value {
-      font-size: 22.4px; /* 14px * 1.6 */
+      font-size: 26px;
       font-weight: 700;
       color: var(--text-primary);
       white-space: nowrap;
@@ -571,32 +571,32 @@
                         <span class="h-label"></span>
                     </div>
                     <div class="h-row">
-                        <span class="h-value muted" style="font-size: 13px;">${contractStr}</span>
                         <span class="h-label">Договор</span>
+                        <span class="h-value muted" style="font-size: 13px;">${contractStr}</span>
                     </div>
                 </div>
                 
                 <!-- Block 2: Org & INN -->
                 <div class="h-block block-2">
                     <div class="h-row">
-                        <span class="h-value">${deal.opf || ''} ${deal.name_company || '-'}</span>
                         <span class="h-label">Организация</span>
+                        <span class="h-value">${deal.opf || ''} ${deal.name_company || '-'}</span>
                     </div>
                     <div class="h-row">
-                        <span class="h-value muted">${deal.inn || '-'}</span>
                         <span class="h-label">ИНН</span>
+                        <span class="h-value muted">${deal.inn || '-'}</span>
                     </div>
                 </div>
                 
                 <!-- Block 3: Client & Phone -->
                 <div class="h-block block-3">
                     <div class="h-row">
-                        <span class="h-value">${fio || '-'}</span>
                         <span class="h-label">Клиент</span>
+                        <span class="h-value">${fio || '-'}</span>
                     </div>
                     <div class="h-row">
-                        <span class="h-value muted">${deal.phone || '-'}</span>
                         <span class="h-label">Телефон</span>
+                        <span class="h-value muted">${deal.phone || '-'}</span>
                     </div>
                 </div>
 
