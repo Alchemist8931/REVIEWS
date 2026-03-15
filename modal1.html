@@ -154,7 +154,7 @@
     .btn-submit:hover { transform: scale(1.02); background: rgba(0, 0, 0, 0.9); }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    /* === TASK MODAL (НОВОЕ) === */
+    /* === TASK MODAL === */
     .task-modal-container { width: 900px; height: 80vh; display: flex; flex-direction: column; }
     .task-modal-body { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden; padding: 24px; }
     
@@ -193,14 +193,14 @@
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     .fade-out { animation: fadeOut 0.3s forwards; }
 
-    /* Button inside window */
+    /* Button inside window - CHANGED COLOR */
     .btn-send-approval {
       position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-      padding: 8px 16px; background: var(--success); color: white; border: none; border-radius: 8px;
+      padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; /* Black background */
       font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transition: all 0.3s ease;
     }
-    .btn-send-approval:hover { transform: translateX(-50%) scale(1.02); }
+    .btn-send-approval:hover { transform: translateX(-50%) scale(1.02); background: var(--accent-hover); }
 
   </style>
 
@@ -342,12 +342,12 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ЗАДАНИЯ СДЕЛКИ (НОВОЕ) -->
+  <!-- МОДАЛЬНОЕ ОКНО ЗАДАНИЯ СДЕЛКИ -->
   <div class="modal-overlay" id="taskModalOverlay">
     <div class="modal-form-container task-modal-container">
       <div class="form-header">
         <div class="form-title">Задание сделки</div>
-        <button class="form-close" onclick="closeTaskModal()" style="width: 160px;">&times;</button>
+        <button class="form-close" onclick="closeTaskModal()">&times;</button>
       </div>
       <div class="task-modal-body">
         
@@ -378,18 +378,13 @@
           <!-- Left: Drafts -->
           <div class="task-window" id="draftWindow">
             <div class="tw-header">Черновики</div>
-            <div class="tw-content" id="draftContent">
-              <!-- Draft items appear here -->
-            </div>
-            <!-- Button appears here dynamically -->
+            <div class="tw-content" id="draftContent"></div>
           </div>
 
           <!-- Right: Approval Queue -->
           <div class="task-window">
             <div class="tw-header">На согласовании</div>
-            <div class="tw-content" id="approvalContent">
-              <!-- Approved items appear here -->
-            </div>
+            <div class="tw-content" id="approvalContent"></div>
           </div>
         </div>
 
@@ -419,8 +414,7 @@
 
     // Task Modal Elements
     const taskModalOverlay = document.getElementById('taskModalOverlay');
-    let currentDealId = null; // To track which deal we are working on
-    let draftItems = []; // Local state for drafts before sending
+    let currentDealId = null; 
 
     const fields = {
       inn: document.getElementById('dealINN'), opf: document.getElementById('dealOPF'), company: document.getElementById('dealCompany'),
@@ -443,9 +437,8 @@
     // Task Modal Logic
     window.openTaskModal = function(dealId) {
         currentDealId = dealId;
-        draftItems = [];
-        renderDrafts();
-        document.getElementById('approvalContent').innerHTML = ''; // Clear approval
+        document.getElementById('draftContent').innerHTML = '';
+        document.getElementById('approvalContent').innerHTML = '';
         document.getElementById('taskText').value = '';
         document.getElementById('taskLink').value = '';
         document.getElementById('taskCount').value = 1;
@@ -461,14 +454,19 @@
     taskModalOverlay.addEventListener('click', (e) => { if (e.target === taskModalOverlay) closeTaskModal(); });
 
     async function loadExistingTasks(dealId) {
-        // Load tasks with status 'approval' to the right window
-        const { data, error } = await sb.from('reviews_deal_tasks').select('*').eq('deal_id', dealId).eq('status', 'approval');
-        if (data) {
+        // Load drafts
+        const { data: drafts, error: e1 } = await sb.from('reviews_deal_tasks').select('*').eq('deal_id', dealId).eq('status', 'draft');
+        if (drafts) {
+            const draftContent = document.getElementById('draftContent');
+            drafts.forEach(t => appendTaskItem(draftContent, t.task_text, 'draft', t.id));
+            checkSendButton();
+        }
+
+        // Load approvals
+        const { data: approvals, error: e2 } = await sb.from('reviews_deal_tasks').select('*').eq('deal_id', dealId).eq('status', 'approval');
+        if (approvals) {
             const appContent = document.getElementById('approvalContent');
-            appContent.innerHTML = '';
-            data.forEach(t => {
-                appendTaskItem(appContent, t.task_text, 'approval');
-            });
+            approvals.forEach(t => appendTaskItem(appContent, t.task_text, 'approval', t.id));
         }
     }
 
@@ -530,7 +528,7 @@
 
     // --- Task Logic ---
 
-    window.createReviewAnimation = function() {
+    window.createReviewAnimation = async function() {
         const textarea = document.getElementById('taskText');
         const text = textarea.value;
         if (!text.trim()) return;
@@ -538,6 +536,33 @@
         const btn = document.getElementById('btnCreateReview');
         btn.disabled = true;
 
+        // 1. Save to DB immediately as DRAFT
+        let savedId = null;
+        try {
+            const link = document.getElementById('taskLink').value;
+            const count = document.getElementById('taskCount').value;
+            const date = document.getElementById('taskDate').value;
+
+            const { data, error } = await sb.from('reviews_deal_tasks').insert([{
+                deal_id: currentDealId,
+                task_text: text,
+                platform_link: link,
+                review_count: count,
+                completion_date: date,
+                status: 'draft',
+                author_phone: window.currentUser.phone
+            }]).select('id').single();
+
+            if (error) throw error;
+            savedId = data.id;
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка сохранения черновика: " + e.message);
+            btn.disabled = false;
+            return;
+        }
+
+        // 2. Animation: Erase from textarea
         let i = text.length;
         const eraseInterval = setInterval(() => {
             if (i >= 0) {
@@ -546,12 +571,9 @@
             } else {
                 clearInterval(eraseInterval);
                 
-                // Add to drafts
-                draftItems.push(text);
-                
-                // Render Draft
+                // 3. Add to Draft Window
                 const draftContent = document.getElementById('draftContent');
-                appendTaskItem(draftContent, text, 'draft');
+                appendTaskItem(draftContent, text, 'draft', savedId);
 
                 btn.disabled = false;
                 
@@ -561,11 +583,11 @@
         }, 1000 / text.length); // 1 second total
     };
 
-    function appendTaskItem(container, text, type) {
+    function appendTaskItem(container, text, type, id) {
         const div = document.createElement('div');
         div.className = 'task-item';
+        div.dataset.id = id; // Store DB ID
         
-        // Text container
         const textDiv = document.createElement('div');
         textDiv.className = 'task-item-text';
         
@@ -577,7 +599,6 @@
             div.style.opacity = '0';
             container.appendChild(div);
             
-            // Animate opacity
             setTimeout(() => div.style.opacity = '1', 10);
 
             let i = 0;
@@ -587,8 +608,6 @@
                     i++;
                 } else {
                     clearInterval(textInterval);
-                    
-                    // Add chip
                     const chip = document.createElement('span');
                     chip.className = 'chip-created';
                     chip.textContent = 'создано';
@@ -604,7 +623,7 @@
             textDiv.textContent = text;
             const chip = document.createElement('span');
             chip.className = 'chip-created';
-            chip.textContent = 'на согласовании'; // Or different status
+            chip.textContent = 'на согласовании';
             chip.style.background = 'rgba(245, 158, 11, 0.1)';
             chip.style.color = '#92400e';
             footer.appendChild(chip);
@@ -614,19 +633,12 @@
         }
     }
 
-    function renderDrafts() {
-        const draftContent = document.getElementById('draftContent');
-        draftContent.innerHTML = '';
-        draftItems.forEach(text => appendTaskItem(draftContent, text, 'draft'));
-        checkSendButton();
-    }
-
     function checkSendButton() {
-        // Remove existing button if any
         const oldBtn = document.getElementById('sendApprovalBtn');
         if (oldBtn) oldBtn.remove();
 
-        if (draftItems.length > 0) {
+        const draftContent = document.getElementById('draftContent');
+        if (draftContent.children.length > 0) {
             const draftWindow = document.getElementById('draftWindow');
             const btn = document.createElement('button');
             btn.id = 'sendApprovalBtn';
@@ -639,51 +651,35 @@
 
     async function sendForApproval() {
         const btn = document.getElementById('sendApprovalBtn');
-        btn.style.display = 'none'; // Hide immediately
+        btn.style.display = 'none'; 
 
         const draftContent = document.getElementById('draftContent');
         const approvalContent = document.getElementById('approvalContent');
         
-        const items = draftContent.querySelectorAll('.task-item');
+        const items = Array.from(draftContent.querySelectorAll('.task-item'));
         
-        // Collect data to save
-        const link = document.getElementById('taskLink').value;
-        const count = document.getElementById('taskCount').value;
-        const date = document.getElementById('taskDate').value;
-
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const text = item.querySelector('.task-item-text').textContent;
+            const taskId = item.dataset.id;
 
             // Animate fade out
             item.classList.add('fade-out');
             
-            await new Promise(r => setTimeout(r, 300)); // Wait for fade
+            await new Promise(r => setTimeout(r, 300));
             
-            // Remove from DOM
             item.remove();
             
             // Add to Approval
-            appendTaskItem(approvalContent, text, 'approval');
+            appendTaskItem(approvalContent, text, 'approval', taskId);
 
-            // Save to DB
+            // Update DB status
             try {
-                await sb.from('reviews_deal_tasks').insert([{
-                    deal_id: currentDealId,
-                    task_text: text,
-                    platform_link: link,
-                    review_count: count,
-                    completion_date: date,
-                    status: 'approval',
-                    author_phone: window.currentUser.phone
-                }]);
-            } catch(e) { console.error(e); alert('Ошибка сохранения'); }
+                await sb.from('reviews_deal_tasks').update({ status: 'approval' }).eq('id', taskId);
+            } catch(e) { console.error(e); alert('Ошибка обновления статуса'); }
 
-            await new Promise(r => setTimeout(r, 300)); // Small pause between items
+            await new Promise(r => setTimeout(r, 300));
         }
-        
-        // Clear local state
-        draftItems = [];
     }
 
     // --- File Logic ---
