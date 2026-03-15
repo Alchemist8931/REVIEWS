@@ -528,7 +528,7 @@
 
     // --- Task Logic ---
 
-    window.createReviewAnimation = async function() {
+        window.createReviewAnimation = async function() {
         const textarea = document.getElementById('taskText');
         const text = textarea.value;
         if (!text.trim()) return;
@@ -541,14 +541,15 @@
         try {
             const link = document.getElementById('taskLink').value;
             const count = document.getElementById('taskCount').value;
-            const date = document.getElementById('taskDate').value;
-
+            // ИСПРАВЛЕНИЕ: Если дата пустая, передаем null вместо пустой строки
+            const dateVal = document.getElementById('taskDate').value;
+            
             const { data, error } = await sb.from('reviews_deal_tasks').insert([{
                 deal_id: currentDealId,
                 task_text: text,
                 platform_link: link,
-                review_count: count,
-                completion_date: date,
+                review_count: parseInt(count) || 1, // Защита от пустого количества
+                completion_date: dateVal || null, // ИСПРАВЛЕНИЕ ЗДЕСЬ
                 status: 'draft',
                 author_phone: window.currentUser.phone
             }]).select('id').single();
